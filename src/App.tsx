@@ -13,6 +13,8 @@ import WhySection from './components/WhySection';
 import TextRevealSection from './components/TextRevealSection';
 import Services from './components/Services';
 import ServicesPage from './pages/ServicesPage';
+import Intro from './components/Intro';
+import HorizontalGallery from './components/HorizontalGallery';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Instagram, Linkedin, ArrowUpRight } from 'lucide-react';
@@ -104,6 +106,8 @@ function Home() {
 
   return (
     <div ref={mainRef} className="min-h-screen bg-brand-light relative selection:bg-brand-green/20">
+      <Intro />
+
       {/* Optimized Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full grid-bg opacity-[0.05]" />
@@ -185,6 +189,8 @@ function Home() {
         </section>
 
         <WhySection />
+
+        <HorizontalGallery />
 
         <AutomationSection />
         <ComparisonSlider />
