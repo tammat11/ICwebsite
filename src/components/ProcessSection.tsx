@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Search, Calculator, CalendarCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, Calculator, CalendarCheck, Sparkles } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -149,7 +149,19 @@ const ProcessSection = () => {
                     <div className="w-full max-w-5xl relative mb-24 mt-20">
                         {/* Progressive Route Line */}
                         <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/10 -translate-y-1/2 overflow-hidden">
-                            <div id="final-mini-path" className="absolute top-0 left-0 h-full bg-brand-green w-full scale-x-0 origin-left" />
+                            <div id="final-mini-path" className="absolute top-0 left-0 h-full bg-brand-green w-full scale-x-0 origin-left shadow-[0_0_10px_rgba(131,182,67,0.5)]" />
+                            {/* Animated particles along the line */}
+                            {[...Array(8)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-brand-green animate-pulse"
+                                    style={{
+                                        left: `${i * 12.5}%`,
+                                        animationDelay: `${i * 0.15}s`,
+                                        boxShadow: '0 0 12px rgba(131,182,67,1), 0 0 6px rgba(255,255,255,0.8)'
+                                    }}
+                                />
+                            ))}
                         </div>
 
                         {/* Route Points */}
