@@ -4,6 +4,7 @@ interface ApplicationModalProps {
     isOpen: boolean;
     onClose: () => void;
     position?: string;
+    category?: string;
 }
 
 const ApplicationModal = ({ isOpen, onClose, position }: ApplicationModalProps) => {
