@@ -25,13 +25,13 @@ const StatsGrid = () => {
         { value: "17", label: "Branches", icon: <MapPin size={28} />, x: "65%", y: "92%", speed: 0.8, size: "md", zIndex: 10, rotation: 4 },
     ];
 
-    // Ambient Particles (More green)
-    const particles = [...Array(60)].map((_, i) => ({
+    // Ambient Particles (Reduced for performance)
+    const particles = [...Array(30)].map((_, i) => ({
         id: i,
         x: `${Math.random() * 100}%`,
         y: `${Math.random() * 100}%`,
         size: Math.random() * 4 + 1,
-        color: ['#83b643', '#83b643', '#83b643', '#0a0a0a', '#cccccc'][Math.floor(Math.random() * 5)], // 60% Green
+        color: ['#83b643', '#83b643', '#83b643', '#0a0a0a', '#cccccc'][Math.floor(Math.random() * 5)],
         speed: Math.random() * 3 + 1,
         opacity: Math.random() * 0.5 + 0.1
     }));
@@ -43,28 +43,19 @@ const StatsGrid = () => {
             items.forEach((item) => {
                 const speed = parseFloat(item.getAttribute('data-speed') || '1');
                 gsap.to(item, {
-                    y: -120 * speed, // Reduced intensity for compact view
+                    y: -120 * speed,
                     ease: "none",
                     force3D: true,
                     scrollTrigger: {
                         trigger: sectionRef.current,
                         start: "top bottom",
                         end: "bottom top",
-                        scrub: 1.8
+                        scrub: 3  // Increased for better performance
                     }
                 });
             });
 
-            // Floating animation on INNER wrapper to avoid Y conflict
-            gsap.to(".parallax-card-inner", {
-                y: "random(-15, 15)",
-                rotate: "random(-2, 2)",
-                duration: "random(2.5, 4)",
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut",
-                force3D: true
-            });
+            // Removed floating animation for performance
         }, sectionRef);
         return () => ctx.revert();
     }, []);

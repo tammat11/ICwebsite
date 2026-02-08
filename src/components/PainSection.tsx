@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Zap, Target, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
@@ -8,7 +8,6 @@ gsap.registerPlugin(ScrollTrigger);
 const PainSection = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const centerRef = useRef<HTMLDivElement>(null);
-    const [isExploded, setIsExploded] = useState(false);
 
     const pains = [
         {
@@ -59,14 +58,14 @@ const PainSection = () => {
                 x: 0, y: 0, scale: 0.2, opacity: 0, rotate: 0
             });
 
-            // 2. PINNED EXPLOSION SEQUENCE
+            // 2. PINNED EXPLOSION SEQUENCE (Optimized)
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
                     start: "top top", // Lock as soon as it hits top
-                    end: "+=200%",   // Hold for 2 screens of scroll
+                    end: "+=150%",   // Reduced for better performance
                     pin: true,       // PIN THE SECTION
-                    scrub: 1,        // Smooth scrub linked to scroll
+                    scrub: 0.5,      // Faster response, less lag
                     anticipatePin: 1
                 }
             });
@@ -90,11 +89,10 @@ const PainSection = () => {
                 }, 0); // All start at beginning of pinned scroll
             });
 
-            // Also fade/blur the question simultaneously (but keep it visible as background)
+            // Fade question (no blur for performance)
             tl.to(".trigger-question", {
                 scale: 0.4,
                 opacity: 0.15, // Keep slightly visible
-                filter: "blur(3px)", // Gentle blur
                 duration: 0.5,
                 ease: "power1.inOut"
             }, 0);
@@ -118,7 +116,7 @@ const PainSection = () => {
             // Actually, simplest is to let scrub control position. Mouse effect might be overkill here combined with scrub.
             // Let's REMOVE mouse interaction for stability, or make it very subtle parallax on the CONTAINER.
 
-            setIsExploded(true); // Just to set classnames if needed
+            // State management removed for performance
 
             // Mouse interaction removed for stability with Pin/Scrub.
             // const handleMouseMove = (e: MouseEvent) => {
