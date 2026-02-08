@@ -5,9 +5,10 @@
   --color-brand-dark: #1A1D1E;
   --color-brand-light: #FBFDF9;
   --color-brand-accent: #E8F0E5;
+  --color-brand-secondary: #7484a5;
   --color-border-subtle: rgba(0, 0, 0, 0.05);
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Montserrat", "Roboto", system-ui, -apple-system, sans-serif;
 
   --shadow-premium: 0 8px 30px rgba(0, 0, 0, 0.04);
   --shadow-button: 0 10px 40px rgba(0, 0, 0, 0.1);
@@ -50,11 +51,29 @@
   }
 }
 
-/* Luxury cleaning vibes */
-.glow-green {
-  background: radial-gradient(circle at center, rgba(131, 182, 67, 0.15), transparent 70%);
+/* Global Clean Background */
+.bg-clean {
+  @apply bg-brand-light;
 }
 
-.parallax-text {
-  will-change: transform;
+.text-stroke-dark {
+  -webkit-text-stroke: 1.5px #1A1D1E;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
 }

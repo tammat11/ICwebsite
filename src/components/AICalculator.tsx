@@ -73,17 +73,17 @@ const AICalculator = () => {
     }, [step]);
 
     return (
-        <section ref={root} className="py-24 px-6 bg-brand-light">
+        <section ref={root} className="py-20 md:py-24 px-6 bg-brand-light">
             <div className="max-w-7xl mx-auto">
-                <div className="grid lg:grid-cols-2 gap-24 items-center">
-                    <div className="calc-reveal">
-                        <span className="text-brand-green text-[11px] font-black tracking-[0.4em] uppercase block mb-8">Service Estimator</span>
-                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-brand-dark mb-10 leading-none">AI <span className="text-brand-green italic">Estimator</span></h2>
-                        <p className="text-brand-dark/40 text-xl font-medium leading-relaxed max-w-lg mb-12">
+                <div className="grid lg:grid-cols-2 gap-12 md:gap-24 items-center">
+                    <div className="calc-reveal text-center lg:text-left">
+                        <span className="text-brand-green text-[10px] md:text-[11px] font-black tracking-[0.4em] uppercase block mb-6 md:mb-8">Калькулятор</span>
+                        <h2 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-brand-dark mb-8 md:mb-10 leading-none">AI <span className="text-brand-green italic">Расчет</span></h2>
+                        <p className="text-brand-dark/40 text-lg md:text-xl font-medium leading-relaxed max-w-lg mx-auto lg:mx-0 mb-10 md:mb-12">
                             Получите мгновенный расчет стоимости обслуживания вашего объекта на базе нейронного анализа площади и типа индустрии.
                         </p>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 inline-block lg:block text-left">
                             {["Точный алгоритм расчета", "Учет специфики индустрии", "Прозрачное ценообразование"].map((text, i) => (
                                 <div key={i} className="flex items-center gap-4 text-sm font-bold">
                                     <div className="w-6 h-6 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center">
@@ -95,12 +95,12 @@ const AICalculator = () => {
                         </div>
                     </div>
 
-                    <div className="calc-reveal premium-card rounded-[60px] p-12 md:p-16 relative overflow-hidden bg-white shadow-3xl min-h-[500px] flex flex-col justify-between">
+                    <div className="calc-reveal premium-card rounded-[30px] md:rounded-[60px] p-6 sm:p-12 md:p-16 relative overflow-hidden bg-white shadow-3xl min-h-[450px] md:min-h-[500px] flex flex-col justify-between">
                         <div>
-                            <div className="flex items-center justify-between mb-16">
+                            <div className="flex items-center justify-between mb-12 sm:mb-16">
                                 <div className="flex gap-2">
                                     {[1, 2, 3].map(i => (
-                                        <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${step >= i ? 'w-8 bg-brand-green' : 'w-4 bg-brand-accent'}`} />
+                                        <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${step >= i ? 'w-6 sm:w-8 bg-brand-green' : 'w-3 sm:w-4 bg-brand-accent'}`} />
                                     ))}
                                 </div>
                                 <Calculator className="text-brand-green opacity-20" size={32} />
@@ -117,7 +117,7 @@ const AICalculator = () => {
                                                     onClick={() => setType(t)}
                                                     className={`p-6 rounded-3xl border-2 transition-all font-bold text-sm ${type === t ? 'border-brand-green bg-brand-green/5 text-brand-green' : 'border-black/5 hover:border-brand-green/20 text-brand-dark/40'}`}
                                                 >
-                                                    {t}
+                                                    {t === 'Office' ? 'Офис' : t === 'Retail' ? 'Торговля' : 'Производство'}
                                                 </button>
                                             ))}
                                         </div>
@@ -138,7 +138,7 @@ const AICalculator = () => {
                                                 className="w-full h-2 bg-brand-accent rounded-lg appearance-none cursor-pointer accent-brand-green"
                                             />
                                             <div className="flex justify-between items-end">
-                                                <span className="text-sm font-black text-brand-dark/20 uppercase tracking-widest">Square Meters</span>
+                                                <span className="text-sm font-black text-brand-dark/20 uppercase tracking-widest">Площадь (м²)</span>
                                                 <span className="text-5xl font-black text-brand-dark leading-none">{size.toLocaleString()} <span className="text-lg opacity-20">m²</span></span>
                                             </div>
                                         </div>
@@ -148,9 +148,9 @@ const AICalculator = () => {
                                 {step === 3 && (
                                     <div className="space-y-10 text-center">
                                         <div>
-                                            <span className="text-brand-green text-[10px] font-black tracking-[0.4em] uppercase block mb-4 font-sans">Estimated Monthly Plan</span>
-                                            <div className="text-6xl md:text-8xl font-black text-brand-dark tracking-tighter leading-none mb-4 italic">
-                                                ~{estimate} <span className="text-2xl not-italic opacity-20 font-sans">KZT</span>
+                                            <span className="text-brand-green text-[10px] font-black tracking-[0.4em] uppercase block mb-4 font-sans">Примерный бюджет в месяц</span>
+                                            <div className="text-4xl sm:text-6xl md:text-8xl font-black text-brand-dark tracking-tighter leading-none mb-4 italic">
+                                                ~{estimate} <span className="text-lg sm:text-2xl not-italic opacity-20 font-sans">KZT</span>
                                             </div>
                                             <p className="text-sm text-brand-dark/40 font-medium">Это предварительная оценка. Точный расчет <br /> после аудита объекта.</p>
                                         </div>
@@ -167,12 +167,12 @@ const AICalculator = () => {
                             )}
                             {step < 3 ? (
                                 <button onClick={() => setStep(step + 1)} className="btn-premium flex-grow flex items-center justify-center gap-4">
-                                    Next Step <ChevronRight size={20} />
+                                    Далее <ChevronRight size={20} />
                                 </button>
                             ) : (
                                 <div className="flex flex-col flex-grow gap-4">
-                                    <button className="btn-premium w-full">Request Audit</button>
-                                    <button onClick={() => setStep(1)} className="text-xs font-black text-brand-dark/20 uppercase tracking-widest hover:text-brand-green transition-colors">Start Over</button>
+                                    <button className="btn-premium w-full">Заказать аудит</button>
+                                    <button onClick={() => setStep(1)} className="text-xs font-black text-brand-dark/20 uppercase tracking-widest hover:text-brand-green transition-colors">Начать заново</button>
                                 </div>
                             )}
                         </div>

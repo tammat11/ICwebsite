@@ -69,32 +69,32 @@ const DetailedServices = () => {
                 </div>
 
                 {/* Main Services Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-32">
                     {services.map((s, i) => (
-                        <div key={i} className="group p-10 rounded-[40px] bg-brand-light border border-black/5 hover:border-brand-green/30 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <div className="text-brand-green transform scale-150">{s.icon}</div>
+                        <div key={i} className="group p-6 md:p-10 rounded-[30px] md:rounded-[40px] bg-brand-light border border-black/5 hover:border-brand-green/30 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-6 md:p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <div className="text-brand-green transform scale-125 md:scale-150">{s.icon}</div>
                             </div>
 
-                            <div className="flex flex-wrap gap-3 mb-8">
+                            <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8">
                                 {s.tags.map((t, idx) => (
-                                    <span key={idx} className="px-4 py-2 rounded-full bg-white text-[10px] font-bold uppercase tracking-wider text-brand-dark/60 border border-black/5">
+                                    <span key={idx} className="px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-brand-dark/60 border border-black/5">
                                         {t}
                                     </span>
                                 ))}
                             </div>
 
-                            <h3 className="text-3xl font-black text-brand-dark mb-4 uppercase">{s.title}</h3>
-                            <div className="flex items-center gap-2 mb-6 text-brand-green font-bold text-sm uppercase tracking-widest">
+                            <h3 className="text-2xl md:text-3xl font-black text-brand-dark mb-4 uppercase">{s.title}</h3>
+                            <div className="flex items-center gap-2 mb-6 text-brand-green font-bold text-xs md:text-sm uppercase tracking-widest">
                                 <Clock size={16} />
                                 <span>{s.time}</span>
                             </div>
 
-                            <p className="text-lg text-brand-dark/60 leading-relaxed mb-10">
+                            <p className="text-base md:text-lg text-brand-dark/60 leading-relaxed mb-10">
                                 {s.desc}
                             </p>
 
-                            <button className="w-full py-4 rounded-xl bg-white border border-black/5 font-bold uppercase tracking-widest hover:bg-brand-green hover:text-white transition-colors">
+                            <button className="w-full py-4 rounded-xl bg-white border border-black/5 font-bold uppercase tracking-widest hover:bg-brand-green hover:text-white transition-colors text-xs md:text-sm">
                                 Рассчитать стоимость
                             </button>
                         </div>

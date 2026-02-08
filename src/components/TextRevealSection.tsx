@@ -71,11 +71,11 @@ const TextRevealSection = () => {
                 backgroundPosition: "0% 0%"
             }}
         >
-            <div className="sticky top-0 h-screen w-full flex flex-col justify-center px-6 overflow-hidden">
+            <div className="sticky top-0 min-h-screen w-full flex flex-col justify-center px-6 py-20 overflow-hidden">
                 <div className="max-w-7xl mx-auto w-full relative">
                     <p
                         ref={textRef}
-                        className="text-white text-4xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-tighter"
+                        className="text-white text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-tighter max-w-[90%] md:max-w-full"
                     >
                         {characters.map((char, i) => (
                             <span
@@ -88,13 +88,12 @@ const TextRevealSection = () => {
                         ))}
                     </p>
 
-                    <div className="absolute top-0 right-0 h-full flex items-center pr-4 md:pr-10">
-                        <div className="flex flex-col items-end gap-2">
-                            <div className="w-1 h-32 bg-white/5 relative overflow-hidden rounded-full">
+                    <div className="absolute top-1/2 -translate-y-1/2 right-0 h-auto flex items-center pr-0 md:pr-10">
+                        <div className="flex flex-col items-end gap-2 md:gap-4">
+                            <div className="hidden md:block w-1 h-32 bg-white/5 relative overflow-hidden rounded-full">
                                 <div className="absolute top-0 left-0 w-full h-full bg-brand-green origin-top scale-y-0 transition-transform duration-100" />
-                                {/* Percentage bar visualization would need more GSAP but let's keep it simple with counter first */}
                             </div>
-                            <div className="text-white font-black text-6xl md:text-8xl italic tracking-tighter tabular-nums opacity-20">
+                            <div className="text-white font-black text-4xl sm:text-6xl md:text-8xl italic tracking-tighter tabular-nums opacity-10 md:opacity-20">
                                 <span ref={counterRef}>0</span>%
                             </div>
                         </div>

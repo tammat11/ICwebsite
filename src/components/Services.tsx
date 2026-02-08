@@ -1,133 +1,123 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Link } from 'react-router-dom';
-import { Building, Sparkles, Shield, HardHat } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const items = [
-    {
-        title: "Eco Management",
-        category: "Office & B-Center",
-        desc: "Системный подход к ежедневной чистоте. Используем биоразлагаемые средства и GPS-контроль персонала.",
-        icon: <Building />,
-        img: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        title: "Deep Precision",
-        category: "General & Special",
-        desc: "Глубокая очистка поверхностей под давлением. Восстановление первоначального вида мрамора и ковролина.",
-        icon: <Sparkles />,
-        img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        title: "Industrial Scale",
-        category: "Factories & Warehouses",
-        desc: "Уборка промышленных зон с учетом ТБ. Очистка сложных загрязнений и высотные работы.",
-        icon: <Shield />,
-        img: "https://images.unsplash.com/photo-1504917595217-d4dc5f6497d7?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        title: "Post-Tech Clean",
-        category: "Construction & Reno",
-        desc: "Финальная подготовка объекта к сдаче. Удаление мелкодисперсной пыли и следов стройматериалов.",
-        icon: <HardHat />,
-        img: "https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=800"
-    }
-];
-
 const Services = () => {
-    const root = useRef<HTMLElement>(null);
+    const root = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Background text parallax
-            gsap.to(".bg-text", {
+            gsap.from(".service-card", {
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
                 scrollTrigger: {
                     trigger: root.current,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: 1
-                },
-                x: -200
-            });
-
-            // Image clip-path reveal
-            const cards = gsap.utils.toArray(".service-card");
-            cards.forEach((card: any) => {
-                const img = card.querySelector(".img-reveal");
-                gsap.fromTo(img,
-                    { clipPath: 'inset(100% 0% 0% 0%)' },
-                    {
-                        clipPath: 'inset(0% 0% 0% 0%)',
-                        duration: 1.5,
-                        ease: 'power4.inOut',
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 95%",
-                            once: true
-                        }
-                    }
-                );
+                    start: "top 80%",
+                    toggleActions: "play none none none",
+                    once: true
+                }
             });
         }, root);
         return () => ctx.revert();
     }, []);
 
-    return (
-        <section ref={root} className="py-40 px-6 relative overflow-hidden bg-brand-light">
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden select-none">
-                <span className="bg-text absolute top-10 right-0 text-[300px] font-black text-black/[0.02] whitespace-nowrap">
-                    EXPERTISE EXPERTISE EXPERTISE
-                </span>
-            </div>
+    const services = [
+        {
+            title: "Facility",
+            subtitle: "Management",
+            desc: "Комплексное обслуживание А-класса. Клининг, техническая эксплуатация, охрана и озеленение.",
+            image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200",
+            tags: ["Cleaning", "Technical", "Security"]
+        },
+        {
+            title: "Industrial",
+            subtitle: "Solutions",
+            desc: "Промышленный клининг и обслуживание заводов, месторождений и вахтовых поселков.",
+            image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200",
+            tags: ["Mining", "Factory", "Safety"]
+        },
+        {
+            title: "Catering",
+            subtitle: "& Events",
+            desc: "Организация корпоративного питания. Столовые полного цикла, буфеты и выездные банкеты.",
+            image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=1200",
+            tags: ["Corporate", "Delivery", "Premium"]
+        },
+        {
+            title: "Outstaffing",
+            subtitle: "Services",
+            desc: "Аутсорсинг линейного персонала. Грузчики, разнорабочие, кассиры и операторы.",
+            image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200",
+            tags: ["HR", "Staffing", "Speed"]
+        }
+    ];
 
-            <div className="max-w-7xl mx-auto relative z-10">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-32 gap-10">
-                    <div className="max-w-2xl reveal">
-                        <span className="text-brand-green text-[11px] font-black tracking-[0.4em] uppercase block mb-6 px-1">Expertise</span>
-                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-brand-dark leading-none">
-                            Решения высшей <br /> <span className="text-brand-green italic">категории</span>
+    return (
+        <section ref={root} className="py-24 bg-white">
+            <div className="max-w-7xl mx-auto px-6">
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                    <div>
+                        <div className="inline-block px-3 py-1 bg-brand-green/10 rounded-full mb-6">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">Full Cycle</span>
+                        </div>
+                        <h2 className="text-[clamp(3rem,8vw,100px)] font-black uppercase leading-[0.85] tracking-tighter text-brand-dark">
+                            Our <span className="text-brand-green">Expertise</span>
                         </h2>
                     </div>
-                    <p className="text-brand-dark/40 text-lg max-w-sm font-medium leading-relaxed reveal">
-                        Индивидуальный план обслуживания для каждого объекта с использованием инновационных технологий.
-                    </p>
+                    <div className="hidden md:block">
+                        <p className="text-right text-gray-400 font-medium max-w-sm">From daily cleaning to complex industrial facility management.</p>
+                    </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-12">
-                    {items.map((item, i) => (
-                        <div key={i} className="service-card group relative p-1 transition-all reveal">
-                            <div className="premium-card rounded-[60px] overflow-hidden p-10 h-full flex flex-col items-start relative z-10">
-                                <div className="w-full h-80 rounded-[45px] overflow-hidden mb-12 relative">
-                                    <img
-                                        src={item.img}
-                                        alt={item.title}
-                                        className="img-reveal w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                                    />
-                                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {services.map((service, i) => (
+                        <div key={i} className="service-card group relative h-[500px] rounded-[40px] overflow-hidden cursor-pointer">
 
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-14 h-14 rounded-2xl bg-brand-accent text-brand-green flex items-center justify-center shadow-inner">
-                                        {item.icon}
-                                    </div>
-                                    <span className="text-[11px] font-black tracking-[0.3em] text-brand-dark/20 uppercase tracking-widest">{item.category}</span>
-                                </div>
-
-                                <h3 className="text-4xl font-black text-brand-dark mb-6 tracking-tighter leading-none">{item.title}</h3>
-                                <p className="text-brand-dark/40 text-lg font-medium leading-relaxed mb-12 flex-grow">{item.desc}</p>
-
-                                <Link to="/services" className="flex items-center gap-4 text-xs font-black text-brand-dark hover:text-brand-green transition-all uppercase tracking-[0.25em]">
-                                    Experience Details
-                                    <div className="w-10 h-px bg-brand-dark/10 group-hover:w-20 group-hover:bg-brand-green transition-all duration-500" />
-                                </Link>
+                            {/* Background Image with Zoom Effect */}
+                            <div className="absolute inset-0 bg-gray-200">
+                                <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
+                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                             </div>
-                            {/* Decorative Gradient Background for card */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-brand-green/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-0 rounded-[60px] blur-xl" />
+
+                            {/* Content Overlay */}
+                            <div className="absolute inset-0 p-10 flex flex-col justify-between text-white">
+                                <div className="flex justify-between items-start">
+                                    <div className="bg-white/10 backdrop-blur px-4 py-2 rounded-full border border-white/20">
+                                        <span className="text-xs font-bold uppercase tracking-widest">0{i + 1}</span>
+                                    </div>
+                                    <div className="w-12 h-12 rounded-full bg-white text-brand-dark flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                                        <ArrowUpRight size={24} />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4 leading-none">
+                                        {service.title}<br /><span className="text-brand-green">{service.subtitle}</span>
+                                    </h3>
+                                    <p className="text-lg text-white/80 font-medium leading-relaxed mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform translate-y-4 group-hover:translate-y-0 delay-100">
+                                        {service.desc}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200">
+                                        {service.tags.map((tag, j) => (
+                                            <span key={j} className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     ))}
                 </div>
+
             </div>
         </section>
     );

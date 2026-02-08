@@ -121,26 +121,26 @@ const WhySection = () => {
                 </h2>
             </div>
 
-            <div ref={trackRef} className="flex px-[10vw] gap-10 pb-40 h-full items-stretch w-max">
+            <div ref={trackRef} className="flex flex-col lg:flex-row px-6 lg:px-[10vw] gap-6 lg:gap-10 pb-20 lg:pb-40 h-full items-stretch lg:w-max">
                 {reasons.map((r, i) => (
-                    <div key={i} className={`why-card min-w-[350px] md:min-w-[600px] p-12 md:p-16 rounded-[60px] ${r.color} border border-black/5 flex flex-col group hover:border-brand-green/30 transition-colors shadow-2xl relative overflow-hidden bg-white`}>
-                        <div className="absolute top-0 right-0 p-8 text-9xl font-black text-brand-green/10 pointer-events-none group-hover:text-brand-green/20 transition-colors">
+                    <div key={i} className={`why-card w-full lg:min-w-[600px] p-8 md:p-16 rounded-[40px] md:rounded-[60px] ${r.color} border border-black/5 flex flex-col group hover:border-brand-green/30 transition-colors shadow-2xl relative overflow-hidden bg-white`}>
+                        <div className="absolute top-0 right-0 p-8 text-7xl md:text-9xl font-black text-brand-green/10 pointer-events-none group-hover:text-brand-green/20 transition-colors leading-none">
                             0{i + 1}
                         </div>
-                        <div className="w-24 h-24 rounded-3xl bg-brand-light flex items-center justify-center mb-12 border border-black/5 group-hover:bg-brand-green group-hover:scale-110 transition-all duration-500">
-                            <span className="text-brand-green group-hover:text-white transition-colors">{r.icon}</span>
+                        <div className="w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-brand-light flex items-center justify-center mb-8 md:mb-12 border border-black/5 group-hover:bg-brand-green group-hover:scale-110 transition-all duration-500">
+                            <span className="text-brand-green group-hover:text-white transition-colors scale-75 md:scale-100">{r.icon}</span>
                         </div>
                         <div className="flex-grow">
-                            <h3 className="text-4xl md:text-5xl font-black text-brand-dark mb-6 tracking-tight leading-none">{r.title}</h3>
-                            <p className="text-brand-dark/50 text-xl font-medium leading-relaxed max-w-sm">{r.desc}</p>
+                            <h3 className="text-2xl md:text-5xl font-black text-brand-dark mb-4 md:mb-6 tracking-tight leading-none uppercase">{r.title}</h3>
+                            <p className="text-brand-dark/50 text-base md:text-xl font-medium leading-relaxed max-w-sm">{r.desc}</p>
                         </div>
-                        <div className="mt-12 pt-8 border-t border-black/5 flex items-center gap-4">
+                        <div className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-black/5 flex items-center gap-4">
                             <div className="w-2 h-2 rounded-full bg-brand-green" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-dark/20">Engineering Purity</span>
+                            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-brand-dark/20">Engineering Purity</span>
                         </div>
                     </div>
                 ))}
-                <div className="min-w-[10vw]" />
+                <div className="hidden lg:block min-w-[10vw]" />
             </div>
         </div>
     );

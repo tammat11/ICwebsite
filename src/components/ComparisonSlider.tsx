@@ -46,7 +46,7 @@ const ComparisonSlider = () => {
                     ease: "power2.inOut",
                     yoyo: true,
                     repeat: 1,
-                    delay: 0.5,
+                    delay: 0.1,
                     scrollTrigger: {
                         trigger: containerRef.current,
                         start: "center center",
@@ -62,24 +62,24 @@ const ComparisonSlider = () => {
     }, []);
 
     return (
-        <section className="py-24 px-6 bg-brand-light">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-24">
-                <div className="md:w-1/3">
-                    <span className="text-brand-green text-[11px] font-black tracking-[0.4em] uppercase block mb-8 transition-all hover:tracking-[0.6em] cursor-default">Precision</span>
-                    <h2 className="comparison-text text-5xl md:text-7xl font-black tracking-tighter text-brand-dark mb-10 leading-[0.9]">Эффект <br /> <span className="text-brand-green italic">совершенства</span></h2>
-                    <p className="comparison-text text-brand-dark/40 text-xl font-medium leading-relaxed mb-12">
-                        Мы используем промышленное оборудование, которое удаляет 99.9% загрязнений.
+        <section className="py-20 md:py-24 px-6 bg-brand-light">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-24">
+                <div className="w-full md:w-1/3 text-center md:text-left mb-12 md:mb-0 relative z-20">
+                    <span className="text-brand-green text-[10px] md:text-[11px] font-black tracking-[0.4em] uppercase block mb-4 md:mb-8 transition-all hover:tracking-[0.6em] cursor-default">ТОЧНОСТЬ</span>
+                    <h2 className="comparison-text text-[clamp(2.5rem,8vw,72px)] font-black tracking-tighter text-brand-dark mb-6 md:mb-10 leading-[0.9]">Эффект <br /> <span className="text-brand-green italic">совершенства</span></h2>
+                    <p className="comparison-text text-brand-dark/40 text-lg md:text-xl font-medium leading-relaxed mb-8 md:mb-12">
+                        Мы используем оборудование, которое удаляет 99.9% загрязнений.
                     </p>
-                    <div className="comparison-text flex items-center gap-4 text-brand-dark font-black text-xs tracking-widest uppercase py-4 border-y border-black/5">
-                        <span>Before</span>
+                    <div className="comparison-text flex items-center justify-center md:justify-start gap-4 text-brand-dark font-black text-[10px] md:text-xs tracking-widest uppercase py-4 border-y border-black/5">
+                        <span>ДО</span>
                         <div className="w-12 h-px bg-brand-dark/10" />
-                        <span>After IC CLEAN</span>
+                        <span>ПОСЛЕ</span>
                     </div>
                 </div>
 
                 <div
                     ref={containerRef}
-                    className="md:w-2/3 aspect-[16/9] rounded-[60px] overflow-hidden relative cursor-col-resize select-none shadow-[0_40px_100px_rgba(0,0,0,0.1)]"
+                    className="w-full md:w-2/3 aspect-[5/4] sm:aspect-[16/9] rounded-[40px] md:rounded-[60px] overflow-hidden relative cursor-col-resize select-none shadow-[0_40px_100px_rgba(0,0,0,0.1)]"
                     onMouseMove={handleMove}
                     onTouchMove={handleMove}
                 >
@@ -107,7 +107,7 @@ const ComparisonSlider = () => {
                         className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.3)] z-10"
                         style={{ left: `${position}%` }}
                     >
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-2xl flex items-center justify-center">
                             <div className="flex gap-1">
                                 <div className="w-1 h-3 bg-brand-green rounded-full" />
                                 <div className="w-1 h-3 bg-brand-green rounded-full opacity-40" />
