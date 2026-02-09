@@ -25,8 +25,8 @@ const StatsGrid = () => {
         { value: "17", label: "Branches", icon: <MapPin size={28} />, x: "65%", y: "92%", speed: 0.8, size: "md", zIndex: 10, rotation: 4 },
     ];
 
-    // Ambient Particles (Reduced for performance)
-    const particles = [...Array(30)].map((_, i) => ({
+    // Ambient Particles (сильно урезаны для производительности)
+    const particles = [...Array(12)].map((_, i) => ({
         id: i,
         x: `${Math.random() * 100}%`,
         y: `${Math.random() * 100}%`,
@@ -38,9 +38,10 @@ const StatsGrid = () => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            const items = gsap.utils.toArray<HTMLElement>(".parallax-item");
+            // Двигаем только крупные карточки, мелкие частицы статичные — меньше ScrollTrigger-инстансов
+            const cards = gsap.utils.toArray<HTMLElement>(".parallax-card");
 
-            items.forEach((item) => {
+            cards.forEach((item) => {
                 const speed = parseFloat(item.getAttribute('data-speed') || '1');
                 gsap.to(item, {
                     y: -120 * speed,
@@ -50,12 +51,10 @@ const StatsGrid = () => {
                         trigger: sectionRef.current,
                         start: "top bottom",
                         end: "bottom top",
-                        scrub: 3  // Increased for better performance
-                    }
+                        scrub: 2.2,
+                    },
                 });
             });
-
-            // Removed floating animation for performance
         }, sectionRef);
         return () => ctx.revert();
     }, []);

@@ -5,7 +5,7 @@ import { Sparkles, ArrowDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Hero = () => {
+const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     const root = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLHeadingElement>(null);
 
@@ -160,9 +160,20 @@ const Hero = () => {
                 </h1>
 
                 <div className="reveal-item flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mt-4 md:mt-10 relative px-6">
-                    <p className="text-xs md:text-xl text-brand-dark/50 max-w-[280px] md:max-w-sm text-center md:text-left font-medium leading-snug md:leading-tight relative z-20">
-                        Мы — самая крупная компания, предоставляющая профессиональные клининговые услуги на рынке Казахстана.
-                    </p>
+                    <div className="flex flex-col items-center md:items-start gap-8">
+                        <p className="text-xs md:text-xl text-brand-dark/50 max-w-[280px] md:max-w-sm text-center md:text-left font-medium leading-snug md:leading-tight relative z-20">
+                            Мы — самая крупная компания, предоставляющая профессиональные клининговые услуги на рынке Казахстана.
+                        </p>
+                        <button
+                            onClick={onCalcOpen}
+                            className="group relative flex items-center gap-4 bg-brand-green text-white px-10 py-5 rounded-full text-sm font-black uppercase tracking-widest overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_20px_40px_rgba(131,182,67,0.3)]"
+                        >
+                            <span className="relative z-10">Рассчитать стоимость уборки</span>
+                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/40 transition-colors">
+                                <ArrowDown size={18} className="-rotate-90" />
+                            </div>
+                        </button>
+                    </div>
 
                     <div className="flex items-center gap-6 relative">
                         <div className="flex flex-col items-center gap-1 text-brand-dark/20 cursor-pointer group relative z-10 transition-colors hover:text-brand-green">

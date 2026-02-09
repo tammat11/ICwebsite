@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 
 import StatsGrid from './components/StatsGrid';
-import MapSection from './components/MapSection';
+import GuaranteeSection from './components/GuaranteeSection';
 import PainSection from './components/PainSection';
 
 
@@ -12,6 +12,7 @@ import PainSection from './components/PainSection';
 
 
 import ProcessSection from './components/ProcessSection';
+import PhilosophySection from './components/PhilosophySection';
 import QualityControl from './components/QualityControl';
 import CasesSection from './components/CasesSection';
 import ManifestoSection from './components/ManifestoSection';
@@ -19,10 +20,12 @@ import ServicesPage from './pages/ServicesPage';
 import CareersPage from './pages/CareersPage';
 import ContactsPage from './pages/ContactsPage';
 import Footer from './components/Footer';
+import ContactSection from './components/ContactSection';
+import AICalculator from './components/AICalculator';
 import Bubbles from './components/Bubbles';
+import { useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowUpRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,21 +52,24 @@ function ScrollToTop() {
 
 function App() {
   const location = useLocation();
+  const [isCalcOpen, setCalcOpen] = useState(false);
 
   return (
     <>
       <ScrollToTop />
+      <Navbar onCalcOpen={() => setCalcOpen(true)} />
       <Routes location={location}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
       </Routes>
+      <AICalculator isOpen={isCalcOpen} onClose={() => setCalcOpen(false)} />
     </>
   );
 }
 
-function Home() {
+function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
   const mainRef = useRef(null);
 
   useEffect(() => {
@@ -97,6 +103,22 @@ function Home() {
 
       // Refresh ScrollTrigger on all layout changes
       ScrollTrigger.refresh();
+
+      // Background Parallax
+      const blobs = document.querySelectorAll('.bg-blob');
+      blobs.forEach((blob) => {
+        const speed = parseFloat(blob.getAttribute('data-speed') || '0.5');
+        gsap.to(blob, {
+          y: () => -ScrollTrigger.maxScroll(window) * (speed * 0.1),
+          ease: "none",
+          scrollTrigger: {
+            trigger: mainRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true
+          }
+        });
+      });
 
       const refreshTimeout = setTimeout(() => {
         ScrollTrigger.refresh();
@@ -134,10 +156,8 @@ function Home() {
         {/* Extra small particles */}
       </div>
 
-      <Navbar />
-
       <main className="relative z-10">
-        <Hero />
+        <Hero onCalcOpen={onCalcOpen} />
         <ManifestoSection />
 
 
@@ -193,42 +213,16 @@ function Home() {
           <QualityControl />
         </section>
 
-        {/* 7. Map (Scale) */}
+        {/* 7. Guarantee (Trust) */}
         <section className="reveal-section">
-          <MapSection />
+          <GuaranteeSection />
         </section>
 
         {/* 5. Strategy Evolution (Vision) - REMOVED */}
 
-        <section id="philosophy" className="py-20 md:py-40 px-6 reveal-section">
-          <div className="max-w-7xl mx-auto premium-card rounded-[40px] md:rounded-[80px] p-10 sm:p-20 md:p-32 relative overflow-hidden bg-white/40 mt-12 md:mt-32">
-            <div className="relative z-10">
-              <blockquote id="quote-text" className="text-[clamp(1.5rem,6vw,72px)] font-black tracking-tighter leading-[0.95] text-brand-dark mb-12 md:text-center italic animate-fade-in">
-                “Каждое пространство должно <span className="text-brand-green underline decoration-4 decoration-brand-green/20 underline-offset-[12px]">дышать</span>.”
-              </blockquote>
-              <div className="quote-author flex flex-col sm:flex-row items-center gap-6 sm:gap-8 justify-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-brand-accent rounded-[24px] sm:rounded-[32px] flex items-center justify-center">
-                  <img src="https://ic-group.kz/wp-content/uploads/2019/07/cropped-Ресурс-14@300x-50x48.png" alt="IC Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain brightness-0 opacity-10" loading="lazy" />
-                </div>
-                <div className="text-center sm:text-left">
-                  <p className="font-black text-xl sm:text-3xl text-brand-dark tracking-tighter">Лян Ларион Викторович</p>
-                  <p className="text-[10px] sm:text-[12px] font-bold text-brand-dark/30 uppercase tracking-[0.4em]">Founder of IC Group</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <PhilosophySection />
 
-        <section id="contacts" className="py-20 md:py-40 px-6 reveal-section text-center">
-          <h2 className="text-[clamp(2.5rem,10vw,160px)] font-black tracking-tighter mb-12 sm:mb-16 leading-none">ДАВАЙТЕ<br /><span className="text-brand-green italic">ОБСУДИМ?</span></h2>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
-            <button className="btn-premium w-full sm:w-auto !px-12 md:!px-16 !py-6 md:!py-8 !text-xl md:!text-2xl flex items-center justify-center gap-4 group">
-              Estimate
-              <ArrowUpRight size={28} />
-            </button>
-            <button className="btn-secondary w-full sm:w-auto !px-12 md:!px-16 !py-6 md:!py-8 !text-xl md:!text-2xl">Our App</button>
-          </div>
-        </section>
+        <ContactSection />
       </main>
 
       <Footer />

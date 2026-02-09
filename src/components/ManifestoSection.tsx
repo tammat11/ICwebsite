@@ -1,121 +1,137 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Sparkles, ArrowRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ManifestoSection = () => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-
-            // 1. Floating Gradient Orbs
-            gsap.to(".orb-1", {
-                x: "20%", y: "20%", duration: 8, repeat: -1, yoyo: true, ease: "sine.inOut"
-            });
-            gsap.to(".orb-2", {
-                x: "-20%", y: "-10%", duration: 10, repeat: -1, yoyo: true, ease: "sine.inOut"
-            });
-
-            // 2. Clear Focus Reveal
             const tl = gsap.timeline({
                 scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top 60%",
-                    end: "bottom 80%",
-                    scrub: 1
+                    trigger: triggerRef.current,
+                    start: "top top",
+                    end: "+=4000",
+                    scrub: 1,
+                    pin: true,
+                    anticipatePin: 1
                 }
             });
 
-            // Blur out -> Focus in effect
-            tl.fromTo(".glass-text",
-                { filter: "blur(10px)", opacity: 0.4, scale: 0.95 },
-                { filter: "blur(0px)", opacity: 1, scale: 1, stagger: 0.2, duration: 1 }
+            // Stage 1: "Мы не просто убираем помещения"
+            tl.fromTo(".line-1",
+                { opacity: 0, y: 100, filter: "blur(20px)" },
+                { opacity: 1, y: 0, filter: "blur(0px)", duration: 2 }
+            );
+            tl.to(".line-1", { opacity: 0.1, y: -50, filter: "blur(10px)", duration: 2 }, "+=1");
+
+            // Stage 2: "МЫ СОЗДАЕМ"
+            tl.fromTo(".line-2",
+                { scale: 0.5, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 2, ease: "power4.out" }
+            );
+            tl.to(".line-2", { scale: 1.5, opacity: 0, duration: 3 }, "+=1");
+
+            // Stage 3: "СТАНДАРТЫ ЧИСТОТЫ"
+            tl.to(".manifesto-bg", { backgroundColor: "#83B643", duration: 2 }, "-=2");
+            tl.fromTo(".line-3",
+                { x: -200, opacity: 0 },
+                { x: 0, opacity: 1, duration: 2 }
+            );
+            tl.to(".line-3", { x: 200, opacity: 0, duration: 2 }, "+=1");
+
+            // Stage 4: "меняют индустрию Казахстан"
+            tl.to(".manifesto-bg", { backgroundColor: "#ffffff", duration: 2 }, "-=1");
+            tl.fromTo(".line-4",
+                { opacity: 0, scale: 0.8 },
+                { opacity: 1, scale: 1, duration: 2 }
+            );
+            tl.fromTo(".kz-map-overlay",
+                { opacity: 0, scale: 0.9 },
+                { opacity: 0.05, scale: 1.1, duration: 3 }, "-=1"
+            );
+            tl.to(".line-4", { opacity: 0.2, duration: 2 }, "+=1");
+
+            // Stage 5: "ЕЖЕДНЕВНО."
+            tl.fromTo(".line-5",
+                { y: 100, opacity: 0 },
+                { y: 0, opacity: 1, duration: 2 }
             );
 
-            // 3. Highlight Line Animation
-            gsap.from(".highlight-bar", {
-                width: 0,
-                duration: 1.5,
-                ease: "expo.out",
-                scrollTrigger: {
-                    trigger: ".highlight-bar",
-                    start: "top 80%"
-                }
+            gsap.to(".line-5", {
+                scale: 1.05,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
             });
 
         }, containerRef);
-
         return () => ctx.revert();
     }, []);
 
     return (
-        <section ref={containerRef} className="py-32 md:py-48 bg-[#111] text-white relative overflow-hidden" id="manifesto">
+        <div ref={containerRef}>
+            <div ref={triggerRef} className="manifesto-bg relative w-full h-screen bg-white overflow-hidden flex items-center justify-center transition-colors duration-1000">
 
-            {/* Background: Deep Graphite + Floating Orbs */}
-            <div className="absolute inset-0 z-0 bg-[#0f0f0f]">
-                <div className="orb-1 absolute top-0 right-0 w-[600px] h-[600px] bg-brand-green/20 rounded-full blur-[120px] opacity-40 mix-blend-screen" />
-                <div className="orb-2 absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
-            </div>
-
-            {/* Glass Container */}
-            <div className="relative z-10 max-w-5xl mx-auto px-6">
-
-                {/* Header Tag */}
-                <div className="mb-12 flex items-center gap-3 opacity-60">
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md">
-                        <Sparkles size={14} className="text-brand-green" />
-                    </div>
-                    <span className="text-xs font-mono tracking-[0.2em] uppercase text-white/60">Core Manifesto</span>
+                <div className="kz-map-overlay absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden">
+                    <img
+                        src="/kz-map.png"
+                        alt="Map"
+                        className="w-[80vw] h-auto object-contain opacity-10 grayscale brightness-0"
+                    />
                 </div>
 
-                {/* Main Text Content */}
-                <div className="space-y-2 md:space-y-4">
-
-                    {/* Line 1 */}
-                    <h2 className="glass-text text-3xl md:text-5xl font-medium text-white/60 tracking-tight">
-                        Мы не просто убираем.
-                    </h2>
-
-                    {/* Line 2 - Big Impact */}
-                    <div className="highlight-wrapper relative py-2">
-                        <h2 className="glass-text text-[clamp(3rem,8vw,120px)] font-bold tracking-tighter text-white leading-[0.9]">
-                            Мы создаем
+                <div className="relative z-10 w-full max-w-7xl px-6 text-center">
+                    <div className="line-1 absolute inset-0 flex items-center justify-center">
+                        <h2 className="text-[clamp(1.5rem,5vw,72px)] font-medium text-black italic tracking-tight uppercase">
+                            Мы не просто убираем помещения —
                         </h2>
                     </div>
 
-                    {/* Line 3 - Highlighted */}
-                    <div className="relative inline-block glass-text">
-                        <h2 className="text-[clamp(3rem,8vw,120px)] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 leading-[0.9] relative z-10">
-                            стандарты
+                    <div className="line-2 absolute inset-0 flex items-center justify-center">
+                        <h2 className="text-[clamp(4rem,15vw,260px)] font-[950] text-black tracking-[-0.08em] leading-none uppercase">
+                            МЫ СОЗДАЕМ
                         </h2>
-                        {/* Underline Bar */}
-                        <div className="highlight-bar absolute bottom-2 left-0 h-3 md:h-6 bg-brand-green/80 -z-0 w-full rounded-sm" />
                     </div>
 
-                    {/* Line 4 - Finish */}
-                    <div className="glass-text mt-8 flex items-center gap-6">
-                        <div className="h-px w-16 bg-white/20" />
-                        <p className="text-lg md:text-2xl font-light text-white/50 italic font-serif">
-                            которые меняют индустрию навсегда.
-                        </p>
+                    <div className="line-3 absolute inset-0 flex items-center justify-center">
+                        <div className="flex flex-col items-center">
+                            <h2 className="text-[clamp(3.5rem,12vw,200px)] font-black text-white leading-[0.8] tracking-tighter uppercase mb-4">
+                                СТАНДАРТЫ
+                            </h2>
+                            <h2 className="text-[clamp(2.5rem,10vw,160px)] font-black text-black leading-none tracking-tighter uppercase italic px-6 bg-white transform rotate-1">
+                                ЧИСТОТЫ
+                            </h2>
+                        </div>
                     </div>
 
+                    <div className="line-4 absolute inset-0 flex items-center justify-center px-12">
+                        <h2 className="text-[clamp(1.8rem,5vw,80px)] font-black text-black leading-[1.1] tracking-tighter uppercase">
+                            Которые меняют <br />
+                            <span className="text-brand-green italic">индустрию Казахстана</span>
+                        </h2>
+                    </div>
+
+                    <div className="line-5 absolute inset-0 flex items-center justify-center">
+                        <div className="relative">
+                            <h2 className="text-[clamp(4rem,18vw,350px)] font-[1000] text-brand-green tracking-[-0.1em] leading-none uppercase">
+                                ЕЖЕДНЕВНО.
+                            </h2>
+                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-1.5 bg-brand-green rounded-full shadow-[0_0_30px_rgba(131,182,67,0.5)]" />
+                        </div>
+                    </div>
                 </div>
 
-                {/* Bottom Call to Action Hint */}
-                <div className="mt-20 flex justify-end opacity-40 glass-text">
-                    <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest cursor-pointer hover:text-brand-green transition-colors">
-                        <span>Read Full Standard</span>
-                        <ArrowRight size={16} />
-                    </div>
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-20">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-black">Scroll to Dive</span>
+                    <div className="w-px h-12 bg-gradient-to-b from-black to-transparent" />
                 </div>
-
             </div>
-
-        </section>
+        </div>
     );
 };
 

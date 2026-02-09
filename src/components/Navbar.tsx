@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 
 interface NavbarProps {
     alwaysVisible?: boolean;
+    onCalcOpen?: () => void;
 }
 
-const Navbar = ({ alwaysVisible = false }: NavbarProps) => {
+const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
     const navRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -32,7 +33,7 @@ const Navbar = ({ alwaysVisible = false }: NavbarProps) => {
     const navLinks = [
         { label: 'Услуги', to: '/services' },
         { label: 'Карьера', to: '/careers' },
-        { label: 'Секторы', to: '/#sectors' },
+        { label: 'Кейсы', to: '/#cases' },
         { label: 'Контакты', to: '/contacts' },
     ];
 
@@ -54,7 +55,10 @@ const Navbar = ({ alwaysVisible = false }: NavbarProps) => {
 
                 <div className="flex items-center gap-1 sm:gap-4 md:gap-6 shrink-0">
                     <span className="hidden lg:block text-[11px] font-black text-brand-dark">+7 (771) 780-08-41</span>
-                    <button className="btn-premium !px-2 sm:!px-4 md:!px-6 !py-1.5 sm:!py-2 md:!py-2.5 !text-[7px] sm:!text-[9px] md:!text-[10px]">
+                    <button
+                        onClick={onCalcOpen}
+                        className="btn-premium !px-2 sm:!px-4 md:!px-6 !py-1.5 sm:!py-2 md:!py-2.5 !text-[7px] sm:!text-[9px] md:!text-[10px]"
+                    >
                         {/* Short text for mobile */}
                         <span className="sm:hidden">$$</span>
                         <span className="hidden sm:inline">Расчет</span>

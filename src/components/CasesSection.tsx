@@ -20,6 +20,32 @@ const CasesSection = () => {
                 x: -150,
                 opacity: 0.05
             });
+
+            // Case Card Sequential Animation
+            gsap.utils.toArray<HTMLElement>(".case-card").forEach((card) => {
+                gsap.from(card, {
+                    y: 100,
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 90%"
+                    }
+                });
+
+                // Parallax on image inside card
+                gsap.from(card.querySelector("img"), {
+                    scale: 1.2,
+                    duration: 2,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top bottom",
+                        scrub: true
+                    }
+                });
+            });
         }, sectionRef);
         return () => ctx.revert();
     }, []);
@@ -67,49 +93,71 @@ const CasesSection = () => {
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-                {/* Header */}
-                <div className="mb-20">
-                    <h2 className="text-[clamp(2.5rem,7vw,100px)] font-black leading-[0.85] tracking-[-0.06em] text-white uppercase italic">
-                        Масштабируем <br />
-                        <span className="text-brand-green not-italic">ваши цели</span>
+                {/* Goal Title - Layered Impact Style (Selected) */}
+                <div className="mb-32 relative">
+                    <div className="absolute -top-20 -left-10 text-[clamp(8rem,25vw,350px)] font-black text-white/[0.03] select-none pointer-events-none italic">PROJECTS</div>
+                    <h2 className="relative z-10 text-[clamp(4.5rem,12vw,180px)] font-black uppercase leading-[0.85] tracking-tighter">
+                        <span className="text-white block mb-2 drop-shadow-[0_10px_30px_rgba(255,255,255,0.1)]">Масштабируем</span>
+                        <span className="inline-block bg-brand-green text-black px-6 md:px-10 py-3 transform -rotate-2 shadow-2xl">ваши цели</span>
                     </h2>
                 </div>
 
-                {/* Vertical List for Stability */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* Vertical Premium Showcase */}
+                <div className="flex flex-col gap-40">
                     {cases.map((item, i) => (
-                        <div key={i} className="flex flex-col bg-[#111] border border-white/[0.05] rounded-[32px] overflow-hidden transition-all duration-300 hover:border-white/20 shadow-2xl">
-                            {/* Media Area */}
-                            <div className="h-[240px] relative overflow-hidden bg-brand-dark">
+                        <div
+                            key={i}
+                            className={`case-card group relative flex flex-col ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 md:gap-24`}
+                        >
+                            {/* 1. Media Area - Large Focus */}
+                            <div className="w-full md:w-3/5 h-[400px] md:h-[600px] relative rounded-[40px] overflow-hidden">
+                                <div className="absolute inset-0 bg-brand-dark/20 z-10" />
                                 <img
                                     src={item.image}
                                     alt={item.company}
-                                    className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
+                                    className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105 transition-all duration-1000"
                                 />
-                                <div className="absolute top-6 left-6 z-20">
-                                    <div className="bg-black/80 backdrop-blur-md px-3 py-1 rounded-lg flex items-center gap-2 border border-white/10">
-                                        {item.icon}
-                                        <span className="text-[10px] font-black">{item.stat}</span>
+
+                                {/* Overlay Stats */}
+                                <div className="absolute inset-0 z-20 flex flex-col justify-end p-12 bg-gradient-to-t from-black to-transparent">
+                                    <div className="text-8xl md:text-[12rem] font-black text-white/10 italic leading-none absolute top-10 right-10">
+                                        0{i + 1}
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <div className="text-7xl md:text-9xl font-black text-brand-green tracking-tighter">
+                                            {item.stat}
+                                        </div>
+                                        <div className="text-sm font-black uppercase tracking-[0.3em] text-white">
+                                            {item.metric}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Content */}
-                            <div className="p-8 flex flex-col flex-grow">
-                                <div className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-4">
-                                    {item.category} // {item.company}
+                            {/* 2. Content Area */}
+                            <div className="w-full md:w-2/5 flex flex-col justify-center">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green border border-brand-green/20">
+                                        {item.icon}
+                                    </div>
+                                    <span className="text-xs font-black uppercase tracking-[0.4em] text-brand-green">
+                                        {item.company}
+                                    </span>
                                 </div>
-                                <h3 className="text-2xl font-black mb-4 tracking-tighter leading-tight">
+                                <h3 className="text-4xl md:text-6xl font-black text-white mb-8 uppercase leading-[0.9] tracking-tighter">
                                     {item.title}
                                 </h3>
-                                <p className="text-white/40 text-sm font-medium leading-relaxed mb-8">
+                                <p className="text-xl text-white/40 font-medium leading-relaxed mb-10 max-w-md">
                                     {item.desc}
                                 </p>
 
-                                <div className="flex items-center justify-between mt-auto pt-6 border-t border-white/5">
-                                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white/10">PROTOCOL 0{i + 1}</span>
-                                    <ArrowUpRight size={18} className="text-white/20" />
-                                </div>
+                                {/* Detail Button */}
+                                <button className="group/btn relative inline-flex items-center gap-4 text-white text-xs font-black uppercase tracking-[0.5em] group-hover:text-brand-green transition-colors">
+                                    <span className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover/btn:border-brand-green transition-colors">
+                                        <ArrowUpRight className="w-5 h-5" />
+                                    </span>
+                                    Explore Case Study
+                                </button>
                             </div>
                         </div>
                     ))}
