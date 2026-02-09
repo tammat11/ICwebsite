@@ -9,7 +9,6 @@ import {
     Zap,
     FlaskConical,
     Users,
-    Clock3,
     Target,
     Building2,
     ShieldCheck,
@@ -30,7 +29,6 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
     const [size, setSize] = useState(2500);
     const [chemistry, setChemistry] = useState('Eco');
     const [staff, setStaff] = useState(3);
-    const [frequency, setFrequency] = useState('Daily');
 
     const modalRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
