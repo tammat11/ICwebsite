@@ -1,149 +1,228 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Shield, CheckCircle, Zap, Lock, Award, Star } from 'lucide-react';
+import { Shield, Lock, BadgeCheck, Users, Zap } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const GuaranteeSection = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const sealRef = useRef<HTMLDivElement>(null);
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const rotatingTextRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
+            // 1. Seal floating animation
+            gsap.to([sealRef.current, rotatingTextRef.current], {
+                y: -20,
+                rotationZ: 1,
+                duration: 4,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+
+            // 2. Cards layout: Peeking from behind the large circle
+            const cards = gsap.utils.toArray<HTMLElement>(".guarantee-card");
+
+            // Initial state: Hidden behind the seal
+            // We set z-index to 10 so they are above the rotating text (z-5) but below the seal (z-20)
+            gsap.set(cards, {
+                scale: 0.5,
+                opacity: 0,
+                x: 0,
+                y: 0,
+                rotate: 0,
+                zIndex: 10
+            });
+
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 85%",
+                    start: "top 60%",
+                    toggleActions: "play none none reverse"
                 }
             });
 
-            tl.from(sealRef.current, {
-                scale: 0.5,
-                rotation: -180,
-                opacity: 0,
-                duration: 1,
-                ease: "elastic.out(1, 0.75)"
+            tl.to(cards, {
+                opacity: 1,
+                scale: 1,
+                duration: 1.5,
+                ease: "expo.out",
+                stagger: 0.1,
+                x: (i) => {
+                    if (window.innerWidth < 768) {
+                        const mobileX = [-85, 85, -85, 85];
+                        return mobileX[i];
+                    }
+                    const xPositions = [-440, -360, 360, 440];
+                    return xPositions[i];
+                },
+                y: (i) => {
+                    if (window.innerWidth < 768) {
+                        const mobileY = [240, 240, 410, 410];
+                        return mobileY[i];
+                    }
+                    const yPositions = [-160, 180, -160, 180];
+                    return yPositions[i];
+                },
+                rotate: (i) => {
+                    if (window.innerWidth < 768) return 0;
+                    const rotations = [-10, -5, 5, 10];
+                    return rotations[i];
+                }
             });
 
-            tl.from(".seal-ring", {
-                scale: 0,
+            // 3. Seal Entrance
+            gsap.from([sealRef.current, rotatingTextRef.current], {
+                scale: 0.8,
                 opacity: 0,
-                stagger: 0.1,
-                duration: 0.8,
-                ease: "back.out(2)"
-            }, "-=0.8");
+                duration: 1.5,
+                ease: "power4.out",
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: "top 70%",
+                    once: true
+                }
+            });
 
-            tl.from(".guarantee-card", {
-                y: 100,
-                opacity: 0,
-                stagger: 0.1,
-                duration: 1,
-                ease: "expo.out"
-            }, "-=0.5");
         }, sectionRef);
 
         return () => ctx.revert();
     }, []);
 
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!sectionRef.current) return;
-            const rect = sectionRef.current.getBoundingClientRect();
-            const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
-            const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
-            setMousePos({ x, y });
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
     const guarantees = [
-        { icon: <CheckCircle size={28} />, title: "SLA 98%", desc: "Гарантия качества", color: "from-green-500 to-emerald-600", rotate: -3, gridArea: "1 / 1 / 2 / 3" },
-        { icon: <Shield size={28} />, title: "₸50M", desc: "Страховой полис", color: "from-blue-500 to-cyan-600", rotate: 2, gridArea: "1 / 3 / 2 / 4" },
-        { icon: <Zap size={28} />, title: "24/7", desc: "Мониторинг", color: "from-yellow-500 to-orange-600", rotate: -2, gridArea: "2 / 1 / 3 / 2" },
-        { icon: <Lock size={28} />, title: "₸500K", desc: "Штрафы", color: "from-red-500 to-pink-600", rotate: 4, gridArea: "2 / 2 / 3 / 4" }
+        {
+            icon: <BadgeCheck className="text-brand-green" />,
+            title: "Европейские стандарты",
+            desc: "Используем только сертифицированную химию и оборудование",
+        },
+        {
+            icon: <Users className="text-brand-green" />,
+            title: "Обученный персонал",
+            desc: "Каждый сотрудник проходит аттестацию в академии",
+        },
+        {
+            icon: <Lock className="text-brand-green" />,
+            title: "Страхование ответственности",
+            desc: "Ваше имущество застраховано до 100 млн ₸",
+        },
+        {
+            icon: <Zap className="text-brand-green" />,
+            title: "Оперативный контроль",
+            desc: "Реакция на любые замечания в течение 2 часов",
+        }
     ];
 
     return (
-        <section ref={sectionRef} className="relative py-40 md:py-56 bg-white overflow-hidden" style={{ perspective: '1200px' }}>
-            {/* Background Grid Accent */}
-            <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#83b643 1.5px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <section ref={sectionRef} className="relative py-24 md:py-40 bg-brand-light overflow-hidden" style={{ perspective: '2000px' }}>
 
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="text-center mb-24">
-                    <div className="inline-flex items-center gap-3 mb-8 px-6 py-2 bg-brand-green/10 rounded-full border border-brand-green/20">
-                        <Award size={18} className="text-brand-green" />
-                        <span className="text-xs font-black uppercase tracking-[0.3em] text-brand-green">Legal Security</span>
-                    </div>
-                    <h2 className="text-[clamp(3.5rem,10vw,160px)] font-[1000] uppercase leading-[0.8] tracking-tighter mb-8">
-                        ПЕЧАТЬ <br /> <span className="text-brand-green">НАДЕЖНОСТИ</span>
+            {/* Background Base */}
+            <div className="absolute inset-0 bg-brand-light" />
+
+            <div className="max-w-7xl mx-auto px-6 relative flex flex-col items-center">
+
+                {/* Header- Improved with brand-secondary */}
+                <div className="text-center mb-32 md:mb-48 z-30">
+                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark uppercase tracking-tighter leading-none mb-8 italic">
+                        ПЕЧАТЬ <br />
+                        <span className="text-brand-green">НАДЕЖНОСТИ</span>
                     </h2>
+                    <p className="text-lg md:text-2xl text-brand-secondary font-[1000] uppercase tracking-[0.2em] drop-shadow-sm">Гарантия качества №1 в Казахстане</p>
                 </div>
 
-                <div className="flex justify-center mb-40 relative">
-                    <div ref={sealRef} className="relative transition-transform duration-300 ease-out" style={{ transform: `rotateX(${mousePos.y * 15}deg) rotateY(${mousePos.x * 15}deg)`, transformStyle: 'preserve-3d' }}>
+                {/* Central Composition */}
+                <div className="relative flex flex-col items-center justify-center w-full min-h-[750px] md:h-[600px]">
 
-                        {/* Multiple Glowing Rings */}
-                        {[0, 1, 2, 3].map((i) => (
-                            <div key={i} className="seal-ring absolute rounded-full border-2 border-brand-green"
-                                style={{
-                                    width: `${450 - i * 50}px`, height: `${450 - i * 50}px`,
-                                    left: '50%', top: '50%',
-                                    transform: `translate(-50%, -50%) translateZ(${i * 20}px)`,
-                                    opacity: 0.3 - i * 0.05,
-                                    boxShadow: i === 0 ? '0 0 50px rgba(131,182,67,0.3)' : 'none'
-                                }}
-                            />
-                        ))}
+                    {/* 1. LAYER: Rotating Text & Orbital Paths (Technical background) */}
+                    <div ref={rotatingTextRef} className="absolute top-0 md:inset-0 flex items-center justify-center z-[5] pointer-events-none opacity-[0.15] md:opacity-20 transform -translate-y-20 md:translate-y-0">
+                        <div className="w-[300px] h-[300px] md:w-[640px] md:h-[640px] relative">
+                            {/* Orbital Path Lines - Subtle technical detail */}
+                            <div className="absolute inset-0 border border-brand-secondary/10 rounded-full scale-[0.85]" />
+                            <div className="absolute inset-0 border border-brand-secondary/5 rounded-full scale-[1.1]" />
 
-                        {/* Central Master Seal */}
-                        <div className="relative w-96 h-96 md:w-[480px] md:h-[480px] rounded-full bg-white border-[12px] border-brand-green flex items-center justify-center shadow-[0_50px_100px_rgba(131,182,67,0.2)]" style={{ transform: 'translateZ(60px)' }}>
-                            <div className="text-center px-12">
-                                <Shield size={140} className="text-brand-green mx-auto mb-8 drop-shadow-[0_0_20px_rgba(131,182,67,0.5)]" />
-                                <div className="text-9xl font-black text-brand-green leading-none tracking-tighter">98<span className="text-4xl italic">%</span></div>
-                                <div className="text-sm font-black uppercase tracking-[0.5em] text-black/20 mt-4">SLA Guarantee</div>
-                            </div>
-
-                            {/* Rotating Label */}
-                            <div className="absolute inset-0 animate-spin-slow p-8">
-                                <svg viewBox="0 0 100 100" className="w-full h-full">
-                                    <path id="curve" d="M 50,50 m -40,0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" fill="none" />
-                                    <text className="text-[4px] fill-brand-green/40 font-black uppercase tracking-[0.6em]">
-                                        <textPath href="#curve">IC GROUP QUALITY STANDARD CONTROL SYSTEM • SECURITY PROTECTION • </textPath>
-                                    </text>
-                                </svg>
-                            </div>
-
-                            {/* Accent Stars */}
-                            {[0, 90, 180, 270].map((angle, i) => (
-                                <div key={i} className="absolute" style={{ transform: `rotate(${angle}deg) translateY(-210px)` }}>
-                                    <Star size={24} className="text-brand-green fill-brand-green animate-pulse" />
-                                </div>
-                            ))}
+                            <svg className="w-full h-full animate-[spin_40s_linear_infinite]" viewBox="0 0 100 100">
+                                <defs>
+                                    <path id="circlePathBack" d="M 50, 50 m -45, 0 a 45, 45 0 1, 1 90, 0 a 45, 45 0 1, 1 -90, 0" />
+                                </defs>
+                                <text className="text-[3.5px] font-[1000] uppercase tracking-[1.4em] fill-brand-secondary">
+                                    <textPath xlinkHref="#circlePathBack">
+                                        • IC Group Premium Quality • Trusted Partner Kazakhstan • Leading Facility Services •
+                                    </textPath>
+                                </text>
+                            </svg>
                         </div>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {guarantees.map((g, i) => (
-                        <div key={i} className="guarantee-card group" style={{ gridArea: window.innerWidth > 768 ? g.gridArea : 'auto' }}>
-                            <div className="bg-white border-2 border-black/5 rounded-[50px] p-10 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-4">
-                                <div className="w-16 h-16 rounded-3xl bg-brand-green/10 flex items-center justify-center text-brand-green mb-8 group-hover:bg-brand-green group-hover:text-white transition-all duration-500">
-                                    {g.icon}
+                    {/* 2. LAYER: The Cards (Peeking with precise offsets for beauty) */}
+                    <div className="absolute top-0 md:inset-0 flex items-center justify-center z-30 pointer-events-none transform -translate-y-20 md:translate-y-0">
+                        {guarantees.map((item, i) => {
+                            // Precise offsets for a 'flower' or 'orbit' effect
+                            return (
+                                <div key={i} className="guarantee-card absolute w-[160px] md:w-[340px] pointer-events-auto">
+                                    <div className={`bg-white/95 backdrop-blur-3xl border border-black/5 p-4 md:p-10 rounded-[32px] md:rounded-[50px] shadow-[0_30px_70px_rgba(0,0,0,0.05)] transition-all duration-700 ${i % 2 === 0 ? 'hover:border-brand-green/30' : 'hover:border-brand-secondary/30'} hover:-translate-y-4 group ring-1 ring-black/5 relative overflow-hidden h-[160px] md:h-auto flex flex-col justify-center`}>
+
+                                        {/* Internal Glow on Hover */}
+                                        <div className={`absolute -top-24 -right-24 w-48 h-48 blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 rounded-full ${i % 2 === 0 ? 'bg-brand-green' : 'bg-brand-secondary'}`} />
+
+                                        <div className={`w-8 h-8 md:w-16 md:h-16 rounded-[12px] md:rounded-[24px] ${i % 2 === 0 ? 'bg-brand-green/10 text-brand-green group-hover:bg-brand-green' : 'bg-brand-secondary/10 text-brand-secondary group-hover:bg-brand-secondary'} flex items-center justify-center mb-4 md:mb-8 group-hover:text-white transition-all duration-700 shadow-sm relative z-10 mx-auto md:mx-0`}>
+                                            <div className="scale-75 md:scale-125 transition-transform duration-500">
+                                                {item.icon}
+                                            </div>
+                                        </div>
+                                        <h4 className={`text-xs md:text-2xl font-[1000] text-brand-dark uppercase tracking-tight mb-2 md:mb-4 leading-[1.1] md:leading-[0.9] ${i % 2 === 0 ? 'group-hover:text-brand-green' : 'group-hover:text-brand-secondary'} transition-colors relative z-10 text-center md:text-left`}>
+                                            {item.title}
+                                        </h4>
+                                        <p className="hidden md:block text-[13px] text-black/40 font-bold leading-relaxed relative z-10">
+                                            {item.desc}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="text-6xl font-black text-brand-green mb-4 tracking-tighter">{g.title}</div>
-                                <p className="text-lg font-bold text-black/40">{g.desc}</p>
+                            );
+                        })}
+                    </div>
+
+                    {/* 3. LAYER: Central Seal Main Body (Heavier Depth) */}
+                    <div ref={sealRef} className="relative z-20 w-64 h-64 md:w-[520px] md:h-[520px] flex items-center justify-center transform -translate-y-24 md:translate-y-0">
+
+                        {/* 3D Glass Layers - More pronounced depth */}
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-xl rounded-full border border-white/40 ring-1 ring-black/5 shadow-2xl" />
+                        <div className="absolute inset-4 bg-white/80 rounded-full border border-black/5" />
+
+                        {/* Technical Precision Markings */}
+                        <div className="absolute inset-0 border border-brand-secondary/5 rounded-full scale-[0.92]" />
+                        <div className="absolute inset-0 border border-brand-secondary/5 rounded-full scale-[0.88] border-dashed" />
+
+                        {/* Rotating Decorative Rings */}
+                        <div className="absolute inset-12 border border-brand-secondary/20 border-dotted rounded-full animate-[spin_60s_linear_infinite] opacity-40" />
+                        <div className="absolute inset-16 border border-brand-green/10 rounded-full" />
+
+                        {/* Main Shield Icon */}
+                        <div className="relative z-30 flex flex-col items-center">
+                            <div className="p-8 md:p-12 rounded-full bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-black/5 mb-4 md:mb-8 group relative">
+                                <Shield size={60} className="md:w-[120px] md:h-[120px] text-brand-secondary drop-shadow-[0_0_30px_rgba(123,133,167,0.3)] transition-all duration-700 group-hover:scale-110 group-hover:text-brand-green" fill="currentColor" fillOpacity={0.05} />
+                                <div className="absolute inset-0 bg-brand-secondary/5 rounded-full blur-2xl group-hover:bg-brand-green/10 transition-colors" />
+                            </div>
+                            <div className="text-center space-y-1 md:space-y-3">
+                                <div className="text-[8px] md:text-[12px] font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary/60">Quality Anchor</div>
+                                <div className="text-3xl md:text-7xl font-[1000] text-brand-dark uppercase italic tracking-[-0.05em] leading-none">PREMIUM</div>
                             </div>
                         </div>
-                    ))}
+
+                    </div>
+
                 </div>
+
             </div>
 
             <style>{`
-                @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                .animate-spin-slow { animation: spin-slow 20s linear infinite; }
+                @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .animate-spin-slow {
+                    animation: spin-slow 20s linear infinite;
+                }
             `}</style>
         </section>
     );

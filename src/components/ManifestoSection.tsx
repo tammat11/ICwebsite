@@ -5,133 +5,81 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const ManifestoSection = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const triggerRef = useRef<HTMLDivElement>(null);
+    const sectionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            const tl = gsap.timeline({
+            gsap.from(".reveal-manifesto", {
+                y: 60,
+                opacity: 0,
+                duration: 1.2,
+                ease: "power4.out",
+                stagger: 0.2,
                 scrollTrigger: {
-                    trigger: triggerRef.current,
-                    start: "top top",
-                    end: "+=4000",
-                    scrub: 1,
-                    pin: true,
-                    anticipatePin: 1
+                    trigger: sectionRef.current,
+                    start: "top 80%",
+                    once: true
                 }
             });
+        }, sectionRef);
 
-            // Stage 1: "Мы не просто убираем помещения"
-            tl.fromTo(".line-1",
-                { opacity: 0, y: 100, filter: "blur(20px)" },
-                { opacity: 1, y: 0, filter: "blur(0px)", duration: 2 }
-            );
-            tl.to(".line-1", { opacity: 0.1, y: -50, filter: "blur(10px)", duration: 2 }, "+=1");
-
-            // Stage 2: "МЫ СОЗДАЕМ"
-            tl.fromTo(".line-2",
-                { scale: 0.5, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 2, ease: "power4.out" }
-            );
-            tl.to(".line-2", { scale: 1.5, opacity: 0, duration: 3 }, "+=1");
-
-            // Stage 3: "СТАНДАРТЫ ЧИСТОТЫ"
-            tl.to(".manifesto-bg", { backgroundColor: "#83B643", duration: 2 }, "-=2");
-            tl.fromTo(".line-3",
-                { x: -200, opacity: 0 },
-                { x: 0, opacity: 1, duration: 2 }
-            );
-            tl.to(".line-3", { x: 200, opacity: 0, duration: 2 }, "+=1");
-
-            // Stage 4: "меняют индустрию Казахстан"
-            tl.to(".manifesto-bg", { backgroundColor: "#ffffff", duration: 2 }, "-=1");
-            tl.fromTo(".line-4",
-                { opacity: 0, scale: 0.8 },
-                { opacity: 1, scale: 1, duration: 2 }
-            );
-            tl.fromTo(".kz-map-overlay",
-                { opacity: 0, scale: 0.9 },
-                { opacity: 0.05, scale: 1.1, duration: 3 }, "-=1"
-            );
-            tl.to(".line-4", { opacity: 0.2, duration: 2 }, "+=1");
-
-            // Stage 5: "ЕЖЕДНЕВНО."
-            tl.fromTo(".line-5",
-                { y: 100, opacity: 0 },
-                { y: 0, opacity: 1, duration: 2 }
-            );
-
-            gsap.to(".line-5", {
-                scale: 1.05,
-                duration: 2,
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut"
-            });
-
-        }, containerRef);
         return () => ctx.revert();
     }, []);
 
     return (
-        <div ref={containerRef}>
-            <div ref={triggerRef} className="manifesto-bg relative w-full h-screen bg-white overflow-hidden flex items-center justify-center transition-colors duration-1000">
+        <section ref={sectionRef} className="relative py-24 md:py-32 bg-brand-light overflow-hidden flex flex-col items-center justify-center">
 
-                <div className="kz-map-overlay absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden">
-                    <img
-                        src="/kz-map.png"
-                        alt="Map"
-                        className="w-[80vw] h-auto object-contain opacity-10 grayscale brightness-0"
-                    />
+            <div className="max-w-7xl mx-auto px-6 w-full text-center">
+
+                {/* 1. Header Info- Styled with new brand-secondary */}
+                <div className="reveal-manifesto mb-12 flex items-center justify-center gap-4">
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-secondary">Philosophy</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand-secondary animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-secondary">Cleaning Standards</span>
                 </div>
 
-                <div className="relative z-10 w-full max-w-7xl px-6 text-center">
-                    <div className="line-1 absolute inset-0 flex items-center justify-center">
-                        <h2 className="text-[clamp(1.5rem,5vw,72px)] font-medium text-black italic tracking-tight uppercase">
-                            Мы не просто убираем помещения —
-                        </h2>
-                    </div>
-
-                    <div className="line-2 absolute inset-0 flex items-center justify-center">
-                        <h2 className="text-[clamp(4rem,15vw,260px)] font-[950] text-black tracking-[-0.08em] leading-none uppercase">
+                {/* 2. Main Slogan - High Impact & Robust Layout */}
+                <div className="flex flex-col items-center gap-2 md:gap-4">
+                    <div className="overflow-hidden">
+                        <h2 className="reveal-manifesto text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark leading-[0.9] tracking-tighter uppercase">
                             МЫ СОЗДАЕМ
                         </h2>
                     </div>
 
-                    <div className="line-3 absolute inset-0 flex items-center justify-center">
-                        <div className="flex flex-col items-center">
-                            <h2 className="text-[clamp(3.5rem,12vw,200px)] font-black text-white leading-[0.8] tracking-tighter uppercase mb-4">
-                                СТАНДАРТЫ
-                            </h2>
-                            <h2 className="text-[clamp(2.5rem,10vw,160px)] font-black text-black leading-none tracking-tighter uppercase italic px-6 bg-white transform rotate-1">
-                                ЧИСТОТЫ
-                            </h2>
-                        </div>
-                    </div>
-
-                    <div className="line-4 absolute inset-0 flex items-center justify-center px-12">
-                        <h2 className="text-[clamp(1.8rem,5vw,80px)] font-black text-black leading-[1.1] tracking-tighter uppercase">
-                            Которые меняют <br />
-                            <span className="text-brand-green italic">индустрию Казахстана</span>
+                    <div className="overflow-hidden">
+                        <h2 className="reveal-manifesto text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-green leading-[0.8] tracking-[-0.05em] uppercase italic px-4">
+                            СТАНДАРТЫ
                         </h2>
                     </div>
 
-                    <div className="line-5 absolute inset-0 flex items-center justify-center">
-                        <div className="relative">
-                            <h2 className="text-[clamp(4rem,18vw,350px)] font-[1000] text-brand-green tracking-[-0.1em] leading-none uppercase">
-                                ЕЖЕДНЕВНО.
-                            </h2>
-                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-1.5 bg-brand-green rounded-full shadow-[0_0_30px_rgba(131,182,67,0.5)]" />
-                        </div>
+                    <div className="overflow-hidden">
+                        <h2 className="reveal-manifesto text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark leading-[0.9] tracking-tighter uppercase shadow-text">
+                            ЧИСТОТЫ<span className="text-brand-secondary"></span>
+                        </h2>
                     </div>
                 </div>
 
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-20">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-black">Scroll to Dive</span>
-                    <div className="w-px h-12 bg-gradient-to-b from-black to-transparent" />
+                {/* 3. The Impact Statement */}
+                <div className="mt-20 md:mt-32 reveal-manifesto">
+                    <p className="text-xl md:text-3xl font-[1000] text-brand-dark/20 uppercase tracking-tighter leading-[0.8]">
+                        КОТОРЫЕ МЕНЯЮТ ИНДУСТРИЮ <br />
+                        <span className="text-brand-secondary drop-shadow-[0_0_30px_rgba(123,133,167,0.3)]">КАЗАХСТАНА ЕЖЕДНЕВНО.</span>
+                    </p>
                 </div>
+
+                {/* 4. Footer Decor */}
+                <div className="mt-20 reveal-manifesto flex items-center justify-center gap-10 opacity-5">
+                    <span className="text-[8px] font-black uppercase tracking-[1em]">ICG_SYS_2025</span>
+                </div>
+
             </div>
-        </div>
+
+            {/* Aesthetic Side Details */}
+            <div className="absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none hidden lg:block">
+                <span className="text-[15vh] font-black uppercase tracking-tighter [writing-mode:vertical-lr] rotate-180">INTEGRITY</span>
+            </div>
+
+        </section>
     );
 };
 

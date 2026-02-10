@@ -47,8 +47,6 @@ const services = [
 
 const ServicesPage = () => {
     useEffect(() => {
-
-        // Title parallax
         gsap.to(".page-title", {
             y: 100,
             ease: "none",
@@ -62,9 +60,7 @@ const ServicesPage = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-brand-dark text-white selection:bg-brand-green/30">
-            {/* Header / Nav */}
-            {/* Header / Nav */}
+        <div className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
             <Navbar alwaysVisible />
 
             <main className="pt-40 pb-20 px-6">
@@ -74,32 +70,30 @@ const ServicesPage = () => {
                         <span className="text-brand-green font-black tracking-[0.4em] uppercase text-sm block mb-4">
                             Our Expertise
                         </span>
-                        <h1 className="page-title text-[15vw] leading-[0.8] font-black tracking-tighter uppercase text-white mix-blend-overlay opacity-50 select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
+                        <h1 className="page-title text-[15vw] leading-[0.8] font-black tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
                             Services
                         </h1>
-                        <h2 className="text-6xl md:text-9xl font-black uppercase leading-none mb-8 relative z-10">
+                        <h2 className="text-6xl md:text-9xl font-black uppercase leading-none mb-8 relative z-10 text-brand-dark">
                             Услуги <br />
                             <span className="text-brand-green italic">Для Бизнеса</span>
                         </h2>
-                        <p className="text-xl md:text-2xl text-white/50 max-w-2xl font-medium leading-relaxed">
+                        <p className="text-xl md:text-2xl text-brand-dark/40 max-w-2xl font-medium leading-relaxed">
                             Мы не просто моем полы. Мы создаем экосистему чистоты, которая работает на репутацию вашего бренда 24/7.
                         </p>
                     </div>
 
-                    {/* Services Grid - Forced single column on mobile/tablet for readability */}
+                    {/* Services Grid */}
                     <div className="services-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {services.map((s) => (
-                            <div key={s.id} className="service-card group p-8 md:p-14 rounded-[40px] bg-[#1a1a1a] border border-white/5 hover:bg-brand-green hover:border-transparent transition-all duration-500 relative overflow-hidden shadow-2xl">
+                            <div key={s.id} className="service-card group p-8 md:p-14 rounded-[40px] bg-white border border-black/5 hover:bg-brand-green hover:border-transparent transition-all duration-500 relative overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-brand-green/20">
 
-                                {/* Hover Gradient Background */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                 <div className="flex justify-between items-start mb-8 md:mb-14 relative z-10">
-                                    <span className="text-[clamp(4rem,15vw,6rem)] font-black text-white/20 group-hover:text-white/40 transition-colors select-none leading-none">
+                                    <span className="text-[clamp(4rem,15vw,6rem)] font-black text-black/[0.03] group-hover:text-white/20 transition-colors select-none leading-none">
                                         {s.id}
                                     </span>
-                                    <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-black/20 flex items-center justify-center text-brand-green group-hover:bg-white group-hover:text-brand-green transition-colors duration-500 backdrop-blur-sm border border-white/5 shrink-0">
-                                        {/* Scale down icon on mobile */}
+                                    <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-black/[0.03] flex items-center justify-center text-brand-green group-hover:bg-white group-hover:text-brand-green transition-colors duration-500 border border-black/5 shrink-0 shadow-sm">
                                         <div className="scale-75 md:scale-100 flex items-center justify-center">
                                             {s.icon}
                                         </div>
@@ -107,32 +101,32 @@ const ServicesPage = () => {
                                 </div>
 
                                 <div className="relative z-10">
-                                    <h3 className="text-[clamp(1.75rem,8vw,3rem)] font-black uppercase mb-3 leading-[0.9] text-white group-hover:text-white transition-colors break-words">
+                                    <h3 className="text-[clamp(1.75rem,8vw,3rem)] font-black uppercase mb-3 leading-[0.9] text-brand-dark group-hover:text-white transition-colors">
                                         {s.title}
                                     </h3>
-                                    <span className="block text-xs font-bold tracking-[0.2em] text-white/30 mb-8 group-hover:text-white/60 uppercase">
+                                    <span className="block text-xs font-bold tracking-[0.2em] text-black/20 mb-8 group-hover:text-white/60 uppercase">
                                         {s.eng}
                                     </span>
 
-                                    <p className="text-lg md:text-xl text-white/60 mb-10 group-hover:text-white font-medium leading-relaxed max-w-md">
+                                    <p className="text-lg md:text-xl text-black/50 mb-10 group-hover:text-white font-medium leading-relaxed max-w-md">
                                         {s.desc}
                                     </p>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-2 mb-10">
                                         {s.features.map((f, fk) => (
-                                            <div key={fk} className="flex items-center gap-3 text-white/40 group-hover:text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors min-w-0">
+                                            <div key={fk} className="flex items-center gap-3 text-black/40 group-hover:text-white/90 text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors min-w-0">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-brand-green group-hover:bg-white transition-colors shrink-0" />
                                                 <span className="truncate sm:whitespace-normal">{f}</span>
                                             </div>
                                         ))}
                                     </div>
 
-                                    <div className="pt-8 border-t border-white/5 group-hover:border-white/20 flex justify-between items-end gap-4">
-                                        <div className="flex flex-col gap-1 text-white/30 group-hover:text-white font-bold uppercase tracking-widest text-[9px] md:text-[10px]">
+                                    <div className="pt-8 border-t border-black/5 group-hover:border-white/20 flex justify-between items-end gap-4">
+                                        <div className="flex flex-col gap-1 text-black/20 group-hover:text-white font-bold uppercase tracking-widest text-[9px] md:text-[10px]">
                                             <span>Время выполнения</span>
-                                            <span className="text-base md:text-lg text-white group-hover:text-white">{s.time}</span>
+                                            <span className="text-base md:text-lg text-brand-dark group-hover:text-white">{s.time}</span>
                                         </div>
-                                        <button className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/10 bg-white/5 flex items-center justify-center group-hover:bg-white group-hover:text-brand-dark transition-all scale-100 group-hover:scale-110 shrink-0">
+                                        <button className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-black/10 bg-black/[0.02] flex items-center justify-center group-hover:bg-white group-hover:text-brand-dark transition-all scale-100 group-hover:scale-110 shrink-0 shadow-sm">
                                             <ArrowUpRight size={20} className="md:w-6 md:h-6" />
                                         </button>
                                     </div>
@@ -142,14 +136,14 @@ const ServicesPage = () => {
                     </div>
 
                     {/* CTA Footer */}
-                    <div className="mt-32 p-12 md:p-24 rounded-[3rem] bg-brand-green relative overflow-hidden text-center">
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+                    <div className="mt-32 p-12 md:p-24 rounded-[3rem] bg-brand-green relative overflow-hidden text-center shadow-2xl shadow-brand-green/40">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
                         <div className="relative z-10">
-                            <h2 className="text-4xl md:text-7xl font-black uppercase mb-8 leading-tight">
+                            <h2 className="text-4xl md:text-7xl font-black uppercase mb-8 leading-tight text-white drop-shadow-lg">
                                 Сложный объект? <br />
-                                <span className="text-white/30">Мы любим вызовы.</span>
+                                <span className="text-brand-dark/20">Мы любим вызовы.</span>
                             </h2>
-                            <button className="bg-brand-dark text-white px-12 py-6 rounded-2xl text-xl font-bold uppercase tracking-widest hover:scale-105 transition-transform">
+                            <button className="bg-brand-dark text-white px-12 py-6 rounded-2xl text-xl font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl">
                                 Рассчитать смету
                             </button>
                         </div>

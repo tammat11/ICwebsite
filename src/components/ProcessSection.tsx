@@ -1,207 +1,285 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Search, Calculator, CalendarCheck, Sparkles } from 'lucide-react';
+import { Search, Calculator, CalendarCheck, Sparkles, ArrowRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ProcessSection = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
-    const titleRef = useRef<HTMLHeadingElement>(null);
-    const finalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            const cards = gsap.utils.toArray<HTMLElement>(".tunnel-card");
-            const finalLines = gsap.utils.toArray<HTMLElement>(".final-step-line");
+            // Path drawing animation
+            const path = document.querySelector(".process-path") as SVGPathElement;
+            if (path) {
+                const length = path.getTotalLength();
+                gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
 
-            // 1. PINNED TUNNEL TIMELINE
-            const tl = gsap.timeline({
+                gsap.to(path, {
+                    strokeDashoffset: 0,
+                    scrollTrigger: {
+                        trigger: ".process-steps-container",
+                        start: "top 70%",
+                        end: "bottom bottom",
+                        scrub: 0.5,
+                    }
+                });
+            }
+
+            // Reveal steps nodes
+            gsap.utils.toArray<HTMLElement>(".process-step-node").forEach((node) => {
+                gsap.from(node, {
+                    scale: 0,
+                    duration: 0.6,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: node,
+                        start: "top 90%",
+                        once: true
+                    }
+                });
+            });
+
+            // Reveal cards on the sides
+            gsap.from(".process-card-anim", {
+                x: (i) => i % 2 === 0 ? -40 : 40,
+                duration: 0.8,
+                stagger: 0.15,
                 scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top top",
-                    end: "+=550%", // Increased for sequential final steps
-                    scrub: 1.2,
-                    pin: true,
-                    anticipatePin: 1
+                    trigger: ".process-steps-container",
+                    start: "top 75%",
+                    once: true
                 }
             });
 
-            // Initial setup
-            gsap.set(cards, {
-                scale: 0, opacity: 0, xPercent: -50, yPercent: -50, left: "50%", top: "50%", perspective: 2000
+            // Polishing Animation (Faster with Jitter)
+            const polishTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".polish-trigger",
+                    start: "top 80%",
+                }
             });
-            gsap.set(finalRef.current, { opacity: 0 });
-            gsap.set(finalLines, { opacity: 0, y: 10 });
 
-            // Phase 1: Entrance Title Zooms Out
-            tl.to(titleRef.current, {
-                scale: 8, opacity: 0, filter: "blur(40px)", duration: 2, ease: "power2.in"
-            }, 0);
-
-            // Phase 2: Cards Explosion (Slightly MORE COMPACT than before)
-            const positions = [
-                { x: "-34%", y: "-32%", rot: -8 }, // Top Left
-                { x: "34%", y: "-32%", rot: 6 },  // Top Right
-                { x: "-30%", y: "32%", rot: -5 },  // Bottom Left
-                { x: "30%", y: "35%", rot: 10 }   // Bottom Right
-            ];
-
-            cards.forEach((card, i) => {
-                // Entry to readable positions
-                tl.to(card, {
-                    scale: 0.9,
-                    opacity: 1,
-                    xPercent: -50 + parseInt(positions[i].x),
-                    yPercent: -50 + parseInt(positions[i].y),
-                    rotate: positions[i].rot,
-                    duration: 1.5,
-                    ease: "back.out(1.2)"
-                }, 0.5 + i * 0.2);
-
-                // Exit: Fly past camera
-                tl.to(card, {
-                    scale: 4,
+            polishTl
+                // 1. Quick Enter
+                .fromTo(".polish-brush",
+                    { x: -100, y: 50, rotate: -30, opacity: 0, scale: 0.9 },
+                    { x: "-10%", y: 20, rotate: -10, opacity: 1, scale: 1.1, duration: 0.3, ease: "power2.out" }
+                )
+                // 2. Fast Sweep with Jitter (Rubbing effect)
+                .to(".polish-brush", {
+                    x: "115%",
+                    y: 10,
+                    rotate: 10,
+                    duration: 0.7,
+                    ease: "power1.inOut",
+                    // Subtle organic jitter - reduced intensity
+                    modifiers: {
+                        y: gsap.utils.unitize((y) => parseFloat(y) + Math.sin(Date.now() * 0.1) * 1.5),
+                        rotate: gsap.utils.unitize((r) => parseFloat(r) + Math.cos(Date.now() * 0.1) * 1)
+                    }
+                })
+                // 3. Single Fast Shine (Blink)
+                .to(".polish-shine", {
+                    x: "250%",
+                    duration: 0.6,
+                    ease: "power3.inOut"
+                }, "-=0.6")
+                // 4. Quick Exit
+                .to(".polish-brush", {
+                    x: 400,
+                    y: -100,
                     opacity: 0,
-                    xPercent: -50 + (parseInt(positions[i].x) * 4),
-                    yPercent: -50 + (parseInt(positions[i].y) * 4),
-                    filter: "blur(20px)",
-                    duration: 2,
+                    rotate: 25,
+                    duration: 0.4,
                     ease: "power2.in"
-                }, 3.5 + i * 0.15);
-            });
+                });
 
-            // Phase 3: Reveal "Вместе с IC" & Final Route
-            tl.to(finalRef.current, {
-                opacity: 1,
-                duration: 1
-            }, 5.5);
-
-            // Animate the route progress line
-            tl.to("#final-mini-path", {
-                scaleX: 1,
-                duration: 1.5,
-                ease: "power2.inOut"
-            }, 5.5);
-
-            // Sequential Summary Steps on the Route
-            finalLines.forEach((line, i) => {
-                tl.to(line, {
+            // Sparkles pop at the climax
+            gsap.fromTo(".polish-sparkle",
+                { scale: 0, opacity: 0 },
+                {
+                    scale: (i) => 1.4 + i * 0.2,
                     opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.8,
-                    ease: "back.out(1.7)"
-                }, 5.8 + i * 0.3);
-            });
-
-            // BG grid distortion
-            tl.to(".tunnel-bg-decoration", { scale: 2.5, opacity: 0.1, rotate: 15, duration: 8, ease: "none" }, 0);
+                    rotate: 180,
+                    duration: 0.4,
+                    stagger: 0.05,
+                    ease: "back.out(2)",
+                    scrollTrigger: {
+                        trigger: ".polish-trigger",
+                        start: "top 65%",
+                    }
+                }
+            );
 
         }, sectionRef);
 
-        ScrollTrigger.refresh();
         return () => ctx.revert();
     }, []);
 
     const steps = [
-        { title: "Technical", subtitle: "Audit", desc: "Аудит объекта за 24 часа. Считаем площади и износ.", icon: <Search size={32} /> },
-        { title: "Commercial", subtitle: "Log", desc: "Прозрачная смета с детализацией ФОТ и налогов.", icon: <Calculator size={32} /> },
-        { title: "Rapid", subtitle: "Launch", desc: "Запуск объекта и вывод персонала за 7 дней.", icon: <CalendarCheck size={32} /> },
-        { title: "Full", subtitle: "Control", desc: "QR-мониторинг и отчетность в вашем смартфоне.", icon: <Sparkles size={32} /> }
+        {
+            title: "Технический",
+            subtitle: "Аудит",
+            desc: "Аудит объекта за 24 часа. Считаем площади и износ.",
+            icon: <Search size={22} />,
+            time: "24h"
+        },
+        {
+            title: "Коммерческий",
+            subtitle: "Расчет",
+            desc: "Прозрачная смета с детализацией ФОТ и налогов.",
+            icon: <Calculator size={22} />,
+            time: "48h"
+        },
+        {
+            title: "Быстрый",
+            subtitle: "Запуск",
+            desc: "Подписание контракта и вывод персонала за 7 дней.",
+            icon: <CalendarCheck size={22} />,
+            time: "7 Days"
+        },
+        {
+            title: "Полный",
+            subtitle: "Контроль",
+            desc: "QR-мониторинг и отчетность в вашем смартфоне.",
+            icon: <Sparkles size={22} />,
+            time: "Live"
+        }
     ];
 
     return (
-        <section ref={sectionRef} className="h-screen w-full bg-[#0a0a0a] relative overflow-hidden flex items-center justify-center translate-z-0" id="process">
+        <section ref={sectionRef} className="relative py-24 md:py-32 bg-brand-light overflow-hidden" id="process">
 
-            <div className="tunnel-bg-decoration absolute inset-0 opacity-[0.05] pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(#83b643 1.5px, transparent 1.5px)', backgroundSize: '100px 100px' }} />
+            {/* Background Grid - Seamless transition via mask */}
+            <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
+                style={{ maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)' }}>
+                <div className="absolute inset-0"
+                    style={{ backgroundImage: 'radial-gradient(#000 1.5px, transparent 1px)', backgroundSize: '40px 40px' }} />
+            </div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-            <div className="relative w-full h-full flex items-center justify-center">
+                {/* Header */}
+                <div className="mb-12 md:mb-16 text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/5 border border-brand-green/10 rounded-full mb-6">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#7B85A7] animate-pulse" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-dark/40">Efficiency Path</span>
+                    </div>
+                    <h2 className="text-[clamp(3.2rem,11.5vw,120px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark overflow-visible">
+                        ЛЕГКИЙ <span className="text-brand-green">ПУТЬ</span> <br />
+                        <span className="relative inline-block polish-trigger">
+                            <span className="relative inline-block overflow-hidden px-2 rounded-xl">
+                                <span className="text-[#7B85A7] drop-shadow-[0_0_40px_rgba(123,133,167,0.2)]">К РЕЗУЛЬТАТУ</span>
+                                <div className="polish-shine absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent -translate-x-full pointer-events-none z-10" />
+                            </span>
 
-                {/* 1. Entrance Title */}
-                <h2 ref={titleRef} className="absolute z-20 text-[clamp(4.5rem,22vw,350px)] font-black uppercase leading-none tracking-tighter text-white italic text-center will-change-transform">
-                    EASY <br /> <span className="text-brand-green">START</span>
-                </h2>
+                            {/* Polishing Brush Animation */}
+                            <img
+                                src="/brush_polish.png"
+                                className="polish-brush absolute left-0 top-1/2 -translate-y-1/2 w-24 h-24 md:w-48 md:h-48 object-contain pointer-events-none z-20 opacity-0"
+                                alt="Polishing Brush"
+                            />
 
-                {/* 2. Step Cards */}
-                <div className="absolute inset-0 w-full h-full z-30 pointer-events-none">
-                    {steps.map((step, i) => (
-                        <div key={i} className="tunnel-card absolute w-[280px] md:w-[400px] pointer-events-auto">
-                            <div className="bg-[#111]/90 backdrop-blur-3xl border border-white/10 rounded-[40px] md:rounded-[70px] p-8 md:p-14 shadow-[0_40px_120px_rgba(0,0,0,0.6)] hover:bg-[#161616] hover:border-brand-green/30 transition-all duration-700 group overflow-hidden ring-1 ring-white/5">
-                                <div className="flex justify-between items-start mb-12">
-                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-brand-green/10 flex items-center justify-center text-brand-green group-hover:bg-brand-green group-hover:text-white transition-all duration-500 shadow-inner group-hover:rotate-12">
-                                        {step.icon}
-                                    </div>
-                                    <div className="text-8xl font-black text-white/[0.03] italic leading-none select-none">0{i + 1}</div>
-                                </div>
-                                <h3 className="text-3xl md:text-4xl font-black text-white leading-[0.85] uppercase tracking-tighter mb-6 italic">{step.title} <br /> <span className="text-brand-green">{step.subtitle}</span></h3>
-                                <p className="text-white/40 font-medium leading-relaxed text-sm md:text-base">{step.desc}</p>
+                            {/* Shine Sparkles */}
+                            <div className="absolute inset-0 pointer-events-none overflow-visible">
+                                <Sparkles className="polish-sparkle absolute top-0 left-1/4 text-brand-green opacity-0" size={32} />
+                                <Sparkles className="polish-sparkle absolute bottom-0 left-1/2 text-brand-green opacity-0" size={24} />
+                                <Sparkles className="polish-sparkle absolute top-1/2 left-3/4 text-brand-green opacity-0" size={40} />
                             </div>
-                        </div>
-                    ))}
+                        </span>
+                    </h2>
                 </div>
 
-                {/* 3. Final State: Route Visualization + Title */}
-                <div ref={finalRef} className="absolute inset-0 flex flex-col items-center justify-center z-40 pointer-events-none px-6">
+                {/* Path Visual Container - Heavily Compacted Vertical Zigzag */}
+                <div className="process-steps-container relative max-w-4xl mx-auto">
 
-                    {/* The Route (Horizontal Timeline) */}
-                    <div className="w-full max-w-5xl relative mb-24 mt-20">
-                        {/* Progressive Route Line */}
-                        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white/10 -translate-y-1/2 overflow-hidden">
-                            <div id="final-mini-path" className="absolute top-0 left-0 h-full bg-brand-green w-full scale-x-0 origin-left shadow-[0_0_10px_rgba(131,182,67,0.5)]" />
-                            {/* Animated particles along the line */}
-                            {[...Array(8)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-brand-green animate-pulse"
-                                    style={{
-                                        left: `${i * 12.5}%`,
-                                        animationDelay: `${i * 0.15}s`,
-                                        boxShadow: '0 0 12px rgba(131,182,67,1), 0 0 6px rgba(255,255,255,0.8)'
-                                    }}
-                                />
-                            ))}
-                        </div>
+                    {/* SVG Path - Vertical Snake (Heavily Condensed) */}
+                    <div className="hidden md:block absolute left-1/2 top-0 -translate-x-1/2 w-full h-[105%] pointer-events-none -mt-4">
+                        <svg className="w-full h-full" viewBox="0 0 100 200" preserveAspectRatio="none">
+                            {/* Background Guide Path */}
+                            <path
+                                d="M 50,0 Q 50,25 75,50 Q 100,75 50,100 Q 0,125 25,150 Q 50,175 50,200"
+                                fill="none"
+                                stroke="#83b643"
+                                strokeWidth="0.3"
+                                strokeDasharray="2,2"
+                                opacity="0.1"
+                            />
+                            {/* Active Growing Path */}
+                            <path
+                                className="process-path"
+                                d="M 50,0 Q 50,25 75,50 Q 100,75 50,100 Q 0,125 25,150 Q 50,175 50,200"
+                                fill="none"
+                                stroke="#83b643"
+                                strokeWidth="0.8"
+                                strokeLinecap="round"
+                                style={{ filter: 'drop-shadow(0 0 8px rgba(131,182,67,0.4))' }}
+                            />
+                        </svg>
+                    </div>
 
-                        {/* Route Points */}
-                        <div className="flex justify-between items-center relative z-10">
-                            {steps.map((step, i) => (
-                                <div key={i} className="final-step-line flex flex-col items-center gap-4 group">
-                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 absolute -top-12 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                                        Step 0{i + 1}
-                                    </div>
-                                    <div className="w-4 h-4 rounded-full bg-[#111] border-2 border-brand-green flex items-center justify-center">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-brand-green" />
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-white/50">
-                                            {step.title}
-                                        </span>
-                                        <span className="text-[8px] font-black uppercase tracking-tighter text-brand-green italic">
-                                            {step.subtitle}
-                                        </span>
+                    {/* Step Nodes - Tighter Spacing */}
+                    <div className="relative space-y-12 md:space-y-16 pointer-events-none">
+                        {steps.map((step, i) => (
+                            <div key={i} className={`flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0 ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+
+                                {/* 1. Content Card - Taller and Slimmer */}
+                                <div className="process-card-anim w-full md:w-[42%] pointer-events-auto">
+                                    <div className="group p-6 md:p-8 bg-white border border-black/5 rounded-[32px] shadow-sm hover:shadow-xl hover:border-brand-green/30 transition-all duration-500 hover:-translate-y-1 relative overflow-hidden min-h-[160px] flex flex-col justify-center">
+                                        <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-100 group-hover:text-brand-green transition-all">
+                                            {step.icon}
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[9px] font-black text-brand-green bg-brand-green/5 px-2 py-0.5 rounded-full uppercase tracking-widest border border-brand-green/10">
+                                                    Step 0{i + 1}
+                                                </span>
+                                                <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">{step.time}</span>
+                                            </div>
+                                            <h3 className="text-xl md:text-2xl font-black text-brand-dark uppercase tracking-tighter italic group-hover:text-brand-green transition-colors leading-[0.9]">
+                                                {step.title} <br /> {step.subtitle}
+                                            </h3>
+                                            <p className="text-xs md:text-sm text-black/40 font-bold group-hover:text-black/70 transition-colors leading-snug">
+                                                {step.desc}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
 
-                    {/* Final Main Title */}
-                    <h1 className="text-[clamp(3rem,11.5vw,170px)] font-black uppercase tracking-tighter italic leading-none text-center transform-gpu">
-                        <span className="text-white">Вместе</span> <span className="text-white italic">с</span> <span className="text-brand-green">IC</span>
-                    </h1>
+                                {/* 2. Central Node */}
+                                <div className="hidden md:flex w-[16%] items-center justify-center relative">
+                                    <div className="process-step-node relative z-20">
+                                        <div className="w-10 h-10 rounded-full bg-white border border-brand-green flex items-center justify-center text-brand-green shadow-sm shadow-brand-green/20">
+                                            {step.icon}
+                                        </div>
+                                        <div className="absolute inset-0 rounded-full bg-brand-green/10 animate-ping -z-10" />
+                                    </div>
+                                </div>
 
-                    {/* Final Status */}
-                    <div className="mt-16 flex items-center gap-4 py-4 px-10 bg-white/5 backdrop-blur-md rounded-full border border-white/10 shadow-sm transition-all hover:border-brand-green/30">
-                        <div className="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse shadow-[0_0_10px_#83b643]" />
-                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.5em] text-white/50 leading-none">
-                            System integration complete
-                        </span>
+                                {/* 3. Spacer */}
+                                <div className="hidden md:block w-[42%]" />
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                <div className="absolute top-12 right-12 text-[10px] font-mono text-white/20 uppercase tracking-[0.5em] text-right">SYNC_v7.5</div>
+                {/* Final Connect CTA - Compact */}
+                <div className="mt-16 md:mt-20 flex justify-center">
+                    <div className="px-8 py-4 rounded-[30px] bg-brand-dark text-white flex items-center gap-6 shadow-xl relative overflow-hidden group cursor-pointer hover:bg-[#7B85A7] transition-colors duration-500">
+                        <div className="relative z-10 space-y-0.5">
+                            <span className="text-[#7B85A7] text-[8px] font-black uppercase tracking-[0.4em] group-hover:text-white">Ready to Launch</span>
+                            <h4 className="text-xl md:text-2xl font-black tracking-tighter uppercase italic leading-none">
+                                Полная интеграция
+                            </h4>
+                        </div>
+                        <div className="relative z-10 w-10 h-10 rounded-full bg-white text-brand-dark flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <ArrowRight size={20} />
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
     );

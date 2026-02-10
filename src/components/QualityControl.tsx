@@ -60,17 +60,19 @@ const QualityControl = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-24 bg-white relative overflow-hidden" id="quality">
+        <section ref={sectionRef} className="py-24 bg-brand-light relative overflow-hidden" id="quality">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
                 {/* Left: Content */}
                 <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/10 rounded-full mb-6">
                         <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">Transparent Control</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">Facility Standard</span>
                     </div>
-                    <h2 className="text-[clamp(2.5rem,5vw,60px)] font-black uppercase leading-[1] tracking-tighter text-brand-dark mb-8">
-                        Мы видим то, <br />что <span className="text-gray-300">скрывают другие</span>
+                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark mb-12">
+                        ИНЖЕНЕРИЯ <br />
+                        <span className="text-[#7B85A7] drop-shadow-[0_0_40px_rgba(123,133,167,0.2)]">ЧИСТОТЫ</span> <br />
+                        <span className="text-brand-green">НОВОГО УРОВНЯ</span>
                     </h2>
 
                     <div className="space-y-8">
@@ -92,7 +94,6 @@ const QualityControl = () => {
 
                 {/* Right: Visual Mockup */}
                 <div className="quality-image relative">
-                    <div className="absolute inset-0 bg-brand-green/20 rounded-full blur-[100px]" />
                     <div className="relative z-10 bg-white border border-gray-100 rounded-[40px] shadow-2xl p-6 md:p-10 transform rotate-3 hover:rotate-0 transition-transform duration-700">
                         {/* Fake App Interface */}
                         <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">

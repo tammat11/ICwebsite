@@ -10,33 +10,20 @@ const CasesSection = () => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.to(".bg-parallax-cases", {
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: 2
-                },
-                x: -150,
-                opacity: 0.05
-            });
-
-            // Case Card Sequential Animation
-            gsap.utils.toArray<HTMLElement>(".case-card").forEach((card) => {
+            gsap.utils.toArray<HTMLElement>(".case-card-v").forEach((card) => {
                 gsap.from(card, {
-                    y: 100,
+                    y: 60,
                     opacity: 0,
-                    duration: 0.8,
+                    duration: 1,
                     ease: "power3.out",
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 90%"
+                        start: "top 85%"
                     }
                 });
 
-                // Parallax on image inside card
-                gsap.from(card.querySelector("img"), {
-                    scale: 1.2,
+                gsap.from(card.querySelector(".case-image-inner"), {
+                    scale: 1.15,
                     duration: 2,
                     ease: "power2.out",
                     scrollTrigger: {
@@ -58,7 +45,7 @@ const CasesSection = () => {
             title: "Build unified service standards",
             desc: "Централизация управления 45 объектами через единую цифровую платформу IC Group. Оптимизация затрат без потери качества.",
             category: "Financial Sector",
-            icon: <TrendingDown className="text-brand-green" size={20} />,
+            icon: <TrendingDown size={20} />,
             image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800"
         },
         {
@@ -68,99 +55,112 @@ const CasesSection = () => {
             title: "Automate quality reporting",
             desc: "Внедрение QR-мониторинга и фото-отчетности в реальном времени для крупнейшего авиаперевозчика региона.",
             category: "Aviation Tech",
-            icon: <Zap className="text-blue-400" size={20} />,
+            icon: <Zap size={20} />,
             image: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&q=80&w=800"
         },
         {
             company: "Samsung",
             stat: "Zero",
             metric: "INCIDENT RATE",
-            title: "Move product work forward",
+            title: "Safety standards",
             desc: "Поддержка чистоты и безопасности на производственных и офисных площадках Samsung по международным стандартам.",
             category: "Production",
-            icon: <ShieldCheck className="text-purple-400" size={20} />,
+            icon: <ShieldCheck size={20} />,
             image: "https://images.unsplash.com/photo-1504384308090-c89e12bf9a51?auto=format&fit=crop&q=80&w=800"
         }
     ];
 
     return (
-        <section ref={sectionRef} className="py-20 md:py-40 bg-[#0a0a0a] text-white overflow-hidden relative" id="cases">
-
-            {/* Background Narrative */}
-            <div className="bg-parallax-cases absolute top-1/2 left-0 -translate-y-1/2 text-[18rem] font-black text-white opacity-[0.02] select-none whitespace-nowrap leading-none hidden lg:block pointer-events-none">
-                SYSTEMS AND INTEGRATIONS
-            </div>
-
+        <section ref={sectionRef} className="py-20 md:py-32 bg-brand-light overflow-hidden relative" id="cases">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-                {/* Goal Title - Layered Impact Style (Selected) */}
-                <div className="mb-32 relative">
-                    <div className="absolute -top-20 -left-10 text-[clamp(8rem,25vw,350px)] font-black text-white/[0.03] select-none pointer-events-none italic">PROJECTS</div>
-                    <h2 className="relative z-10 text-[clamp(4.5rem,12vw,180px)] font-black uppercase leading-[0.85] tracking-tighter">
-                        <span className="text-white block mb-2 drop-shadow-[0_10px_30px_rgba(255,255,255,0.1)]">Масштабируем</span>
-                        <span className="inline-block bg-brand-green text-black px-6 md:px-10 py-3 transform -rotate-2 shadow-2xl">ваши цели</span>
+                {/* Header */}
+                <div className="mb-20">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full mb-6">
+                        <span className="w-1 h-1 rounded-full bg-brand-green" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-brand-green">Proof of Efficiency</span>
+                    </div>
+                    <h2 className="text-5xl md:text-8xl font-[1000] uppercase tracking-tighter leading-[0.8] italic text-brand-dark">
+                        РЕАЛЬНЫЕ <br />
+                        <span className="text-brand-green">КЕЙСЫ</span>
                     </h2>
                 </div>
 
-                {/* Vertical Premium Showcase */}
-                <div className="flex flex-col gap-40">
+                {/* Vertical Cases - More Compact */}
+                <div className="space-y-20 md:space-y-32">
                     {cases.map((item, i) => (
                         <div
                             key={i}
-                            className={`case-card group relative flex flex-col ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-12 md:gap-24`}
+                            className={`case-card-v group flex flex-col ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} gap-10 md:gap-20 items-center`}
                         >
-                            {/* 1. Media Area - Large Focus */}
-                            <div className="w-full md:w-3/5 h-[400px] md:h-[600px] relative rounded-[40px] overflow-hidden">
-                                <div className="absolute inset-0 bg-brand-dark/20 z-10" />
-                                <img
-                                    src={item.image}
-                                    alt={item.company}
-                                    className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105 transition-all duration-1000"
-                                />
+                            {/* Image Side - Compacted Height */}
+                            <div className="w-full md:w-3/5">
+                                <div className="relative h-[300px] md:h-[450px] rounded-[32px] md:rounded-[48px] overflow-hidden border border-black/[0.05] shadow-sm group-hover:shadow-2xl transition-all duration-700">
+                                    <img
+                                        src={item.image}
+                                        alt={item.company}
+                                        className="case-image-inner w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-[1500ms]"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
 
-                                {/* Overlay Stats */}
-                                <div className="absolute inset-0 z-20 flex flex-col justify-end p-12 bg-gradient-to-t from-black to-transparent">
-                                    <div className="text-8xl md:text-[12rem] font-black text-white/10 italic leading-none absolute top-10 right-10">
-                                        0{i + 1}
-                                    </div>
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-7xl md:text-9xl font-black text-brand-green tracking-tighter">
-                                            {item.stat}
+                                    {/* Company Label Floating */}
+                                    <div className="absolute top-8 left-8">
+                                        <div className={`px-5 py-2 ${i === 1 ? 'bg-brand-secondary' : 'bg-brand-green'} text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl`}>
+                                            {item.company}
                                         </div>
-                                        <div className="text-sm font-black uppercase tracking-[0.3em] text-white">
-                                            {item.metric}
+                                    </div>
+
+                                    {/* Fast Stat Overlay */}
+                                    <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-5xl md:text-7xl font-[1000] text-white italic tracking-tighter leading-none drop-shadow-lg">
+                                                {item.stat}
+                                            </div>
+                                            <div className="h-10 w-px bg-white/20" />
+                                            <div className="space-y-1">
+                                                <div className="text-[8px] font-black text-white/40 uppercase tracking-[0.3em]">Validation</div>
+                                                <div className="text-[11px] font-bold text-white uppercase tracking-wider">{item.metric}</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* 2. Content Area */}
-                            <div className="w-full md:w-2/5 flex flex-col justify-center">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green border border-brand-green/20">
-                                        {item.icon}
+                            {/* Content Side */}
+                            <div className="w-full md:w-2/5 space-y-6">
+                                <div className="space-y-4">
+                                    <div className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green flex items-center gap-2">
+                                        <div className="w-8 h-px bg-brand-green" /> {item.category}
                                     </div>
-                                    <span className="text-xs font-black uppercase tracking-[0.4em] text-brand-green">
-                                        {item.company}
-                                    </span>
+                                    <h3 className="text-3xl md:text-5xl font-black text-brand-dark uppercase italic tracking-tighter leading-[0.85] group-hover:text-brand-green transition-colors">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-base md:text-lg text-black/40 font-bold leading-tight">
+                                        {item.desc}
+                                    </p>
                                 </div>
-                                <h3 className="text-4xl md:text-6xl font-black text-white mb-8 uppercase leading-[0.9] tracking-tighter">
-                                    {item.title}
-                                </h3>
-                                <p className="text-xl text-white/40 font-medium leading-relaxed mb-10 max-w-md">
-                                    {item.desc}
-                                </p>
 
-                                {/* Detail Button */}
-                                <button className="group/btn relative inline-flex items-center gap-4 text-white text-xs font-black uppercase tracking-[0.5em] group-hover:text-brand-green transition-colors">
-                                    <span className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover/btn:border-brand-green transition-colors">
-                                        <ArrowUpRight className="w-5 h-5" />
-                                    </span>
-                                    Explore Case Study
+                                <button className="group/btn flex items-center gap-6 pt-6 text-brand-dark hover:text-brand-green transition-colors">
+                                    <div className="w-12 h-12 rounded-full border border-black/[0.1] flex items-center justify-center group-hover/btn:bg-brand-green group-hover/btn:text-white group-hover/btn:border-brand-green transition-all duration-500 group-hover/btn:rotate-45 shadow-sm">
+                                        <ArrowUpRight size={20} />
+                                    </div>
+                                    <div className="space-y-0.5 text-left">
+                                        <div className="text-[10px] font-black uppercase tracking-[0.3em]">View Full Case</div>
+                                        <div className="text-[8px] font-bold text-black/20 uppercase tracking-widest">Read methodology</div>
+                                    </div>
                                 </button>
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Bottom Action */}
+                <div className="mt-20 md:mt-32 pt-16 border-t border-black/[0.03] flex flex-col items-center">
+                    <button className="px-12 py-6 bg-brand-dark text-white rounded-full font-black text-[11px] uppercase tracking-[0.5em] shadow-2xl hover:bg-brand-green transition-all transform hover:-translate-y-1 active:scale-95 group">
+                        Смотреть все проекты
+                        <span className="inline-block ml-4 group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+                    <p className="mt-10 text-[9px] font-black uppercase tracking-[0.3em] text-black/10">100+ active contracts across Kazakhstan</p>
                 </div>
             </div>
         </section>

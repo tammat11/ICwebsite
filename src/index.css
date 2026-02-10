@@ -5,7 +5,7 @@
   --color-brand-dark: #1A1D1E;
   --color-brand-light: #FBFDF9;
   --color-brand-accent: #E8F0E5;
-  --color-brand-secondary: #7484a5;
+  --color-brand-secondary: #7B85A7;
   --color-border-subtle: rgba(0, 0, 0, 0.05);
 
   --font-sans: "Montserrat", "Roboto", system-ui, -apple-system, sans-serif;
@@ -15,8 +15,16 @@
 }
 
 @layer base {
+
+  html,
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    touch-action: pan-y;
+  }
+
   html {
-    scroll-behavior: smooth;
     background: #FBFDF9;
     color: #1A1D1E;
   }
@@ -24,6 +32,11 @@
   body {
     @apply bg-brand-light text-brand-dark font-sans selection:bg-brand-green/20;
     -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 
