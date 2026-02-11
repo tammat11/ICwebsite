@@ -53,7 +53,7 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
             <nav ref={navRef} className="fixed top-0 left-0 w-full z-[110] transition-all duration-500 px-4 md:px-6 py-4 font-sans">
                 <div className={`max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-3 rounded-full border border-black/5 backdrop-blur-md transition-all duration-500 ${alwaysVisible ? 'bg-white/95 shadow-xl' : ''}`}>
                     <Link to="/" className="flex items-center gap-1 shrink-0">
-                        <img src="/logo.png" alt="IC GROUP" className="h-8 md:h-10 w-auto object-contain" />
+                        <img src="logo.png" alt="IC GROUP" className="h-8 md:h-10 w-auto object-contain" />
                     </Link>
 
                     {/* Main Nav Items (Adaptive spacing) */}

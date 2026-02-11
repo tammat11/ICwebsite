@@ -160,7 +160,7 @@ const ProcessSection = () => {
 
                             {/* Polishing Brush Animation */}
                             <img
-                                src="/brush_polish.png"
+                                src="brush_polish.png"
                                 className="polish-brush absolute left-0 top-1/2 -translate-y-1/2 w-24 h-24 md:w-48 md:h-48 object-contain pointer-events-none z-20 opacity-0"
                                 alt="Polishing Brush"
                             />

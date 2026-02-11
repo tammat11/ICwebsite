@@ -13,7 +13,7 @@ const newsArticles = [
         date: "15 Февраля 2026",
         category: "Расширение",
         desc: "IC Group расширяет географию присутствия. Новый региональный офис позволит обслуживать более 100 объектов в столице и повысить качество сервиса для клиентов в северном регионе.",
-        image: "/office_leadership.png",
+        image: "office_leadership.png",
         tag: "Новое",
         icon: <Rocket size={48} />,
         readTime: "3 мин"

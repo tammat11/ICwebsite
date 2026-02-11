@@ -14,7 +14,7 @@ const WhyUs = () => {
             title: "Лидерство на Рынке",
             description: "№1 в B2B сегменте Казахстана с долей рынка 40%",
             icon: <Globe2 className="w-8 h-8" />,
-            image: "/office_leadership.png",
+            image: "office_leadership.png",
             accent: "bg-brand-green/10"
         },
         {
@@ -33,7 +33,7 @@ const WhyUs = () => {
             title: "Ресурсная Мощность",
             description: "Собственный парк из 500+ единиц профессиональной спецтехники",
             icon: <Settings2 className="w-8 h-8" />,
-            image: "/cleaning_tech.png",
+            image: "cleaning_tech.png",
             accent: "bg-orange-500/5"
         },
         {

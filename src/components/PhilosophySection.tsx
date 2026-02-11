@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 const PhilosophySection = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const photoContainerRef = useRef<HTMLDivElement>(null);
-    const photoPath = "/IMG_7169.jpg";
+    const photoPath = "IMG_7169.jpg";
 
     useEffect(() => {
         const ctx = gsap.context(() => {

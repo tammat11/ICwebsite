@@ -182,7 +182,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
                                     {/* Rag Hand */}
                                     <img
-                                        src="/rag.png"
+                                        src="rag.png"
                                         alt="Cleaning Rag"
                                         className="rag-hand absolute top-1/2 right-0 -translate-y-1/2 w-24 md:w-64 h-24 md:h-64 object-contain pointer-events-none z-50 opacity-0"
                                     />
