@@ -3,7 +3,7 @@
 @theme {
   --color-brand-green: #83B643;
   --color-brand-dark: #1A1D1E;
-  --color-brand-light: #FBFDF9;
+  --color-brand-light: #FFFFFF;
   --color-brand-accent: #E8F0E5;
   --color-brand-secondary: #7B85A7;
   --color-border-subtle: rgba(0, 0, 0, 0.05);
@@ -25,8 +25,17 @@
   }
 
   html {
-    background: #FBFDF9;
+    background: #FFFFFF;
     color: #1A1D1E;
+    -webkit-text-size-adjust: 100%;
+    font-size: 16px;
+    /* Increased for mobile readability */
+  }
+
+  @media (min-width: 768px) {
+    html {
+      font-size: 15px;
+    }
   }
 
   body {
@@ -36,7 +45,18 @@
 
   #root {
     width: 100%;
-    overflow-x: hidden;
+    position: relative;
+    /* Zoom for Chrome/Safari/Edge */
+    zoom: 0.9;
+
+    /* Transform for Firefox fallback */
+    @supports not (zoom: 0.9) {
+      transform: scale(0.9);
+      transform-origin: top center;
+      width: 111.11%;
+      /* Compensate for scale(0.9) width reduction */
+      left: -5.55%;
+    }
   }
 }
 

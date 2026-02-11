@@ -2,18 +2,17 @@ import { useEffect, useRef } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+
 import StatsGrid from './components/StatsGrid';
-import WhyUs from './components/WhyUs';
+import ServicesSection from './components/ServicesSection';
 import ClientsMarquee from './components/ClientsMarquee';
-import GuaranteeSection from './components/GuaranteeSection';
-import SolutionSection from './components/SolutionSection';
 import ProcessSection from './components/ProcessSection';
 import PhilosophySection from './components/PhilosophySection';
-import QualityControl from './components/QualityControl';
 import CasesSection from './components/CasesSection';
 import ServicesPage from './pages/ServicesPage';
 import CareersPage from './pages/CareersPage';
 import ContactsPage from './pages/ContactsPage';
+import NewsPage from './pages/NewsPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
@@ -55,6 +54,7 @@ function App() {
         <Route path="/" element={<Home onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/careers" element={<CareersPage />} />
+        <Route path="/news" element={<NewsPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
       </Routes>
       <AICalculator isOpen={isCalcOpen} onClose={() => setCalcOpen(false)} />
@@ -71,9 +71,20 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
     };
 
     window.addEventListener('load', refreshTrigger);
-    setTimeout(refreshTrigger, 1000);
+    window.addEventListener('resize', refreshTrigger);
+    window.addEventListener('orientationchange', refreshTrigger);
+
+    // Multiple refreshes to catch lazy-loaded content or layout shifts
+    const timeouts = [
+      setTimeout(refreshTrigger, 100),
+      setTimeout(refreshTrigger, 500),
+      setTimeout(refreshTrigger, 1000),
+      setTimeout(refreshTrigger, 2000),
+      setTimeout(refreshTrigger, 5000),
+    ];
 
     const ctx = gsap.context(() => {
+      // reveal-section logic
       const reveals = document.querySelectorAll('.reveal-section');
       reveals.forEach((el) => {
         gsap.fromTo(el,
@@ -121,6 +132,9 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
       ctx.revert();
       ScrollTrigger.refresh();
       window.removeEventListener('load', refreshTrigger);
+      window.removeEventListener('resize', refreshTrigger);
+      window.removeEventListener('orientationchange', refreshTrigger);
+      timeouts.forEach(clearTimeout);
     };
   }, []);
 
@@ -140,22 +154,14 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
 
       <main className="relative z-10 w-full overflow-x-hidden">
         <Hero onCalcOpen={onCalcOpen} />
-        <ClientsMarquee />
 
         <StatsGrid />
-        <WhyUs />
+        <ClientsMarquee />
+        <ServicesSection />
 
-        <SolutionSection />
         <ProcessSection />
         <CasesSection />
 
-        <section className="reveal-section">
-          <GuaranteeSection />
-        </section>
-
-        <section className="reveal-section">
-          <QualityControl />
-        </section>
 
         <PhilosophySection />
 

@@ -15,7 +15,7 @@ const PhilosophySection = () => {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 75%",
+                    start: "top bottom",
                 }
             });
 
@@ -72,41 +72,34 @@ const PhilosophySection = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="relative pb-24 md:pb-32 pt-0 bg-brand-light overflow-hidden" id="philosophy">
-
-            {/* Background "BREATHING SPACE" Text (Parallax) */}
-            <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none select-none">
-                <span className="bg-breath-text text-[clamp(10rem,35vw,500px)] font-[1000] text-brand-secondary italic opacity-[0.05] leading-none uppercase tracking-tighter whitespace-nowrap">
-                    FACILITY EXPERTISE
-                </span>
-            </div>
+        <section ref={sectionRef} className="relative pb-12 md:pb-16 pt-0 bg-white overflow-hidden" id="philosophy">
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
 
                 {/* 1. The Circular Master Portrait */}
                 <div
                     ref={photoContainerRef}
-                    className="w-64 h-64 md:w-[450px] md:h-[450px] rounded-full overflow-hidden border-[10px] md:border-[24px] border-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] mb-12 md:mb-16 relative bg-gray-50 flex-shrink-0"
+                    className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full overflow-hidden border-[10px] md:border-[16px] border-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] mb-8 md:mb-12 relative bg-gray-50 flex-shrink-0"
                 >
                     <img
                         src={photoPath}
                         alt="Larion Lyan"
-                        className="w-full h-full object-cover scale-[1.3] translate-y-4 md:translate-y-7"
+                        className="w-full h-full object-cover scale-[1.3] translate-y-7"
                     />
 
                     {/* Corner Accent Star */}
-                    <div className="absolute top-10 right-10 text-brand-secondary animate-pulse hidden md:block">
-                        <Star size={40} fill="currentColor" />
+                    <div className="absolute top-4 right-4 md:top-10 md:right-10 text-brand-secondary animate-pulse">
+                        <Star className="w-6 h-6 md:w-10 md:h-10" fill="currentColor" />
                     </div>
                 </div>
 
                 {/* 2. Main Quote Typography with reveal words */}
-                <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] uppercase leading-[0.8] tracking-[-0.08em] mb-12 contact-reveal">
-                    <span className="flex flex-col md:flex-row gap-x-6 justify-center">
+                <h2 className="text-[clamp(44px,8vw,95px)] font-[1000] uppercase leading-[0.8] tracking-tighter mb-8">
+                    <span className="flex flex-col md:flex-row gap-y-1 gap-x-6 justify-center">
                         <span className="reveal-word block text-black">Каждое</span>
                         <span className="reveal-word block text-black">пространство</span>
                     </span>
-                    <span className="flex flex-wrap items-center justify-center gap-x-6 md:gap-x-10 mt-2">
+                    <span className="flex flex-wrap items-center justify-center gap-x-4 md:gap-x-10 mt-1 md:mt-2">
                         <span className="reveal-word block text-black">должно</span>
                         <span className="reveal-word relative inline-block text-brand-green italic px-4">
                             дышать.
@@ -116,19 +109,19 @@ const PhilosophySection = () => {
                 </h2>
 
                 {/* 3. Author / Signature with Animated Lines */}
-                <div className="flex items-center justify-center gap-6 md:gap-12 w-full max-w-4xl mb-4">
+                <div className="flex items-center justify-center gap-6 md:gap-12 w-full max-w-full md:max-w-4xl mb-3 md:mb-4">
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-right" />
                     <p className="reveal-word text-xl md:text-3xl font-black italic text-black whitespace-nowrap tracking-tight">
                         Лян Ларион Викторович
                     </p>
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-left" />
                 </div>
-                <p className="reveal-word text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-brand-dark/30 mb-16">
+                <p className="reveal-word text-[9px] md:text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-brand-dark/30 mb-8 md:mb-12">
                     Основатель IC GROUP • Лидер отрасли клининга
                 </p>
 
                 {/* 4. Action Link */}
-                <button className="reveal-word group flex items-center gap-4 text-[11px] font-[1000] uppercase tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
+                <button className="reveal-word group flex items-center gap-4 text-[10px] md:text-[11px] font-[1000] uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
                     Explore Philosophy
                     <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform duration-300" />
                 </button>
