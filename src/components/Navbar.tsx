@@ -56,8 +56,8 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                         <img src="/logo.png" alt="IC GROUP" className="h-8 md:h-10 w-auto object-contain" />
                     </Link>
 
-                    {/* Main Nav Items (Hidden on mobile/tablet to prevent overcrowding) */}
-                    <div className="hidden lg:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-brand-dark/40 min-w-0">
+                    {/* Main Nav Items (Adaptive spacing) */}
+                    <div className="hidden md:flex items-center gap-3 lg:gap-10 text-[9px] lg:text-[11px] font-black uppercase tracking-[0.1em] lg:tracking-[0.3em] text-brand-dark/40 min-w-0">
                         {navLinks.map((link) => (
                             <Link key={link.to} to={link.to} className="hover:text-brand-green transition-colors whitespace-nowrap">
                                 {link.label}
@@ -74,10 +74,10 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                         >
                             Расчет
                         </button>
-                        {/* Burger for all screens below lg */}
+                        {/* Burger for all screens below md */}
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="w-10 h-10 flex lg:hidden items-center justify-center text-brand-dark"
+                            className="w-10 h-10 flex md:hidden items-center justify-center text-brand-dark"
                         >
                             {menuOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
