@@ -18,7 +18,7 @@ const CasesSection = () => {
                     ease: "power3.out",
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 98%"
+                        start: "top 135%"
                     }
                 });
 
@@ -28,7 +28,7 @@ const CasesSection = () => {
                     ease: "power2.out",
                     scrollTrigger: {
                         trigger: card,
-                        start: "top bottom",
+                        start: "top 135%",
                         scrub: true
                     }
                 });

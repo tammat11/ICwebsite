@@ -17,7 +17,7 @@ const SolutionSection = () => {
                 yPercent: -15,
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top bottom",
+                    start: "top 120%",
                     end: "bottom top",
                     scrub: 1
                 }
@@ -31,7 +31,7 @@ const SolutionSection = () => {
                 ease: "expo.out",
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top bottom",
+                    start: "top 120%",
                     once: true
                 }
             });
@@ -58,7 +58,7 @@ const SolutionSection = () => {
                             ease: "back.out(1.2)",
                             scrollTrigger: {
                                 trigger: sectionRef.current,
-                                start: "top bottom",
+                                start: "top 120%",
                                 once: true
                             }
                         }
@@ -73,7 +73,7 @@ const SolutionSection = () => {
                             ease: "power3.out",
                             scrollTrigger: {
                                 trigger: sectionRef.current,
-                                start: "top 80%",
+                                start: "top 100%",
                                 once: true
                             }
                         }
@@ -180,7 +180,7 @@ const SolutionSection = () => {
     };
 
     return (
-        <section ref={sectionRef} className="relative py-20 md:py-32 bg-brand-light overflow-hidden z-20" id="solution">
+        <section ref={sectionRef} className="relative py-12 md:py-20 bg-brand-light overflow-hidden z-20" id="solution">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(123,133,167,0.08)_0%,transparent_100%)]" />
 
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">

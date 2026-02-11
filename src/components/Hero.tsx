@@ -12,29 +12,33 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     useEffect(() => {
         const ctx = gsap.context(() => {
             // Initial states
-            gsap.set(".reveal-item", { y: 60, opacity: 0 });
-            gsap.set(".hero-line", { y: 100, opacity: 0 });
-
-
             // 1. Text Lines Animation (Staggered)
-            gsap.to(".hero-line", {
-                y: 0,
-                opacity: 1,
-                duration: 1,
-                stagger: 0.15,
-                ease: "power3.out",
-                delay: 0.2
-            });
+            gsap.fromTo(".hero-line",
+                { y: 150, opacity: 0, scale: 0.85, filter: "blur(15px)" },
+                {
+                    y: 0,
+                    opacity: 1,
+                    scale: 1,
+                    filter: "blur(0px)",
+                    duration: 2.2,
+                    stagger: 0.2,
+                    ease: "power4.out",
+                    delay: 0.4
+                }
+            );
 
             // 2. Buttons/Tags Reveal
-            gsap.to(".reveal-item", {
-                y: 0,
-                opacity: 1,
-                duration: 1.2,
-                stagger: 0.15,
-                ease: "power3.out",
-                delay: 0.8
-            });
+            gsap.fromTo(".reveal-item",
+                { y: 40, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1.5,
+                    stagger: 0.15,
+                    ease: "power2.out",
+                    delay: 1.6
+                }
+            );
 
 
 
@@ -50,67 +54,81 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                 opacity: 0.5
             });
 
-            // Rag Cleaning Animation (Fast & Fluid)
+            // Rag Cleaning Animation (Fast & Precise)
+            const isMobile = window.innerWidth < 768;
             const ragTl = gsap.timeline({ delay: 1.2 });
 
-            // 1. Hand Appears - Nudged right and down to hit the spot
+            // 1. Hand Appears - Using Responsive Coordinates
             ragTl.fromTo(".rag-hand",
-                { x: 100, y: 200, opacity: 0, rotate: 45 },
+                { x: 300, y: 200, opacity: 0, rotate: 45 },
                 {
-                    x: 100,
-                    y: 60,
+                    x: isMobile ? 30 : 80,
+                    y: isMobile ? -30 : -40,
                     opacity: 1,
                     duration: 0.6,
                     ease: "power2.out"
                 }
             )
-                // 2. Wipe Motion
+                // 2. Circular Rubbing (Stay on target)
                 .to(".rag-hand", {
-                    x: 60,
-                    y: 20,
-                    rotation: -10,
+                    x: isMobile ? 40 : 100,
+                    y: isMobile ? -30 : -40,
+                    rotation: -15,
                     duration: 0.2,
                     ease: "sine.inOut"
                 })
-                // Clean the dirt spot simultaneously
-                .to(".dirt-spot", {
-                    opacity: 0,
-                    scale: 1.3,
-                    duration: 0.2,
-                    ease: "power2.out"
-                }, "<")
                 .to(".rag-hand", {
-                    x: 60,
-                    y: 60,
+                    x: isMobile ? 20 : 70,
+                    y: isMobile ? -30 : -40,
                     rotation: 15,
                     duration: 0.2,
                     ease: "sine.inOut"
                 })
-                // 3. Exit
-                .to(".rag-hand", {
-                    x: 500,
-                    y: 500,
+                .to(".dirt-spot", {
                     opacity: 0,
-                    duration: 0.5,
+                    scale: 1.5,
+                    duration: 0.4,
+                    ease: "power2.out"
+                }, "<")
+                .to(".rag-hand", {
+                    x: isMobile ? 35 : 90,
+                    y: isMobile ? -30 : -40,
+                    rotation: -10,
+                    duration: 0.15,
+                    ease: "sine.inOut"
+                })
+                .to(".rag-hand", {
+                    x: isMobile ? 25 : 80,
+                    y: isMobile ? -30 : -40,
+                    rotation: 0,
+                    duration: 0.15,
+                    ease: "sine.inOut"
+                })
+                // 3. Fluid Exit
+                .to(".rag-hand", {
+                    x: 600,
+                    y: 600,
+                    opacity: 0,
+                    duration: 0.6,
                     ease: "power2.in"
                 });
 
-            // Cartoon Shine Pop - Aligned with dirt spot removal
+            // Cartoon Shine Pop - Slowed down
             ragTl.fromTo(".cartoon-shine",
                 { scale: 0, rotation: 0, opacity: 0 },
                 {
-                    scale: 1.4,
+                    scale: 1.6,
                     rotation: 120,
                     opacity: 1,
-                    duration: 0.4,
-                    ease: "back.out(3)"
+                    duration: 0.8,
+                    ease: "back.out(2)"
                 },
-                "-=0.8"
+                "-=1.2"
             )
                 .to(".cartoon-shine", {
                     scale: 0,
                     opacity: 0,
-                    duration: 0.3
+                    duration: 0.5
                 }, "-=0.2");
 
             // Continuous Micro-Sparkles Loop on Title
@@ -132,7 +150,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     }, []);
 
     return (
-        <section ref={root} className="relative min-h-[90vh] flex flex-col items-center justify-center pt-24 md:pt-32 px-4 overflow-hidden bg-white">
+        <section ref={root} className="relative min-h-[90vh] flex flex-col items-center justify-center pt-16 md:pt-24 px-4 overflow-hidden bg-white">
             <div className="max-w-7xl mx-auto text-center relative z-10 w-full flex flex-col items-center">
                 <div className="reveal-item inline-flex items-center gap-2 md:gap-3 bg-brand-secondary/10 text-brand-secondary px-3 md:px-5 py-2 rounded-full font-black text-[8px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase mb-4 md:mb-6 shadow-sm border border-brand-secondary/10">
                     <Sparkles size={14} />
@@ -142,10 +160,10 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
                 {/* Main Content Column */}
                 <div className="flex flex-col items-center w-full">
-                    <h1 ref={textRef} className="parallax-text font-black tracking-[-0.07em] leading-[0.9] text-brand-dark mb-10 md:mb-16 select-none relative z-20 flex flex-col items-center w-full text-center">
-                        <div className="hero-line w-full text-[clamp(34px,13vw,160px)]">СОЗДАТЬ</div>
+                    <h1 ref={textRef} className="parallax-text font-black tracking-[-0.07em] leading-[0.8] text-brand-dark mb-6 md:mb-8 select-none relative z-20 flex flex-col items-center w-full text-center">
+                        <div className="hero-line w-full text-[clamp(36px,13vw,160px)]">СОЗДАТЬ</div>
 
-                        <div className="hero-line relative z-10 w-full flex justify-center py-1 text-[clamp(38px,14vw,160px)]">
+                        <div className="hero-line relative z-10 w-full flex justify-center py-0 text-[clamp(40px,14vw,160px)]">
                             <span className="relative inline-block group w-fit">
                                 <span className="text-brand-green italic relative z-10 leading-none pr-[0.15em] inline-block w-fit">
                                     ЧИСТОТУ
@@ -172,10 +190,10 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                             </span>
                         </div>
 
-                        <div className="hero-line w-full text-[clamp(38px,13vw,160px)]">ВО ВСЕМ</div>
+                        <div className="hero-line w-full text-[clamp(48px,13vw,160px)]">ВО ВСЕМ</div>
                     </h1>
 
-                    <div className="reveal-item flex flex-col items-center text-center gap-10 md:gap-16 w-full px-4 md:px-6">
+                    <div className="reveal-item flex flex-col items-center text-center gap-6 md:gap-10 w-full px-4 md:px-6">
                         {/* Description */}
                         <div className="flex flex-col items-center">
                             <p className="text-lg md:text-xl text-brand-dark/70 max-w-sm font-bold uppercase tracking-[0.1em] leading-tight relative z-20">
@@ -222,7 +240,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
             </div>
 
 
-        </section>
+        </section >
     );
 };
 

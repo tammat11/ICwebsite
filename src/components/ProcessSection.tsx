@@ -20,7 +20,7 @@ const ProcessSection = () => {
                     strokeDashoffset: 0,
                     scrollTrigger: {
                         trigger: ".process-steps-container",
-                        start: "top 95%",
+                        start: "top 115%",
                         end: "bottom bottom",
                         scrub: 0.5,
                     }
@@ -36,7 +36,7 @@ const ProcessSection = () => {
                 stagger: 0.15,
                 scrollTrigger: {
                     trigger: ".process-steps-container",
-                    start: "top 95%",
+                    start: "top 115%",
                     once: true
                 }
             });
@@ -45,7 +45,7 @@ const ProcessSection = () => {
             const polishTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: ".polish-trigger",
-                    start: "top 98%",
+                    start: "top 118%",
                 }
             });
 
@@ -98,7 +98,7 @@ const ProcessSection = () => {
                     ease: "back.out(2)",
                     scrollTrigger: {
                         trigger: ".polish-trigger",
-                        start: "top 95%",
+                        start: "top 115%",
                     }
                 }
             );
@@ -140,7 +140,7 @@ const ProcessSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-10 md:py-16 bg-white relative overflow-hidden" id="process">
+        <section ref={sectionRef} className="py-4 md:py-8 bg-white relative overflow-hidden" id="process">
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
@@ -199,15 +199,15 @@ const ProcessSection = () => {
                     </div>
 
                     {/* Step Nodes - Zigzag even on mobile */}
-                    <div className="relative space-y-4 md:space-y-12 pointer-events-none flex flex-col">
+                    <div className="relative space-y-2 md:space-y-4 pointer-events-none flex flex-col">
                         {steps.map((step, i) => (
                             <div
                                 key={i}
-                                className={`flex flex-row items-center justify-center gap-0 ${i % 2 === 1 ? 'flex-row-reverse' : 'flex-row'} w-full relative min-h-[120px] md:min-h-[140px]`}
+                                className={`flex flex-row items-center justify-center gap-0 ${i % 2 === 1 ? 'flex-row-reverse' : 'flex-row'} w-full relative min-h-[90px] md:min-h-[110px]`}
                             >
                                 {/* 1. Content Card */}
                                 <div className={`process-card-anim w-[50%] max-w-[200px] md:max-w-none md:w-[42%] pointer-events-auto`}>
-                                    <div className={`group p-3 md:p-6 bg-white border border-black/5 rounded-[16px] md:rounded-[32px] shadow-sm hover:shadow-xl hover:border-brand-green/30 transition-all duration-500 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-center`}>
+                                    <div className={`group p-3 md:p-4 bg-white border border-black/5 rounded-[16px] md:rounded-[24px] shadow-sm hover:shadow-xl hover:border-brand-green/30 transition-all duration-500 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-center`}>
                                         <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-100 group-hover:text-brand-green transition-all">
                                             {step.icon}
                                         </div>

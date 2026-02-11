@@ -92,11 +92,12 @@ const NewsPage = () => {
             y: 60,
             opacity: 0,
             stagger: 0.1,
-            duration: 1,
-            ease: "power3.out",
+            duration: 1.2,
+            ease: "power4.out",
             scrollTrigger: {
                 trigger: ".news-grid",
-                start: "top 80%"
+                start: "top 120%",
+                once: true
             }
         });
     }, []);
@@ -133,7 +134,7 @@ const NewsPage = () => {
                                     <img
                                         src={article.image}
                                         alt={article.title}
-                                        className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
+                                        className="w-full h-full object-cover grayscale-[30%] opacity-90 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
@@ -169,7 +170,7 @@ const NewsPage = () => {
                                         {article.title}
                                     </h3>
 
-                                    <p className="text-xs text-black/50 font-bold leading-relaxed mb-4 flex-1">
+                                    <p className="text-xs text-brand-dark/70 font-bold leading-relaxed mb-4 flex-1">
                                         {article.desc}
                                     </p>
 

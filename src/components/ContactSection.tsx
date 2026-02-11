@@ -46,8 +46,9 @@ const ContactSection = () => {
                 ease: "power4.out",
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top bottom",
-                    fastScrollEnd: true
+                    start: "top 150%",
+                    fastScrollEnd: true,
+                    once: true
                 }
             });
 

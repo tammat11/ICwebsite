@@ -20,7 +20,7 @@ const MapSection = () => {
                 ease: "power2.out",
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 70%",
+                    start: "top 90%",
                     toggleActions: "play none none none",
                     once: true
                 }
@@ -36,7 +36,7 @@ const MapSection = () => {
                 ease: "back.out(2)",
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 60%",
+                    start: "top 80%",
                     toggleActions: "play none none none",
                     once: true
                 }

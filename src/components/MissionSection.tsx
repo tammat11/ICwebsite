@@ -16,7 +16,7 @@ const MissionSection = () => {
                 gsap.to(".mission-title-sticky", {
                     scrollTrigger: {
                         trigger: triggerRef.current,
-                        start: "top top",
+                        start: "top 20%",
                         end: "bottom bottom",
                         pin: ".mission-title-container",
                         pinSpacing: false,
@@ -31,7 +31,7 @@ const MissionSection = () => {
                 transformOrigin: "top center",
                 scrollTrigger: {
                     trigger: triggerRef.current,
-                    start: "top center",
+                    start: "top 70%",
                     end: "bottom bottom",
                     scrub: 0.5
                 }
@@ -46,7 +46,7 @@ const MissionSection = () => {
                     ease: "power3.out",
                     scrollTrigger: {
                         trigger: block,
-                        start: "top 92%",
+                        start: "top 112%",
                     }
                 });
             });
@@ -57,7 +57,7 @@ const MissionSection = () => {
 
     return (
         <section ref={sectionRef} className="bg-white relative overflow-hidden" id="mission">
-            <div ref={triggerRef} className="max-w-7xl mx-auto px-6 py-20 md:py-56 flex flex-col lg:flex-row gap-10 lg:gap-20">
+            <div ref={triggerRef} className="max-w-7xl mx-auto px-6 py-12 md:py-32 flex flex-col lg:flex-row gap-10 lg:gap-20">
 
                 {/* L E F T : Sticky Info (The Context) */}
                 <div className="w-full lg:w-1/3 mission-title-container">
@@ -85,7 +85,7 @@ const MissionSection = () => {
                 </div>
 
                 {/* R I G H T : Immersive Scrolling Content */}
-                <div className="w-full lg:w-2/3 space-y-24 md:space-y-64 relative">
+                <div className="w-full lg:w-2/3 space-y-16 md:space-y-32 relative">
 
                     {/* Vertical Connecting Cable */}
                     <div className="mission-connector-line hidden lg:block absolute -left-10 top-0 w-[1px] h-full bg-gradient-to-b from-brand-green via-brand-dark/10 to-transparent origin-top" />

@@ -15,7 +15,7 @@ const PhilosophySection = () => {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top bottom",
+                    start: "top 150%",
                 }
             });
 
@@ -52,7 +52,7 @@ const PhilosophySection = () => {
                 xPercent: -30,
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top bottom",
+                    start: "top 120%",
                     end: "bottom top",
                     scrub: 1
                 }

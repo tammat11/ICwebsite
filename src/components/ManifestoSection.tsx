@@ -17,7 +17,7 @@ const ManifestoSection = () => {
                 stagger: 0.2,
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 80%",
+                    start: "top 100%",
                     once: true
                 }
             });

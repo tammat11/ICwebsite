@@ -87,14 +87,32 @@ const ServicesSection = () => {
         scrollContainer.scrollLeft = middleOffset - (window.innerWidth / 2 - (cardTotal - 24) / 2);
 
         const ctx = gsap.context(() => {
-            gsap.from(".services-big-title", {
-                y: 100,
+            // 1. Cinematic Title Reveal
+            const lines = gsap.utils.toArray<HTMLElement>(".services-title-line");
+            lines.forEach((line, i) => {
+                gsap.from(line, {
+                    x: i === 0 ? -100 : 100,
+                    skewX: i === 0 ? -20 : 20,
+                    opacity: 0,
+                    filter: "blur(20px)",
+                    duration: 1.5,
+                    ease: "power4.out",
+                    scrollTrigger: {
+                        trigger: line,
+                        start: "top 115%",
+                    }
+                });
+            });
+
+            // 2. Cards Reveal: Entire Row slides from right
+            gsap.from(scrollRef.current, {
+                x: 500,
                 opacity: 0,
-                duration: 1.5,
+                duration: 1.8,
                 ease: "power4.out",
                 scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 98%",
+                    trigger: ".service-cards-container",
+                    start: "top 110%",
                 }
             });
         }, sectionRef);
@@ -109,17 +127,17 @@ const ServicesSection = () => {
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                     <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green">Our Capabilities</span>
                 </div>
-                <h2 className="services-big-title text-[clamp(32px,9vw,115px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark">
-                    СТАНДАРТ <br />
-                    <span className="text-brand-green">ПРЕВОСХОДСТВА</span>
+                <h2 className="text-[clamp(48px,9vw,115px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark overflow-visible">
+                    <div className="services-title-line block">СТАНДАРТ</div>
+                    <div className="services-title-line block text-brand-green">ПРЕВОСХОДСТВА</div>
                 </h2>
             </div>
 
             {/* Horizontal Scroll Area */}
-            <div className="relative w-full group">
+            <div className="relative w-full group service-cards-container">
                 <div
                     ref={scrollRef}
-                    className="flex overflow-x-auto gap-6 py-12 md:py-16 snap-x snap-mandatory no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing"
+                    className="flex overflow-x-auto gap-6 py-6 md:py-10 snap-x snap-mandatory no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing"
                     style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',

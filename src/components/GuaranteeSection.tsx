@@ -39,7 +39,7 @@ const GuaranteeSection = () => {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 60%",
+                    start: "top 80%",
                     toggleActions: "play none none reverse"
                 }
             });
@@ -81,7 +81,7 @@ const GuaranteeSection = () => {
                 ease: "power4.out",
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 70%",
+                    start: "top 90%",
                     once: true
                 }
             });

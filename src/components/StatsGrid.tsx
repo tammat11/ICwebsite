@@ -32,7 +32,7 @@ const StatsGrid = () => {
                     ease: "power2.out",
                     scrollTrigger: {
                         trigger: htmlTarget,
-                        start: "top 98%",
+                        start: "top 118%",
                     },
                     onUpdate: () => {
                         if (isMillion) {
@@ -40,6 +40,47 @@ const StatsGrid = () => {
                         } else {
                             htmlTarget.innerText = Math.floor(obj.val).toLocaleString();
                         }
+                    }
+                });
+            });
+
+            // Scramble Text Animation (Numbers to Letters)
+            const scrambleTargets = document.querySelectorAll(".scramble-text");
+            scrambleTargets.forEach((target) => {
+                const htmlTarget = target as HTMLElement;
+                const finalLiveText = htmlTarget.getAttribute("data-text") || "";
+                const chars = "0123456789";
+
+                let iteration = 0;
+                let interval: any = null;
+
+                ScrollTrigger.create({
+                    trigger: htmlTarget,
+                    start: "top 95%",
+                    onEnter: () => {
+                        // Fade in and slide up
+                        gsap.fromTo(htmlTarget,
+                            { opacity: 0, y: 30 },
+                            { opacity: 1, y: 0, duration: 1.5, ease: "power4.out" }
+                        );
+
+                        interval = setInterval(() => {
+                            htmlTarget.innerText = finalLiveText
+                                .split("")
+                                .map((_, index) => {
+                                    if (index < iteration) {
+                                        return finalLiveText[index];
+                                    }
+                                    return chars[Math.floor(Math.random() * 10)];
+                                })
+                                .join("");
+
+                            if (iteration >= finalLiveText.length) {
+                                clearInterval(interval);
+                            }
+
+                            iteration += 1 / 3;
+                        }, 30);
                     }
                 });
             });
@@ -53,7 +94,7 @@ const StatsGrid = () => {
                 ease: "power3.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top 98%",
+                    start: "top 118%",
                 }
             });
         }, sectionRef);
@@ -62,7 +103,7 @@ const StatsGrid = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="py-10 md:py-16 bg-white relative overflow-hidden" id="stats">
+        <section ref={sectionRef} className="py-6 md:py-10 bg-white relative overflow-hidden" id="stats">
             <div className="max-w-7xl mx-auto px-6 relative z-10" ref={containerRef}>
 
                 {/* Header */}
@@ -72,8 +113,8 @@ const StatsGrid = () => {
                         <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green">Market Leadership</span>
                     </div>
                     <h2 className="text-[clamp(32px,9vw,115px)] font-[1000] uppercase tracking-tighter leading-[0.8] italic text-brand-dark">
-                        ЦИФРЫ <br />
-                        <span className="text-brand-green">НЕ ВРУТ</span>
+                        <div className="scramble-text" data-text="ЦИФРЫ">01010</div>
+                        <div className="scramble-text text-brand-green" data-text="НЕ ВРУТ">258 4932</div>
                     </h2>
                 </div>
 

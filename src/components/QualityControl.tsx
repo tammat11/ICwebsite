@@ -16,7 +16,7 @@ const QualityControl = () => {
                 stagger: 0.1,
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 75%",
+                    start: "top 95%",
                     toggleActions: "play none none none",
                     once: true
                 }
@@ -27,7 +27,7 @@ const QualityControl = () => {
                 duration: 1,
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 70%",
+                    start: "top 90%",
                     toggleActions: "play none none none",
                     once: true
                 }

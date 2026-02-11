@@ -24,7 +24,7 @@ const PainSection = () => {
                     ease: "elastic.out(1, 0.8)",
                     scrollTrigger: {
                         trigger: ".benefit-cards-grid",
-                        start: "top 95%",
+                        start: "top 120%",
                     }
                 }
             );
@@ -37,7 +37,7 @@ const PainSection = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="relative py-12 md:py-16 bg-white overflow-hidden text-brand-dark" id="benefits">
+        <section ref={sectionRef} className="relative py-6 md:py-10 bg-white overflow-hidden text-brand-dark" id="benefits">
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
