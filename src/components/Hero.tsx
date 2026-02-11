@@ -142,10 +142,10 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
                 {/* Main Content Column */}
                 <div className="flex flex-col items-center w-full">
-                    <h1 ref={textRef} className="parallax-text font-black tracking-[-0.07em] leading-[0.85] text-brand-dark mb-6 md:mb-8 select-none relative z-20 flex flex-col items-center w-full text-center">
-                        <div className="hero-line w-full text-[clamp(36px,13vw,160px)]">СОЗДАТЬ</div>
+                    <h1 ref={textRef} className="parallax-text font-black tracking-[-0.07em] leading-[0.8] text-brand-dark mb-6 md:mb-8 select-none relative z-20 flex flex-col items-center w-full text-center">
+                        <div className="hero-line w-full text-[clamp(34px,13vw,160px)]">СОЗДАТЬ</div>
 
-                        <div className="hero-line relative z-10 w-full flex justify-center py-0 text-[clamp(40px,14vw,160px)]">
+                        <div className="hero-line relative z-10 w-full flex justify-center py-1 text-[clamp(38px,14vw,160px)]">
                             <span className="relative inline-block group w-fit">
                                 <span className="text-brand-green italic relative z-10 leading-none pr-[0.15em] inline-block w-fit">
                                     ЧИСТОТУ
@@ -166,13 +166,13 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                                     <img
                                         src="/rag.png"
                                         alt="Cleaning Rag"
-                                        className="rag-hand absolute top-1/2 right-[5%] -translate-y-1/2 w-32 md:w-64 h-32 md:h-64 object-contain pointer-events-none z-50 opacity-0"
+                                        className="rag-hand absolute top-1/2 right-0 -translate-y-1/2 w-24 md:w-64 h-24 md:h-64 object-contain pointer-events-none z-50 opacity-0"
                                     />
                                 </span>
                             </span>
                         </div>
 
-                        <div className="hero-line w-full text-[clamp(48px,13vw,160px)]">ВО ВСЕМ</div>
+                        <div className="hero-line w-full text-[clamp(38px,13vw,160px)]">ВО ВСЕМ</div>
                     </h1>
 
                     <div className="reveal-item flex flex-col items-center text-center gap-6 md:gap-10 w-full px-4 md:px-6">

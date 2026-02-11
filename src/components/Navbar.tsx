@@ -56,8 +56,8 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                         <img src="/logo.png" alt="IC GROUP" className="h-8 md:h-10 w-auto object-contain" />
                     </Link>
 
-                    {/* Main Nav Items (Always visible now) */}
-                    <div className="flex items-center gap-2 md:gap-4 lg:gap-10 text-[7px] min-[375px]:text-[8px] md:text-[9px] lg:text-[11px] font-black uppercase tracking-tight min-[375px]:tracking-widest text-brand-dark/40 min-w-0">
+                    {/* Main Nav Items (Hidden on mobile/tablet to prevent overcrowding) */}
+                    <div className="hidden lg:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-brand-dark/40 min-w-0">
                         {navLinks.map((link) => (
                             <Link key={link.to} to={link.to} className="hover:text-brand-green transition-colors whitespace-nowrap">
                                 {link.label}
@@ -67,19 +67,19 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
 
                     {/* Right side Actions */}
                     <div className="flex items-center gap-2 md:gap-6 shrink-0">
-                        <span className="hidden lg:inline text-[11px] font-black text-brand-dark">+7 (771) 780-08-41</span>
+                        <span className="hidden xl:inline text-[11px] font-black text-brand-dark">+7 (771) 780-08-41</span>
                         <button
                             onClick={onCalcOpen}
-                            className="btn-premium !px-3 md:!px-6 !py-1.5 md:!py-2.5 !text-[7px] min-[375px]:!text-[9px] md:!text-[10px] min-w-fit"
+                            className="btn-premium !px-4 md:!px-6 !py-2 md:!py-2.5 !text-[9px] md:!text-[10px] min-w-fit"
                         >
                             Расчет
                         </button>
-                        {/* Burger only for very narrow screens or as a backup */}
+                        {/* Burger for all screens below lg */}
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-brand-dark lg:hidden"
+                            className="w-10 h-10 flex lg:hidden items-center justify-center text-brand-dark"
                         >
-                            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+                            {menuOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
                     </div>
                 </div>

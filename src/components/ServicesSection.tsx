@@ -109,7 +109,7 @@ const ServicesSection = () => {
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                     <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green">Our Capabilities</span>
                 </div>
-                <h2 className="services-big-title text-[clamp(48px,9vw,115px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark">
+                <h2 className="services-big-title text-[clamp(32px,9vw,115px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark">
                     СТАНДАРТ <br />
                     <span className="text-brand-green">ПРЕВОСХОДСТВА</span>
                 </h2>
