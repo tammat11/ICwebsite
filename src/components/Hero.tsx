@@ -132,7 +132,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     }, []);
 
     return (
-        <section ref={root} className="relative min-h-[90vh] flex flex-col items-center justify-center pt-16 md:pt-24 px-4 overflow-hidden bg-white">
+        <section ref={root} className="relative min-h-[90vh] flex flex-col items-center justify-center pt-24 md:pt-32 px-4 overflow-hidden bg-white">
             <div className="max-w-7xl mx-auto text-center relative z-10 w-full flex flex-col items-center">
                 <div className="reveal-item inline-flex items-center gap-2 md:gap-3 bg-brand-secondary/10 text-brand-secondary px-3 md:px-5 py-2 rounded-full font-black text-[8px] md:text-[10px] tracking-[0.3em] md:tracking-[0.4em] uppercase mb-4 md:mb-6 shadow-sm border border-brand-secondary/10">
                     <Sparkles size={14} />
@@ -142,7 +142,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
                 {/* Main Content Column */}
                 <div className="flex flex-col items-center w-full">
-                    <h1 ref={textRef} className="parallax-text font-black tracking-[-0.07em] leading-[0.8] text-brand-dark mb-6 md:mb-8 select-none relative z-20 flex flex-col items-center w-full text-center">
+                    <h1 ref={textRef} className="parallax-text font-black tracking-[-0.07em] leading-[0.9] text-brand-dark mb-10 md:mb-16 select-none relative z-20 flex flex-col items-center w-full text-center">
                         <div className="hero-line w-full text-[clamp(34px,13vw,160px)]">СОЗДАТЬ</div>
 
                         <div className="hero-line relative z-10 w-full flex justify-center py-1 text-[clamp(38px,14vw,160px)]">
@@ -175,7 +175,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                         <div className="hero-line w-full text-[clamp(38px,13vw,160px)]">ВО ВСЕМ</div>
                     </h1>
 
-                    <div className="reveal-item flex flex-col items-center text-center gap-6 md:gap-10 w-full px-4 md:px-6">
+                    <div className="reveal-item flex flex-col items-center text-center gap-10 md:gap-16 w-full px-4 md:px-6">
                         {/* Description */}
                         <div className="flex flex-col items-center">
                             <p className="text-lg md:text-xl text-brand-dark/70 max-w-sm font-bold uppercase tracking-[0.1em] leading-tight relative z-20">
