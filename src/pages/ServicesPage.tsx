@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Clock, ShieldCheck, Zap, Sparkles, ArrowUpRight } from 'lucide-react';
-import Navbar from '../components/Navbar';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,19 +60,17 @@ const ServicesPage = () => {
 
     return (
         <div className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
-            <Navbar alwaysVisible />
-
             <main className="pt-40 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
                     <div className="mb-32 relative">
-                        <span className="text-brand-green font-black tracking-[0.4em] uppercase text-sm block mb-4">
+                        <span className="text-brand-green font-bold tracking-[0.4em] uppercase text-sm block mb-4">
                             Our Expertise
                         </span>
-                        <h1 className="page-title text-[15vw] leading-[0.8] font-black tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
+                        <h1 className="page-title text-[15vw] leading-[0.8] font-bold tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
                             Services
                         </h1>
-                        <h2 className="text-6xl md:text-9xl font-black uppercase leading-none mb-8 relative z-10 text-brand-dark">
+                        <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none mb-8 relative z-10 text-brand-dark">
                             Услуги <br />
                             <span className="text-brand-green italic">Для Бизнеса</span>
                         </h2>
@@ -90,7 +87,7 @@ const ServicesPage = () => {
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                 <div className="flex justify-between items-start mb-8 md:mb-14 relative z-10">
-                                    <span className="text-[clamp(4rem,15vw,6rem)] font-black text-black/[0.03] group-hover:text-white/20 transition-colors select-none leading-none">
+                                    <span className="text-[clamp(4rem,15vw,6rem)] font-bold text-black/[0.03] group-hover:text-white/20 transition-colors select-none leading-none">
                                         {s.id}
                                     </span>
                                     <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-black/[0.03] flex items-center justify-center text-brand-green group-hover:bg-white group-hover:text-brand-green transition-colors duration-500 border border-black/5 shrink-0 shadow-sm">
@@ -101,7 +98,7 @@ const ServicesPage = () => {
                                 </div>
 
                                 <div className="relative z-10">
-                                    <h3 className="text-[clamp(1.75rem,8vw,3rem)] font-black uppercase mb-3 leading-[0.9] text-brand-dark group-hover:text-white transition-colors">
+                                    <h3 className="text-[clamp(1.75rem,8vw,3rem)] font-bold uppercase mb-3 leading-[0.9] text-brand-dark group-hover:text-white transition-colors">
                                         {s.title}
                                     </h3>
                                     <span className="block text-xs font-bold tracking-[0.2em] text-black/20 mb-8 group-hover:text-white/60 uppercase">
@@ -139,8 +136,8 @@ const ServicesPage = () => {
                     <div className="mt-32 p-12 md:p-24 rounded-[3rem] bg-brand-green relative overflow-hidden text-center shadow-2xl shadow-brand-green/40">
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
                         <div className="relative z-10">
-                            <h2 className="text-4xl md:text-7xl font-black uppercase mb-8 leading-tight text-white drop-shadow-lg">
-                                Сложный объект? <br />
+                            <h2 className="text-4xl md:text-7xl font-bold uppercase mb-8 leading-tight text-white drop-shadow-lg">
+                                "Сложный" объект? <br />
                                 <span className="text-brand-dark/20">Мы любим вызовы.</span>
                             </h2>
                             <button className="bg-brand-dark text-white px-12 py-6 rounded-2xl text-xl font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-2xl">

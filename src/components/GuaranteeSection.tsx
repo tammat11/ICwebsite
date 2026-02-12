@@ -115,7 +115,7 @@ const GuaranteeSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="relative py-24 md:py-40 bg-brand-light overflow-hidden" style={{ perspective: '2000px' }}>
+        <section ref={sectionRef} className="relative py-12 md:py-20 bg-brand-light overflow-hidden" style={{ perspective: '2000px' }}>
 
             {/* Background Base */}
             <div className="absolute inset-0 bg-brand-light" />
@@ -123,12 +123,12 @@ const GuaranteeSection = () => {
             <div className="max-w-7xl mx-auto px-6 relative flex flex-col items-center">
 
                 {/* Header- Improved with brand-secondary */}
-                <div className="text-center mb-32 md:mb-48 z-30">
-                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark uppercase tracking-tighter leading-none mb-8 italic">
+                <div className="text-center mb-16 md:mb-24 z-30">
+                    <h2 className="text-[clamp(2rem,6vw,80px)] font-[1000] text-brand-dark uppercase tracking-tighter leading-none mb-4 italic">
                         ПЕЧАТЬ <br />
                         <span className="text-brand-green">НАДЕЖНОСТИ</span>
                     </h2>
-                    <p className="text-lg md:text-2xl text-brand-secondary font-[1000] uppercase tracking-[0.2em] drop-shadow-sm">Гарантия качества №1 в Казахстане</p>
+                    <p className="text-base md:text-xl text-brand-secondary font-[1000] uppercase tracking-[0.2em] drop-shadow-sm">Гарантия качества №1 в Казахстане</p>
                 </div>
 
                 {/* Central Composition */}

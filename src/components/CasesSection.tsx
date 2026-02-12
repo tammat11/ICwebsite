@@ -18,7 +18,7 @@ const CasesSection = () => {
                     ease: "power3.out",
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 135%"
+                        start: "top 120%"
                     }
                 });
 
@@ -28,7 +28,7 @@ const CasesSection = () => {
                     ease: "power2.out",
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 135%",
+                        start: "top 120%",
                         scrub: true
                     }
                 });
@@ -71,16 +71,16 @@ const CasesSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-12 md:py-20 bg-brand-light overflow-hidden relative" id="cases">
+        <section ref={sectionRef} className="py-8 md:py-12 bg-brand-light overflow-hidden relative" id="cases">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Header */}
-                <div className="mb-12 md:mb-16 text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full mb-4">
+                <div className="mb-8 md:mb-12 text-center">
+                    <div className="section-tag">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green">Proof of Efficiency</span>
+                        <span>Proof of Efficiency</span>
                     </div>
-                    <h2 className="text-[clamp(48px,9vw,115px)] font-[1000] uppercase tracking-tighter leading-[0.8] italic text-brand-dark">
+                    <h2 className="section-header italic text-brand-dark overflow-visible">
                         РЕАЛЬНЫЕ <br />
                         <span className="text-brand-green">КЕЙСЫ</span>
                     </h2>
@@ -99,25 +99,25 @@ const CasesSection = () => {
                                     <img
                                         src={item.image}
                                         alt={item.company}
-                                        className="case-image-inner w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-[1500ms]"
+                                        className="case-image-inner w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-[1500ms]"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
 
                                     {/* Company Label Floating */}
                                     <div className="absolute top-6 left-6">
-                                        <div className={`px-4 py-1.5 ${i === 1 ? 'bg-brand-secondary' : 'bg-brand-green'} text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl`}>
+                                        <div className={`px-4 py-1.5 ${i === 1 ? 'bg-brand-secondary' : 'bg-brand-green'} text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full shadow-xl`}>
                                             {item.company}
                                         </div>
                                     </div>
 
                                     {/* Fast Stat Overlay */}
                                     <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-2">
-                                        <div className="text-5xl md:text-7xl font-[1000] text-white italic tracking-tighter leading-none drop-shadow-lg">
+                                        <div className="text-4xl md:text-6xl font-bold text-white italic tracking-tighter leading-none drop-shadow-lg">
                                             {item.stat}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-4 h-px bg-white/40" />
-                                            <div className="text-[11px] font-bold text-white uppercase tracking-wider">{item.metric}</div>
+                                            <div className="text-[11px] font-medium text-white uppercase tracking-wider">{item.metric}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -126,13 +126,13 @@ const CasesSection = () => {
                             {/* Content Side */}
                             <div className="w-full md:w-2/5 space-y-4 md:space-y-6 pl-0 md:pl-2">
                                 <div className="space-y-4">
-                                    <div className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green flex items-center gap-2">
+                                    <div className="text-[9px] font-semibold uppercase tracking-[0.4em] text-brand-green flex items-center gap-2">
                                         <div className="w-8 h-px bg-brand-green" /> {item.category}
                                     </div>
-                                    <h3 className="text-3xl md:text-5xl font-black text-brand-dark uppercase italic tracking-tighter leading-[0.9] group-hover:text-brand-green transition-colors">
+                                    <h3 className="text-xl md:text-3xl font-bold uppercase tracking-tight text-brand-dark group-hover:text-brand-green transition-colors duration-500 leading-tight italic">
                                         {item.title}
                                     </h3>
-                                    <p className="text-base md:text-lg text-black/40 font-bold leading-tight">
+                                    <p className="text-base md:text-lg text-brand-dark/60 font-medium leading-tight">
                                         {item.desc}
                                     </p>
                                 </div>
@@ -142,8 +142,8 @@ const CasesSection = () => {
                                         <ArrowUpRight size={20} />
                                     </div>
                                     <div className="space-y-0.5 text-left">
-                                        <div className="text-[10px] font-black uppercase tracking-[0.3em]">View Full Case</div>
-                                        <div className="text-[8px] font-bold text-black/20 uppercase tracking-widest">Read methodology</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-[0.3em]">View Full Case</div>
+                                        <div className="text-[8px] font-semibold text-black/20 uppercase tracking-widest">Read methodology</div>
                                     </div>
                                 </button>
                             </div>
@@ -153,11 +153,11 @@ const CasesSection = () => {
 
                 {/* Bottom Action */}
                 <div className="mt-12 md:mt-20 pt-8 md:pt-12 border-t border-black/[0.03] flex flex-col items-center">
-                    <button className="px-8 md:px-12 py-4 md:py-5 bg-brand-dark text-white rounded-full font-black text-[11px] uppercase tracking-[0.5em] shadow-2xl hover:bg-brand-green transition-all transform hover:-translate-y-1 active:scale-95 group">
+                    <button className="px-8 md:px-12 py-4 md:py-5 bg-brand-dark text-white rounded-full font-bold text-[11px] uppercase tracking-[0.5em] shadow-2xl hover:bg-brand-green transition-all transform hover:-translate-y-1 active:scale-95 group">
                         Смотреть все проекты
                         <span className="inline-block ml-4 group-hover:translate-x-1 transition-transform">→</span>
                     </button>
-                    <p className="mt-10 text-[9px] font-black uppercase tracking-[0.3em] text-black/10">100+ active contracts across Kazakhstan</p>
+                    <p className="mt-10 text-[9px] font-bold uppercase tracking-[0.3em] text-black/10">100+ active contracts across Kazakhstan</p>
                 </div>
             </div>
         </section>

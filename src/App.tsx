@@ -16,7 +16,7 @@ import NewsPage from './pages/NewsPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
-import Bubbles from './components/Bubbles';
+// Bubbles import removed
 import { useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -139,18 +139,10 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
   }, []);
 
   return (
-    <div ref={mainRef} className="min-h-screen bg-brand-light relative selection:bg-brand-green/20 overflow-x-hidden w-full">
+    <div ref={mainRef} className="min-h-screen bg-white relative selection:bg-brand-green/20 overflow-x-hidden w-full">
 
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <Bubbles />
-        <div data-speed="0.2" className="bg-blob absolute top-[20%] -left-20 w-[1000px] h-[1000px] bg-brand-green/5 rounded-full blur-[60px] will-change-transform" />
-        <div data-speed="0.4" className="bg-blob absolute top-[60%] -right-40 w-[800px] h-[800px] bg-brand-dark/5 rounded-full blur-[40px] will-change-transform" />
-        <div data-speed="0.8" className="bg-blob absolute top-[40%] right-[20%] w-40 h-40 border-[2px] border-brand-green/20 rounded-full will-change-transform" />
-        <div data-speed="0.6" className="bg-blob absolute top-[70%] left-[10%] w-60 h-60 bg-brand-green/5 rounded-[40px] rotate-12 will-change-transform" />
-        <div data-speed="1.2" className="bg-blob absolute top-[50%] left-[15%] w-24 h-24 border-2 border-brand-dark/5 rounded-full blur-[1px] will-change-transform" />
-        <div data-speed="1.5" className="bg-blob absolute top-[80%] right-[10%] w-32 h-32 bg-brand-green/10 rounded-full mix-blend-multiply blur-md will-change-transform" />
-        <div data-speed="2.0" className="bg-blob absolute top-[90%] left-[30%] w-16 h-16 bg-brand-accent/40 rounded-lg rotate-45 shadow-md will-change-transform" />
-      </div>
+      {/* Global background elements removed for maximum cleanliness and performance */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-white" />
 
       <main className="relative z-10 w-full overflow-x-hidden">
         <Hero onCalcOpen={onCalcOpen} />

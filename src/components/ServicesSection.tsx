@@ -78,7 +78,7 @@ const ServicesSection = () => {
         const totalItems = services.length;
         const getCardWidth = () => {
             const firstCard = scrollContainer.querySelector('.service-card-wrapper');
-            return firstCard ? firstCard.getBoundingClientRect().width + 24 : (window.innerWidth > 768 ? 474 : 304);
+            return firstCard ? firstCard.getBoundingClientRect().width + 24 : (window.innerWidth > 768 ? 384 : 284);
         };
 
         const cardTotal = getCardWidth();
@@ -98,8 +98,9 @@ const ServicesSection = () => {
                     duration: 1.5,
                     ease: "power4.out",
                     scrollTrigger: {
-                        trigger: line,
-                        start: "top 115%",
+                        trigger: sectionRef.current,
+                        start: "top 90%",
+                        once: true
                     }
                 });
             });
@@ -112,7 +113,7 @@ const ServicesSection = () => {
                 ease: "power4.out",
                 scrollTrigger: {
                     trigger: ".service-cards-container",
-                    start: "top 110%",
+                    start: "top 90%",
                 }
             });
         }, sectionRef);
@@ -121,13 +122,13 @@ const ServicesSection = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="py-12 md:py-16 bg-white relative overflow-hidden" id="services">
-            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-8 md:mb-12 text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full mb-4">
+        <section ref={sectionRef} className="section-padding-compact bg-white relative" id="services">
+            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-6 md:mb-10 text-center">
+                <div className="section-tag">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green">Our Capabilities</span>
+                    <span>Our Capabilities</span>
                 </div>
-                <h2 className="text-[clamp(48px,9vw,115px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark overflow-visible">
+                <h2 className="section-header italic text-brand-dark overflow-visible">
                     <div className="services-title-line block">СТАНДАРТ</div>
                     <div className="services-title-line block text-brand-green">ПРЕВОСХОДСТВА</div>
                 </h2>
@@ -137,7 +138,7 @@ const ServicesSection = () => {
             <div className="relative w-full group service-cards-container">
                 <div
                     ref={scrollRef}
-                    className="flex overflow-x-auto gap-6 py-6 md:py-10 snap-x snap-mandatory no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing"
+                    className="flex overflow-x-auto gap-6 py-12 md:py-24 snap-x snap-mandatory no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing"
                     style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
@@ -146,16 +147,16 @@ const ServicesSection = () => {
                     {infiniteServices.map((service, i) => (
                         <div
                             key={i}
-                            className="service-card-wrapper flex-shrink-0 w-[280px] md:w-[420px] snap-center"
+                            className="service-card-wrapper flex-shrink-0 w-[260px] md:w-[360px] snap-center"
                         >
-                            <div className="group/card relative overflow-hidden rounded-[24px] md:rounded-[40px] border border-black/[0.04] bg-brand-light h-[380px] md:h-[550px] transition-all duration-700 hover:border-brand-green/30 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] flex flex-col justify-end p-6 md:p-10 whitespace-normal">
+                            <div className="group/card relative overflow-hidden rounded-[24px] md:rounded-[40px] border border-black/[0.04] bg-brand-light h-[320px] md:h-[480px] transition-all duration-700 hover:border-brand-green/30 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] flex flex-col justify-end p-6 md:p-10 whitespace-normal">
 
                                 {service.image && (
                                     <>
                                         <img
                                             src={service.image}
                                             alt={service.title}
-                                            className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover/card:opacity-50 transition-all duration-[1.5s] group-hover/card:scale-110"
+                                            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover/card:opacity-100 group-hover/card:scale-110 transition-all duration-1000"
                                         />
                                         <div className="absolute inset-0 z-10 bg-gradient-to-t from-brand-light via-brand-light/60 to-transparent" />
                                     </>
@@ -166,10 +167,10 @@ const ServicesSection = () => {
                                 </div>
 
                                 <div className="space-y-4 relative z-20">
-                                    <h3 className="text-2xl md:text-4xl font-[1000] uppercase tracking-tight text-brand-dark group-hover/card:text-brand-green transition-colors duration-500 leading-tight italic">
+                                    <h3 className="text-lg md:text-2xl font-bold uppercase tracking-tight text-brand-dark group-hover/card:text-brand-green transition-colors duration-500 leading-tight italic">
                                         {service.title}
                                     </h3>
-                                    <p className="text-brand-dark/70 text-base md:text-lg font-bold leading-snug transition-colors duration-500 group-hover/card:text-brand-dark/90">
+                                    <p className="text-brand-dark/70 text-sm md:text-base font-medium leading-snug transition-colors duration-500 group-hover/card:text-brand-dark/90">
                                         {service.description}
                                     </p>
                                 </div>
@@ -185,8 +186,8 @@ const ServicesSection = () => {
             </div>
 
             {/* Bottom Status Tag */}
-            <div className="flex flex-col items-center mt-12 px-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-dark/20 italic">Прокрутите для ознакомления</p>
+            <div className="flex flex-col items-center mt-8 px-6">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-brand-dark/20 italic">Прокрутите для ознакомления</p>
             </div>
 
             <style>{`

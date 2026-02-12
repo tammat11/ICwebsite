@@ -12,9 +12,9 @@ const Footer = () => {
                     <div className="col-span-1 lg:col-span-2 space-y-8">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center">
-                                <span className="font-black text-brand-green text-xl">ic</span>
+                                <span className="font-bold text-brand-green text-xl">ic</span>
                             </div>
-                            <span className="text-2xl md:text-3xl font-black tracking-tighter">IC GROUP</span>
+                            <span className="text-2xl md:text-3xl font-bold tracking-tighter">IC GROUP</span>
                         </div>
                         <p className="text-white/40 text-base md:text-lg leading-relaxed max-w-sm">
                             Инновационные решения в сфере Facility Management. Мы создаем стандарты чистоты и комфорта для вашего бизнеса.
@@ -30,7 +30,7 @@ const Footer = () => {
 
                     {/* Navigation */}
                     <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-green">Компания</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">Компания</h4>
                         <ul className="space-y-4">
                             {['О нас', 'Услуги', 'Проекты', 'Карьера', 'Контакты'].map((item) => (
                                 <li key={item}>
@@ -45,13 +45,13 @@ const Footer = () => {
 
                     {/* Contacts */}
                     <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-green">Контакты</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">Контакты</h4>
                         <ul className="space-y-6">
                             <li className="flex items-start gap-4">
                                 <Phone className="mt-1 text-brand-green" size={20} />
                                 <div>
                                     <p className="text-white/40 text-sm mb-1">Горячая линия</p>
-                                    <p className="text-xl font-bold">+7 (771) 780-08-41</p>
+                                    <p className="text-xl font-medium">+7 (771) 780-08-41</p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -74,14 +74,14 @@ const Footer = () => {
 
                 {/* Big Footer CTA (Visual element) */}
                 <div className="border-t border-white/10 flex flex-col md:flex-row justify-center md:justify-end items-center gap-4 md:gap-8 py-8 md:py-12">
-                    <button className="px-8 md:px-10 py-4 md:py-5 bg-brand-green rounded-full text-brand-dark font-black uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2 text-sm md:text-base w-full md:w-auto text-center">
+                    <button className="px-8 md:px-10 py-4 md:py-5 bg-brand-green rounded-full text-brand-dark font-bold uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2 text-sm md:text-base w-full md:w-auto text-center">
                         Скачать презентацию
                         <ArrowUpRight size={20} />
                     </button>
                 </div>
 
                 {/* Copyright */}
-                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-xs font-bold text-white/20 uppercase tracking-widest">
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-xs font-medium text-white/20 uppercase tracking-widest">
                     <p>© 2026 IC Group Holding. All rights reserved.</p>
                     <div className="flex gap-8">
                         <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

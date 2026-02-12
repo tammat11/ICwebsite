@@ -20,9 +20,10 @@ const ProcessSection = () => {
                     strokeDashoffset: 0,
                     scrollTrigger: {
                         trigger: ".process-steps-container",
-                        start: "top 115%",
+                        start: "top 100%",
+                        // ⚙️ ADJUST HERE: "end" controls when the line finishes drawing. "bottom bottom" means when the bottom of the container hits the bottom of the screen.
                         end: "bottom bottom",
-                        scrub: 0.5,
+                        scrub: 1,
                     }
                 });
             }
@@ -36,7 +37,7 @@ const ProcessSection = () => {
                 stagger: 0.15,
                 scrollTrigger: {
                     trigger: ".process-steps-container",
-                    start: "top 115%",
+                    start: "top 90%",
                     once: true
                 }
             });
@@ -45,23 +46,23 @@ const ProcessSection = () => {
             const polishTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: ".polish-trigger",
-                    start: "top 118%",
+                    start: "top 90%",
                 }
             });
 
             polishTl
-                // 1. Quick Enter (Higher position)
+                // 1. Quick Enter (Lowered position)
                 .fromTo(".polish-brush",
-                    { x: -100, y: -20, rotate: -30, opacity: 0, scale: 0.9 },
-                    { x: "-10%", y: -45, rotate: -10, opacity: 1, scale: 1.1, duration: 0.3, ease: "power2.out" }
+                    { x: -100, y: 0, rotate: -30, opacity: 0, scale: 0.9 },
+                    { x: "-10%", y: 15, rotate: -10, opacity: 1, scale: 1.1, duration: 0.3, ease: "power2.out" }
                 )
-                // 2. Fast Sweep (Higher horizontal path)
+                // 2. Fast Sweep (Lower horizontal path)
                 .to(".polish-brush", {
                     x: () => {
                         const trigger = document.querySelector(".polish-trigger");
                         return trigger ? trigger.clientWidth + 150 : 1000;
                     },
-                    y: -65,
+                    y: 5,
                     rotate: 20,
                     duration: 1.4,
                     ease: "power2.inOut",
@@ -98,7 +99,7 @@ const ProcessSection = () => {
                     ease: "back.out(2)",
                     scrollTrigger: {
                         trigger: ".polish-trigger",
-                        start: "top 115%",
+                        start: "top 90%",
                     }
                 }
             );
@@ -140,17 +141,17 @@ const ProcessSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-4 md:py-8 bg-white relative overflow-hidden" id="process">
+        <section ref={sectionRef} className="section-padding-compact bg-white relative overflow-hidden" id="process">
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Header */}
-                <div className="mb-8 md:mb-12 text-center mx-auto">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full mb-4">
+                <div className="mb-6 md:mb-10 text-center mx-auto">
+                    <div className="section-tag">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-brand-green">Efficiency Path</span>
+                        <span>Efficiency Path</span>
                     </div>
-                    <h2 className="text-[clamp(32px,9vw,115px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark overflow-visible">
+                    <h2 className="section-header italic text-brand-dark overflow-visible">
                         ЛЕГКИЙ <span className="text-brand-green">ПУТЬ</span> <br />
                         <span className="relative inline-block polish-trigger">
                             <span className="relative inline-block overflow-hidden px-2 rounded-xl">
@@ -160,12 +161,10 @@ const ProcessSection = () => {
 
                             {/* Polishing Brush Animation */}
                             <img
-                                src="brush_polish.png"
+                                src="brush.png"
                                 className="polish-brush absolute left-0 top-1/2 -translate-y-1/2 w-24 h-24 md:w-48 md:h-48 object-contain pointer-events-none z-20 opacity-0"
                                 alt="Polishing Brush"
                             />
-
-                            {/* Shine Sparkles Removed */}
                         </span>
                     </h2>
                 </div>
@@ -174,24 +173,24 @@ const ProcessSection = () => {
                 <div className="process-steps-container relative max-w-4xl mx-auto">
 
                     {/* SVG Path - Vertical Snake (Condensed) */}
-                    <div className="absolute left-1/2 top-0 -translate-x-1/2 w-full h-[105%] pointer-events-none -mt-4 opacity-50 md:opacity-100">
-                        <svg className="w-full h-full" viewBox="0 0 100 200" preserveAspectRatio="none">
+                    <div className="absolute left-1/2 top-0 -translate-x-1/2 w-full h-full pointer-events-none -mt-4 opacity-50 md:opacity-100">
+                        <svg className="w-full h-full" viewBox="0 0 100 400" preserveAspectRatio="none">
                             {/* Background Guide Path */}
                             <path
-                                d="M 50,0 Q 50,25 75,50 Q 100,75 50,100 Q 0,125 25,150 Q 50,175 50,200"
+                                d="M 50,0 C 50,20 20,25 20,50 C 20,90 80,110 80,150 C 80,190 20,210 20,250 C 20,290 80,310 80,350 C 80,380 50,390 50,400"
                                 fill="none"
                                 stroke="#83b643"
-                                strokeWidth="0.3"
-                                strokeDasharray="2,2"
+                                strokeWidth="0.5"
+                                strokeDasharray="4,4"
                                 opacity="0.1"
                             />
                             {/* Active Growing Path */}
                             <path
                                 className="process-path"
-                                d="M 50,0 Q 50,25 75,50 Q 100,75 50,100 Q 0,125 25,150 Q 50,175 50,200"
+                                d="M 50,0 C 50,20 20,25 20,50 C 20,90 80,110 80,150 C 80,190 20,210 20,250 C 20,290 80,310 80,350 C 80,380 50,390 50,400"
                                 fill="none"
                                 stroke="#83b643"
-                                strokeWidth="0.8"
+                                strokeWidth="1.2"
                                 strokeLinecap="round"
                                 style={{ filter: 'drop-shadow(0 0 8px rgba(131,182,67,0.4))' }}
                             />
@@ -214,12 +213,12 @@ const ProcessSection = () => {
 
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-3">
-                                                <span className="text-[9px] font-black text-brand-green bg-brand-green/5 px-2 py-0.5 rounded-full uppercase tracking-widest border border-brand-green/10">
+                                                <span className="text-[9px] font-bold text-brand-green bg-brand-green/5 px-2 py-0.5 rounded-full uppercase tracking-widest border border-brand-green/10">
                                                     Step 0{i + 1}
                                                 </span>
                                                 <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">{step.time}</span>
                                             </div>
-                                            <h3 className="text-sm md:text-2xl font-black text-brand-dark uppercase tracking-tighter italic group-hover:text-brand-green transition-colors leading-[0.9]">
+                                            <h3 className="text-sm md:text-2xl font-bold text-brand-dark uppercase tracking-tighter italic group-hover:text-brand-green transition-colors leading-[0.9]">
                                                 {step.title} <br /> {step.subtitle}
                                             </h3>
                                             <p className="text-[11px] md:text-sm text-black/50 font-bold group-hover:text-black/70 transition-colors leading-snug">
@@ -237,16 +236,16 @@ const ProcessSection = () => {
                 </div>
 
                 {/* Final Connect CTA - Compact */}
-                <div className="mt-12 md:mt-20 flex justify-center">
-                    <div className="px-6 py-3 md:px-8 md:py-4 rounded-[20px] md:rounded-[30px] bg-brand-dark text-white flex items-center gap-6 shadow-xl relative overflow-hidden group cursor-pointer hover:bg-[#7B85A7] transition-colors duration-500">
+                <div className="mt-10 md:mt-16 flex justify-center">
+                    <div className="px-6 py-3 md:px-8 md:py-4 rounded-[18px] md:rounded-[28px] bg-brand-dark text-white flex items-center gap-4 shadow-xl relative overflow-hidden group cursor-pointer hover:bg-brand-green transition-colors duration-500">
                         <div className="relative z-10 space-y-0.5">
-                            <span className="text-[#7B85A7] text-[8px] font-black uppercase tracking-[0.4em] group-hover:text-white">Ready to Launch</span>
-                            <h4 className="text-xl md:text-2xl font-black tracking-tighter uppercase italic leading-none">
+                            <span className="text-[#7B85A7] text-[7px] font-bold uppercase tracking-[0.4em] group-hover:text-white/70">Ready to Launch</span>
+                            <h4 className="text-lg md:text-xl font-extrabold tracking-tighter uppercase italic leading-none">
                                 Полная интеграция
                             </h4>
                         </div>
-                        <div className="relative z-10 w-10 h-10 rounded-full bg-white text-brand-dark flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <ArrowRight size={20} />
+                        <div className="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-brand-dark flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <ArrowRight size={18} />
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
@@ -10,6 +10,9 @@ interface NavbarProps {
 const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
     const navRef = useRef<HTMLDivElement>(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const location = useLocation();
+    const isHomePage = location.pathname === '/';
+    const [logoVisible, setLogoVisible] = useState(!isHomePage);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -22,15 +25,19 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                     navRef.current?.firstElementChild?.classList.remove('shadow-xl', 'bg-white/95');
                 }
             }
+
+            if (isHomePage) {
+                setLogoVisible(window.scrollY > 50);
+            } else {
+                setLogoVisible(true);
+            }
         };
 
-        if (alwaysVisible) {
-            navRef.current?.firstElementChild?.classList.add('shadow-xl', 'bg-white/95');
-        }
+        handleScroll();
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [alwaysVisible]);
+    }, [alwaysVisible, isHomePage]);
 
     useEffect(() => {
         if (menuOpen) {
@@ -52,12 +59,12 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
         <>
             <nav ref={navRef} className="fixed top-0 left-0 w-full z-[110] transition-all duration-500 px-4 md:px-6 py-4 font-sans">
                 <div className={`max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8 py-3 rounded-full border border-black/5 backdrop-blur-md transition-all duration-500 ${alwaysVisible ? 'bg-white/95 shadow-xl' : ''}`}>
-                    <Link to="/" className="flex items-center gap-1 shrink-0">
+                    <Link to="/" className={`flex items-center gap-1 shrink-0 transition-opacity duration-300 ${logoVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                         <img src="logo.png" alt="IC GROUP" className="h-8 md:h-10 w-auto object-contain" />
                     </Link>
 
                     {/* Main Nav Items (Adaptive spacing) */}
-                    <div className="hidden md:flex items-center gap-3 lg:gap-10 text-[9px] lg:text-[11px] font-black uppercase tracking-[0.1em] lg:tracking-[0.3em] text-brand-dark/40 min-w-0">
+                    <div className="hidden md:flex items-center gap-3 lg:gap-10 text-[9px] lg:text-[11px] font-bold uppercase tracking-[0.1em] lg:tracking-[0.3em] text-brand-dark/60 min-w-0">
                         {navLinks.map((link) => (
                             <Link key={link.to} to={link.to} className="hover:text-brand-green transition-colors whitespace-nowrap">
                                 {link.label}
@@ -67,7 +74,7 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
 
                     {/* Right side Actions */}
                     <div className="flex items-center gap-2 md:gap-6 shrink-0">
-                        <span className="hidden xl:inline text-[11px] font-black text-brand-dark">+7 (771) 780-08-41</span>
+                        <span className="hidden xl:inline text-[11px] font-bold text-brand-dark">+7 (771) 780-08-41</span>
                         <button
                             onClick={onCalcOpen}
                             className="btn-premium !px-4 md:!px-6 !py-2 md:!py-2.5 !text-[9px] md:!text-[10px] min-w-fit"
@@ -93,12 +100,12 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                             key={link.to}
                             to={link.to}
                             onClick={() => setMenuOpen(false)}
-                            className="text-3xl font-black uppercase tracking-tight text-brand-dark hover:text-brand-green transition-colors"
+                            className="text-3xl font-bold uppercase tracking-tight text-brand-dark hover:text-brand-green transition-colors"
                         >
                             {link.label}
                         </Link>
                     ))}
-                    <a href="tel:+77717800841" className="mt-8 text-lg font-black text-brand-dark">
+                    <a href="tel:+77717800841" className="mt-8 text-lg font-bold text-brand-dark">
                         +7 (771) 780-08-41
                     </a>
                 </div>

@@ -15,7 +15,7 @@ const PhilosophySection = () => {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 150%",
+                    start: "top 120%",
                 }
             });
 
@@ -52,7 +52,7 @@ const PhilosophySection = () => {
                 xPercent: -30,
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: "top 120%",
+                    start: "top 90%",
                     end: "bottom top",
                     scrub: 1
                 }
@@ -72,7 +72,7 @@ const PhilosophySection = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="relative pb-12 md:pb-16 pt-0 bg-white overflow-hidden" id="philosophy">
+        <section ref={sectionRef} className="section-padding-compact bg-white overflow-hidden" id="philosophy">
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
 
@@ -94,14 +94,14 @@ const PhilosophySection = () => {
                 </div>
 
                 {/* 2. Main Quote Typography with reveal words */}
-                <h2 className="text-[clamp(44px,8vw,95px)] font-[1000] uppercase leading-[0.8] tracking-tighter mb-8">
+                <h2 className="section-header mb-8">
                     <span className="flex flex-col md:flex-row gap-y-1 gap-x-6 justify-center">
                         <span className="reveal-word block text-black">Каждое</span>
                         <span className="reveal-word block text-black">пространство</span>
                     </span>
                     <span className="flex flex-wrap items-center justify-center gap-x-4 md:gap-x-10 mt-1 md:mt-2">
                         <span className="reveal-word block text-black">должно</span>
-                        <span className="reveal-word relative inline-block text-brand-green italic px-4">
+                        <span className="reveal-word relative inline-block text-brand-green px-4">
                             дышать.
                             <div className="absolute inset-x-0 h-[85%] top-[7%] bg-brand-green/15 -z-10 transform -rotate-1 skew-x-[-12deg] scale-y-110" />
                         </span>
@@ -111,17 +111,17 @@ const PhilosophySection = () => {
                 {/* 3. Author / Signature with Animated Lines */}
                 <div className="flex items-center justify-center gap-6 md:gap-12 w-full max-w-full md:max-w-4xl mb-3 md:mb-4">
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-right" />
-                    <p className="reveal-word text-xl md:text-3xl font-black italic text-black whitespace-nowrap tracking-tight">
+                    <p className="reveal-word text-lg md:text-2xl font-semibold italic text-black whitespace-nowrap tracking-tight">
                         Лян Ларион Викторович
                     </p>
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-left" />
                 </div>
-                <p className="reveal-word text-[9px] md:text-xs font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-brand-dark/30 mb-8 md:mb-12">
+                <p className="reveal-word text-[9px] md:text-xs font-semibold uppercase tracking-[0.3em] md:tracking-[0.4em] text-brand-dark/30 mb-8 md:mb-12">
                     Основатель IC GROUP • Лидер отрасли клининга
                 </p>
 
                 {/* 4. Action Link */}
-                <button className="reveal-word group flex items-center gap-4 text-[10px] md:text-[11px] font-[1000] uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
+                <button className="reveal-word group flex items-center gap-4 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
                     Explore Philosophy
                     <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform duration-300" />
                 </button>
