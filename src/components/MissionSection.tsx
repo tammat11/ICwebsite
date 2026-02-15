@@ -67,7 +67,7 @@ const MissionSection = () => {
                             <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-brand-dark/40">Philosophy</span>
                         </div>
 
-                        <h2 className="text-4xl md:text-6xl font-[1000] uppercase italic tracking-tighter leading-[0.8] text-brand-dark mb-12">
+                        <h2 className="text-4xl md:text-6xl font-[1000] uppercase tracking-tighter leading-[0.8] text-brand-dark mb-12">
                             ДНК <br />
                             <span className="text-brand-green">ЛИДЕРА</span>
                         </h2>
@@ -93,13 +93,13 @@ const MissionSection = () => {
                     {/* BLOCK 1: MISSION (Massive Impact) */}
                     <div className="mission-block-entry relative pl-0 lg:pl-10">
                         <div className="absolute -left-2 top-0 opacity-[0.05] select-none">
-                            <span className="text-[6rem] md:text-[10rem] font-bold italic leading-none">01</span>
+                            <span className="text-[6rem] md:text-[10rem] font-bold leading-none">01</span>
                         </div>
                         <div className="relative z-10">
                             <div className="w-12 h-12 rounded-2xl md:w-16 md:h-16 md:rounded-3xl bg-brand-green/10 flex items-center justify-center text-brand-green mb-6 md:mb-10 shadow-sm border border-brand-green/10">
                                 <Target className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
-                            <h3 className="text-3xl md:text-5xl font-[1000] uppercase italic tracking-tighter text-brand-dark mb-8 leading-[0.9]">
+                            <h3 className="text-3xl md:text-5xl font-[1000] uppercase tracking-tighter text-brand-dark mb-8 leading-[0.9]">
                                 МИССИЯ: <br />
                                 <span className="text-brand-green">ЧИСТОТА КАК<br /> ИСКУССТВО</span>
                             </h3>
@@ -116,13 +116,13 @@ const MissionSection = () => {
                     {/* BLOCK 2: VISION (Split Layout) */}
                     <div className="mission-block-entry relative pl-0 lg:pl-10">
                         <div className="absolute -left-2 top-0 opacity-[0.05] select-none">
-                            <span className="text-[6rem] md:text-[10rem] font-bold italic leading-none">02</span>
+                            <span className="text-[6rem] md:text-[10rem] font-bold leading-none">02</span>
                         </div>
                         <div className="relative z-10">
                             <div className="w-12 h-12 rounded-2xl md:w-16 md:h-16 md:rounded-3xl bg-[#7B85A7]/10 flex items-center justify-center text-[#7B85A7] mb-6 md:mb-10 shadow-sm border border-[#7B85A7]/10">
                                 <Eye className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
-                            <h3 className="text-3xl md:text-5xl font-[1000] uppercase italic tracking-tighter text-brand-dark mb-8 leading-[0.9]">
+                            <h3 className="text-3xl md:text-5xl font-[1000] uppercase tracking-tighter text-brand-dark mb-8 leading-[0.9]">
                                 ВИДЕНИЕ: <br />
                                 <span className="text-[#7B85A7]">КВАНТОВЫЙ<br /> ПРЫЖОК</span>
                             </h3>
@@ -144,32 +144,32 @@ const MissionSection = () => {
                     {/* BLOCK 3: VALUES (Grid Detail) */}
                     <div className="mission-block-entry relative pl-0 lg:pl-10 pb-20">
                         <div className="absolute -left-2 top-0 opacity-[0.05] select-none">
-                            <span className="text-[6rem] md:text-[10rem] font-bold italic leading-none">03</span>
+                            <span className="text-[6rem] md:text-[10rem] font-bold leading-none">03</span>
                         </div>
                         <div className="relative z-10">
                             <div className="w-12 h-12 rounded-2xl md:w-16 md:h-16 md:rounded-3xl bg-brand-dark/10 flex items-center justify-center text-brand-dark mb-6 md:mb-10 shadow-sm border border-brand-dark/10">
                                 <Heart className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
-                            <h3 className="text-3xl md:text-5xl font-[1000] uppercase italic tracking-tighter text-brand-dark mb-12 leading-[0.9]">
+                            <h3 className="text-3xl md:text-5xl font-[1000] uppercase tracking-tighter text-brand-dark mb-12 leading-[0.9]">
                                 ЦЕННОСТИ: <br />
-                                <span className="text-brand-dark/40 italic">ФУНДАМЕНТ</span>
+                                <span className="text-brand-dark/40">ФУНДАМЕНТ</span>
                             </h3>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 md:gap-x-12 gap-y-10 md:gap-y-16">
                                 <div className="space-y-4">
-                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase italic tracking-tight">Качество</h4>
+                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase tracking-tight">Качество</h4>
                                     <p className="text-sm font-medium text-black/40 leading-snug">Бескомпромиссный контроль на каждом этапе.</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase italic tracking-tight">Инновации</h4>
+                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase tracking-tight">Инновации</h4>
                                     <p className="text-sm font-medium text-black/40 leading-snug">Использование лучших мировых технологий.</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase italic tracking-tight">Надежность</h4>
+                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase tracking-tight">Надежность</h4>
                                     <p className="text-sm font-medium text-black/40 leading-snug">Стабильность и выполнение обязательств.</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase italic tracking-tight">Забота</h4>
+                                    <h4 className="text-xl md:text-2xl font-bold text-brand-green uppercase tracking-tight">Забота</h4>
                                     <p className="text-sm font-medium text-black/40 leading-snug">Искреннее отношение к клиентам и людям.</p>
                                 </div>
                             </div>

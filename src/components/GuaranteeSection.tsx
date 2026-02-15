@@ -124,7 +124,7 @@ const GuaranteeSection = () => {
 
                 {/* Header- Improved with brand-secondary */}
                 <div className="text-center mb-16 md:mb-24 z-30">
-                    <h2 className="text-[clamp(2rem,6vw,80px)] font-[1000] text-brand-dark uppercase tracking-tighter leading-none mb-4 italic">
+                    <h2 className="text-[clamp(2rem,6vw,80px)] font-[1000] text-brand-dark uppercase tracking-tighter leading-none mb-4">
                         ПЕЧАТЬ <br />
                         <span className="text-brand-green">НАДЕЖНОСТИ</span>
                     </h2>
@@ -205,7 +205,7 @@ const GuaranteeSection = () => {
                             </div>
                             <div className="text-center space-y-1 md:space-y-3">
                                 <div className="text-[8px] md:text-[12px] font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary/60">Quality Anchor</div>
-                                <div className="text-3xl md:text-7xl font-[1000] text-brand-dark uppercase italic tracking-[-0.05em] leading-none">PREMIUM</div>
+                                <div className="text-3xl md:text-7xl font-[1000] text-brand-dark uppercase tracking-[-0.05em] leading-none">PREMIUM</div>
                             </div>
                         </div>
 

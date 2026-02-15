@@ -51,7 +51,7 @@ const ContactsPage = () => {
                     </span>
                     <h1 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] mb-8 page-title opacity-0 translate-y-12">
                         СВЯЖИТЕСЬ <br />
-                        <span className="text-brand-green italic">С НАМИ</span>
+                        <span className="text-brand-green">С НАМИ</span>
                     </h1>
                 </div>
 

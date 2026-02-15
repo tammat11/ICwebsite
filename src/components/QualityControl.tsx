@@ -69,7 +69,7 @@ const QualityControl = () => {
                         <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">Facility Standard</span>
                     </div>
-                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] uppercase italic leading-[0.8] tracking-tighter text-brand-dark mb-12">
+                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] uppercase leading-[0.8] tracking-tighter text-brand-dark mb-12">
                         ИНЖЕНЕРИЯ <br />
                         <span className="text-[#7B85A7] drop-shadow-[0_0_40px_rgba(123,133,167,0.2)]">ЧИСТОТЫ</span> <br />
                         <span className="text-brand-green">НОВОГО УРОВНЯ</span>

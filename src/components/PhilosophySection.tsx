@@ -111,7 +111,7 @@ const PhilosophySection = () => {
                 {/* 3. Author / Signature with Animated Lines */}
                 <div className="flex items-center justify-center gap-6 md:gap-12 w-full max-w-full md:max-w-4xl mb-3 md:mb-4">
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-right" />
-                    <p className="reveal-word text-lg md:text-2xl font-semibold italic text-black whitespace-nowrap tracking-tight">
+                    <p className="reveal-word text-lg md:text-2xl font-semibold text-black whitespace-nowrap tracking-tight">
                         Лян Ларион Викторович
                     </p>
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-left" />

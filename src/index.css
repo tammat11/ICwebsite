@@ -115,7 +115,7 @@
   }
 
   .section-header {
-    @apply font-bold uppercase italic leading-[0.8] tracking-tighter text-brand-dark;
+    @apply font-bold uppercase not-italic leading-[0.8] tracking-tighter text-brand-dark;
     font-size: clamp(32px, 6vw, 70px);
   }
 

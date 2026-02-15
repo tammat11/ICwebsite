@@ -51,7 +51,7 @@ const PainSection = () => {
                                 <div className="w-16 h-1 rounded-[22px] bg-brand-green/10 flex items-center justify-center text-brand-green mb-8 group-hover:rotate-12 transition-transform">
                                     <Globe size={36} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-2xl md:text-4xl font-bold text-brand-dark uppercase italic tracking-tighter leading-[0.85] mb-8">
+                                <h3 className="text-2xl md:text-4xl font-bold text-brand-dark uppercase tracking-tighter leading-[0.85] mb-8">
                                     Цифровая <br /><span className="text-brand-green">Экосистема</span>
                                 </h3>
                                 <p className="text-lg text-black/70 font-medium leading-relaxed mb-4">
@@ -71,10 +71,10 @@ const PainSection = () => {
                         <div className="h-full bg-brand-dark rounded-[24px] md:rounded-[40px] p-5 md:p-10 flex flex-col justify-between overflow-hidden relative shadow-2xl transition-all duration-700 hover:scale-[1.02]">
                             <div className="relative z-10">
                                 <div className="text-[11px] font-bold text-white/30 mb-12 tracking-[0.4em]">QUALITY_GURU</div>
-                                <h3 className="text-4xl md:text-6xl font-bold text-white uppercase italic tracking-tighter leading-[0.8]">
+                                <h3 className="text-4xl md:text-6xl font-bold text-white uppercase tracking-tighter leading-[0.8]">
                                     99.8%
                                 </h3>
-                                <p className="text-xl md:text-2xl text-white font-bold uppercase italic tracking-tight mt-6 text-brand-green">
+                                <p className="text-xl md:text-2xl text-white font-bold uppercase tracking-tight mt-6 text-brand-green">
                                     БЕЗУПРЕЧНЫЙ SLA
                                 </p>
                             </div>
@@ -96,7 +96,7 @@ const PainSection = () => {
                                 <div className="w-16 h-16 rounded-[22px] bg-brand-secondary/10 flex items-center justify-center text-brand-secondary mb-10">
                                     <ShieldCheck size={36} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-2xl md:text-4xl font-bold text-brand-dark uppercase italic tracking-tighter leading-[0.9] mb-8">
+                                <h3 className="text-2xl md:text-4xl font-bold text-brand-dark uppercase tracking-tighter leading-[0.9] mb-8">
                                     0% <br /><span className="text-black/20 text-xl md:text-2xl">РИСКОВ</span>
                                 </h3>
                                 <p className="text-lg text-black/70 font-medium leading-relaxed mb-6">
@@ -122,7 +122,7 @@ const PainSection = () => {
                                     <BarChart3 size={24} />
                                     <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-brand-green">Profit_Guardian</span>
                                 </div>
-                                <h3 className="text-3xl md:text-5xl font-bold text-brand-dark uppercase italic tracking-tighter leading-[0.8] mb-8">
+                                <h3 className="text-3xl md:text-5xl font-bold text-brand-dark uppercase tracking-tighter leading-[0.8] mb-8">
                                     -30% <br /><span className="text-black/10">БУДЖЕТА</span>
                                 </h3>
                                 <p className="text-lg md:text-xl text-black/70 font-medium leading-relaxed max-w-sm">
@@ -146,7 +146,7 @@ const PainSection = () => {
                 <div className="mt-10 md:mt-14 flex flex-col items-center">
                     <div className="p-8 md:p-12 rounded-[40px] md:rounded-[60px] bg-slate-50 border border-black/[0.03] flex flex-col items-center gap-8 group hover:shadow-2xl transition-all duration-1000">
                         <Cpu className="text-brand-green group-hover:scale-125 transition-transform duration-700 w-10 h-10 md:w-14 md:h-14" strokeWidth={1} />
-                        <h4 className="text-3xl md:text-5xl font-bold text-brand-dark uppercase italic tracking-tighter text-center leading-none">
+                        <h4 className="text-3xl md:text-5xl font-bold text-brand-dark uppercase tracking-tighter text-center leading-none">
                             IC GROUP <span className="text-black/5">SYSTEMS</span>
                         </h4>
                         <div className="h-[2px] w-24 bg-brand-green/20 group-hover:w-48 transition-all duration-700" />

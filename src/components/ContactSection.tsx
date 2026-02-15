@@ -68,7 +68,7 @@ const ContactSection = () => {
 
                 <h2 className="text-[clamp(44px,8vw,95px)] font-semibold uppercase leading-[0.8] tracking-tighter mb-8 contact-reveal">
                     <span className="block text-black">Давайте</span>
-                    <span className="block text-brand-green italic">обсудим?</span>
+                    <span className="block text-brand-green">обсудим?</span>
                 </h2>
 
                 <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 contact-reveal">
@@ -80,7 +80,7 @@ const ContactSection = () => {
 
                     <button className="group flex flex-col items-center gap-2 px-8 md:px-12 py-4 md:py-6 rounded-full border-2 border-black/5 hover:border-brand-secondary/50 transition-all duration-300">
                         <span className="text-[10px] font-medium text-black/40 uppercase tracking-[0.4em]">Our mobile app</span>
-                        <span className="text-xl md:text-2xl font-bold text-brand-secondary tracking-tighter italic">Coming Soon</span>
+                        <span className="text-xl md:text-2xl font-bold text-brand-secondary tracking-tighter">Coming Soon</span>
                     </button>
                 </div>
 

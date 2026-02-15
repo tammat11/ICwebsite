@@ -43,7 +43,7 @@ const ClientsMarquee = () => {
         <section className="py-20 bg-white border-y border-black/5 overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 mb-12">
                 <div className="flex items-center gap-6">
-                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-dark/30 whitespace-nowrap">Наши ключевые партнеры</span>
+                    <span className="text-[12px] font-black uppercase tracking-[0.3em] text-brand-dark/30 whitespace-nowrap">Наши ключевые партнеры</span>
                     <div className="h-px w-full bg-black/5" />
                 </div>
             </div>

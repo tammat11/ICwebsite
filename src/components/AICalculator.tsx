@@ -115,7 +115,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                         <Zap size={14} className="text-brand-green fill-brand-green" />
                         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-green">Alpha Calc v.3.0.1</span>
                     </div>
-                    <h2 className="text-[clamp(4.5rem,8vw,110px)] font-[1000] text-white leading-[0.85] tracking-tighter uppercase italic">
+                    <h2 className="text-[clamp(4.5rem,8vw,110px)] font-[1000] text-white leading-[0.85] tracking-tighter uppercase">
                         ТОЧНЫЙ <br />
                         <span className="text-brand-green relative inline-block">
                             РАСЧЕТ
@@ -131,14 +131,14 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                 <Award size={14} />
                                 <p className="text-[10px] font-black uppercase tracking-widest leading-none">Standard</p>
                             </div>
-                            <p className="text-5xl font-black text-white italic">99.8%</p>
+                            <p className="text-5xl font-black text-white">99.8%</p>
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2 text-white/30">
                                 <Target size={14} />
                                 <p className="text-[10px] font-black uppercase tracking-widest leading-none">Security</p>
                             </div>
-                            <p className="text-5xl font-black text-brand-green italic">100%</p>
+                            <p className="text-5xl font-black text-brand-green">100%</p>
                         </div>
                     </div>
                 </div>
@@ -172,7 +172,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                             <Building2 size={12} className="text-brand-green" />
                                             <span className="text-[9px] font-black text-brand-green uppercase tracking-widest">Target sector selection</span>
                                         </div>
-                                        <h3 className="text-4xl font-black text-black uppercase tracking-tighter italic">ТИП ОБЪЕКТА.</h3>
+                                        <h3 className="text-4xl font-black text-black uppercase tracking-tighter">ТИП ОБЪЕКТА.</h3>
                                     </div>
                                     <div className="grid grid-cols-1 gap-3 max-w-md mx-auto w-full">
                                         {[
@@ -190,7 +190,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                                         {item.icon}
                                                     </div>
                                                     <div className="text-left">
-                                                        <span className="text-lg font-black uppercase tracking-tight italic block leading-none">{item.label}</span>
+                                                        <span className="text-lg font-black uppercase tracking-tight block leading-none">{item.label}</span>
                                                         <span className={`text-[9px] font-bold uppercase tracking-widest mt-2 block ${type === item.id ? 'text-white/40' : 'text-black/10'}`}>{item.note}</span>
                                                     </div>
                                                 </div>
@@ -208,15 +208,15 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                             <CircleDashed size={12} className="text-brand-green animate-spin-slow" />
                                             <span className="text-[9px] font-black text-brand-green uppercase tracking-widest">Volume definition</span>
                                         </div>
-                                        <h3 className="text-4xl font-black text-black uppercase tracking-tighter italic">МАСШТАБ.</h3>
+                                        <h3 className="text-4xl font-black text-black uppercase tracking-tighter">МАСШТАБ.</h3>
                                     </div>
                                     <div className="space-y-16 py-6">
                                         <div className="relative group">
                                             <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-75 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="relative text-[100px] md:text-[140px] font-[1000] text-black leading-none tracking-tighter italic tabular-nums text-center group-hover:scale-105 transition-transform">
+                                            <div className="relative text-[100px] md:text-[140px] font-[1000] text-black leading-none tracking-tighter tabular-nums text-center group-hover:scale-105 transition-transform">
                                                 {size.toLocaleString()}
                                             </div>
-                                            <div className="text-center text-sm font-black text-brand-green uppercase tracking-[1em] mt-4 italic">МЕТРОВ²</div>
+                                            <div className="text-center text-sm font-black text-brand-green uppercase tracking-[1em] mt-4">МЕТРОВ²</div>
                                         </div>
                                         <div className="space-y-8">
                                             <input
@@ -241,7 +241,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                             <Sparkles size={12} className="text-brand-green" />
                                             <span className="text-[9px] font-black text-brand-green uppercase tracking-widest">Quality standards phase</span>
                                         </div>
-                                        <h3 className="text-4xl font-black text-black uppercase tracking-tighter italic">РЕСУРСЫ.</h3>
+                                        <h3 className="text-4xl font-black text-black uppercase tracking-tighter">РЕСУРСЫ.</h3>
                                     </div>
 
                                     <div className="space-y-8 max-w-md mx-auto w-full">
@@ -271,7 +271,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                                         <Users size={18} className="text-brand-green" />
                                                         <span className="text-[10px] font-black uppercase tracking-widest text-white/40">ПЕРСОНАЛ</span>
                                                     </div>
-                                                    <span className="text-5xl font-black italic tracking-tighter tabular-nums flex items-center gap-2">
+                                                    <span className="text-5xl font-black tracking-tighter tabular-nums flex items-center gap-2">
                                                         {staff}
                                                         <span className="text-xs text-brand-green font-black uppercase tracking-normal">Staff</span>
                                                     </span>
@@ -291,7 +291,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                 <div className="space-y-12 py-10">
                                     <div className="text-center space-y-4">
                                         <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.8em] animate-pulse">Generated Budget Result</p>
-                                        <div className="text-[60px] md:text-[85px] font-[1000] text-black tracking-tighter leading-none italic tabular-nums drop-shadow-sm select-none">
+                                        <div className="text-[60px] md:text-[85px] font-[1000] text-black tracking-tighter leading-none tabular-nums drop-shadow-sm select-none">
                                             ~{formattedBudget}
                                         </div>
                                         <div className="inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.4em] text-black/20">
@@ -304,13 +304,13 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/20">
                                                 {chemMap[chemistry].icon} <span className="text-black/40">ХИМИЯ</span>
                                             </div>
-                                            <span className="text-xs font-black uppercase italic tracking-tight">{chemMap[chemistry].label}</span>
+                                            <span className="text-xs font-black uppercase tracking-tight">{chemMap[chemistry].label}</span>
                                         </div>
                                         <div className="bg-gray-50 p-6 rounded-[32px] border border-black/5 flex flex-col gap-2 group hover:bg-white transition-colors">
                                             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/20">
                                                 <Users size={12} className="text-brand-green" /> <span className="text-black/40">КОМАНДА</span>
                                             </div>
-                                            <span className="text-xs font-black uppercase italic tracking-tight">{staff} сотрудников</span>
+                                            <span className="text-xs font-black uppercase tracking-tight">{staff} сотрудников</span>
                                         </div>
                                     </div>
 

@@ -53,7 +53,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                 }, "-=0.6")
                 // 4. Hand leaves
                 .to(".cleaning-hand", {
-                    x: -400, y: 200, rotate: -40, opacity: 0, duration: 0.7, ease: "power2.in"
+                    x: -1200, y: 800, rotate: -60, opacity: 0, duration: 0.8, ease: "power2.in"
                 })
                 // 5. Shine Pop
                 .fromTo(".clean-sparkle",
@@ -88,7 +88,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                     <span className="hero-title-reveal block text-[clamp(55px,15vw,120px)] text-brand-dark">
                         Создать
                     </span>
-                    <span className="hero-title-reveal block text-[clamp(60px,16vw,140px)] text-brand-green italic relative inline-block px-4 py-2 overflow-visible group">
+                    <span className="hero-title-reveal block text-[clamp(60px,16vw,140px)] text-brand-green relative inline-block px-4 py-2 overflow-visible group">
 
                         <span className="relative z-20">
                             Чистоту
@@ -142,7 +142,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                             <span className="text-[7px] font-medium text-brand-dark/50 uppercase tracking-widest">Founder IC Group</span>
                         </div>
                         <div className="w-[1px] h-8 bg-brand-dark/20" />
-                        <div className="text-[14px] font-semibold uppercase tracking-[0.2em] text-brand-dark italic">
+                        <div className="text-[14px] font-semibold uppercase tracking-[0.2em] text-brand-dark">
                             #1 KZ
                         </div>
                     </div>

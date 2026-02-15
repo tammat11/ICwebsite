@@ -128,7 +128,7 @@ const ServicesSection = () => {
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                     <span>Our Capabilities</span>
                 </div>
-                <h2 className="section-header italic text-brand-dark overflow-visible">
+                <h2 className="section-header text-brand-dark overflow-visible">
                     <div className="services-title-line block">СТАНДАРТ</div>
                     <div className="services-title-line block text-brand-green">ПРЕВОСХОДСТВА</div>
                 </h2>
@@ -167,7 +167,7 @@ const ServicesSection = () => {
                                 </div>
 
                                 <div className="space-y-4 relative z-20">
-                                    <h3 className="text-lg md:text-2xl font-bold uppercase tracking-tight text-brand-dark group-hover/card:text-brand-green transition-colors duration-500 leading-tight italic">
+                                    <h3 className="text-lg md:text-2xl font-bold uppercase tracking-tight text-brand-dark group-hover/card:text-brand-green transition-colors duration-500 leading-tight">
                                         {service.title}
                                     </h3>
                                     <p className="text-brand-dark/70 text-sm md:text-base font-medium leading-snug transition-colors duration-500 group-hover/card:text-brand-dark/90">
@@ -187,7 +187,7 @@ const ServicesSection = () => {
 
             {/* Bottom Status Tag */}
             <div className="flex flex-col items-center mt-8 px-6">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-brand-dark/20 italic">Прокрутите для ознакомления</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-brand-dark/20">Прокрутите для ознакомления</p>
             </div>
 
             <style>{`

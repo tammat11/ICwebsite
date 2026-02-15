@@ -55,7 +55,7 @@ const CareersPage = () => {
                     </span>
                     <h1 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter text-brand-dark leading-[0.9] mb-8">
                         <div className="overflow-hidden"><span className="career-title-line block">СТАНЬ ЧАСТЬЮ</span></div>
-                        <div className="overflow-hidden"><span className="career-title-line block text-brand-green italic uppercase">КОМАНДЫ ЛИДЕРОВ</span></div>
+                        <div className="overflow-hidden"><span className="career-title-line block text-brand-green uppercase">КОМАНДЫ ЛИДЕРОВ</span></div>
                     </h1>
                     <p className="career-subtitle text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium">
                         Мы ищем талантливых людей, готовых расти и развиваться вместе с крупнейшей клининговой компанией Казахстана.

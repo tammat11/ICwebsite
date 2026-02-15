@@ -27,11 +27,11 @@ const StatsGrid = () => {
                 const obj = { val: 0 };
                 gsap.to(obj, {
                     val: endValue,
-                    duration: 2,
+                    duration: 1.2,
                     ease: "power2.out",
                     scrollTrigger: {
                         trigger: htmlTarget,
-                        start: "top 90%",
+                        start: "top 95%",
                     },
                     onUpdate: () => {
                         htmlTarget.innerText = Math.floor(obj.val).toLocaleString();
@@ -41,14 +41,14 @@ const StatsGrid = () => {
 
             // Global Cards Reveal
             gsap.from(".stat-card", {
-                y: 40,
+                y: 30,
                 opacity: 0,
-                duration: 1,
-                stagger: 0.1,
-                ease: "power3.out",
+                duration: 0.8,
+                stagger: 0.05,
+                ease: "power2.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top 90%",
+                    start: "top 95%",
                 }
             });
         }, sectionRef);
@@ -66,7 +66,7 @@ const StatsGrid = () => {
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                         <span>Market Leadership</span>
                     </div>
-                    <h2 className="section-header italic text-brand-dark">
+                    <h2 className="section-header text-brand-dark">
                         ЦИФРЫ <span className="text-brand-green">IC GROUP</span>
                     </h2>
                 </div>
@@ -85,8 +85,8 @@ const StatsGrid = () => {
                                 {/* Main Content centered */}
                                 <div className="relative z-10 flex flex-col items-center space-y-4">
                                     <div className="flex items-baseline justify-center gap-1">
-                                        <span className="stat-number font-bold tracking-tighter italic leading-none text-5xl md:text-6xl text-brand-green" data-value={stat.value}>0</span>
-                                        <span className="font-bold italic leading-none text-3xl md:text-3xl text-brand-green">{stat.suffix}</span>
+                                        <span className="stat-number font-bold tracking-tighter leading-none text-5xl md:text-6xl text-brand-green" data-value={stat.value}>0</span>
+                                        <span className="font-bold leading-none text-3xl md:text-3xl text-brand-green">{stat.suffix}</span>
                                     </div>
                                     <div className="text-xs md:text-sm font-bold uppercase tracking-widest text-brand-dark/70 leading-relaxed whitespace-pre-line">
                                         {stat.label}

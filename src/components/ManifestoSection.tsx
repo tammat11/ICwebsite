@@ -47,7 +47,7 @@ const ManifestoSection = () => {
                     </div>
 
                     <div className="overflow-hidden">
-                        <h2 className="reveal-manifesto text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-green leading-[0.8] tracking-[-0.05em] uppercase italic px-4">
+                        <h2 className="reveal-manifesto text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-green leading-[0.8] tracking-[-0.05em] uppercase px-4">
                             СТАНДАРТЫ
                         </h2>
                     </div>

@@ -80,7 +80,7 @@ const CasesSection = () => {
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                         <span>Proof of Efficiency</span>
                     </div>
-                    <h2 className="section-header italic text-brand-dark overflow-visible">
+                    <h2 className="section-header text-brand-dark overflow-visible">
                         РЕАЛЬНЫЕ <br />
                         <span className="text-brand-green">КЕЙСЫ</span>
                     </h2>
@@ -112,7 +112,7 @@ const CasesSection = () => {
 
                                     {/* Fast Stat Overlay */}
                                     <div className="absolute bottom-6 left-6 right-6 flex flex-col gap-2">
-                                        <div className="text-4xl md:text-6xl font-bold text-white italic tracking-tighter leading-none drop-shadow-lg">
+                                        <div className="text-4xl md:text-6xl font-bold text-white tracking-tighter leading-none drop-shadow-lg">
                                             {item.stat}
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ const CasesSection = () => {
                                     <div className="text-[9px] font-semibold uppercase tracking-[0.4em] text-brand-green flex items-center gap-2">
                                         <div className="w-8 h-px bg-brand-green" /> {item.category}
                                     </div>
-                                    <h3 className="text-xl md:text-3xl font-bold uppercase tracking-tight text-brand-dark group-hover:text-brand-green transition-colors duration-500 leading-tight italic">
+                                    <h3 className="text-xl md:text-3xl font-bold uppercase tracking-tight text-brand-dark group-hover:text-brand-green transition-colors duration-500 leading-tight">
                                         {item.title}
                                     </h3>
                                     <p className="text-base md:text-lg text-brand-dark/60 font-medium leading-tight">

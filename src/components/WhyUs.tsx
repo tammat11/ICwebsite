@@ -95,7 +95,7 @@ const WhyUs = () => {
                     <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">Why IC Group</span>
                 </div>
-                <h2 className="why-big-title text-[clamp(2.5rem,8vw,100px)] font-[1000] uppercase italic leading-[0.9] tracking-tighter text-brand-dark">
+                <h2 className="why-big-title text-[clamp(2.5rem,8vw,100px)] font-[1000] uppercase leading-[0.9] tracking-tighter text-brand-dark">
                     СТАНДАРТ <br />
                     <span className="text-brand-green">ПРЕВОСХОДСТВА</span>
                 </h2>
@@ -122,7 +122,7 @@ const WhyUs = () => {
                                 </div>
 
                                 <div className="space-y-2 md:space-y-4 relative z-20">
-                                    <h3 className="text-xl md:text-4xl font-[1000] uppercase tracking-tight text-brand-dark group-hover/card:text-brand-green transition-colors duration-500 leading-tight italic">
+                                    <h3 className="text-xl md:text-4xl font-[1000] uppercase tracking-tight text-brand-dark group-hover/card:text-brand-green transition-colors duration-500 leading-tight">
                                         {reason.title}
                                     </h3>
                                     <p className="text-brand-dark/40 text-[10px] md:text-xl font-bold leading-tight md:leading-relaxed transition-colors duration-500 group-hover/card:text-brand-dark/70">
@@ -152,7 +152,7 @@ const WhyUs = () => {
 
             {/* Bottom Status Tag */}
             <div className="flex flex-col items-center mt-12 px-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-dark/20 italic">Прокрутите для ознакомления</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-dark/20">Прокрутите для ознакомления</p>
             </div>
 
             <style>{`

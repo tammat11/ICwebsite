@@ -184,7 +184,7 @@ const SolutionSection = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(123,133,167,0.08)_0%,transparent_100%)]" />
 
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">
-                <h2 className="monolith-text text-[25vw] font-[1000] text-black leading-none tracking-tighter italic uppercase">
+                <h2 className="monolith-text text-[25vw] font-[1000] text-black leading-none tracking-tighter uppercase">
                     HUB_SYS
                 </h2>
             </div>
@@ -197,7 +197,7 @@ const SolutionSection = () => {
                         <span className="text-[8px] font-black uppercase tracking-[0.5em] text-black/40">Facility Service Ecosystem</span>
                     </div>
 
-                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] uppercase tracking-[-0.05em] leading-[0.8] text-brand-dark italic">
+                    <h2 className="text-[clamp(2.5rem,8vw,120px)] font-[1000] uppercase tracking-[-0.05em] leading-[0.8] text-brand-dark">
                         НАШЕ <br />
                         <span className="text-brand-green drop-shadow-[0_0_60px_rgba(131,182,67,0.4)]">РЕШЕНИЕ</span>
                     </h2>
@@ -244,7 +244,7 @@ const SolutionSection = () => {
                                         </div>
 
                                         <div className="space-y-3 md:space-y-6">
-                                            <h3 className="text-2xl md:text-5xl font-[1000] text-brand-dark uppercase italic tracking-tighter leading-none group-hover:text-brand-secondary md:transition-colors">
+                                            <h3 className="text-2xl md:text-5xl font-[1000] text-brand-dark uppercase tracking-tighter leading-none group-hover:text-brand-secondary md:transition-colors">
                                                 {item.title}
                                             </h3>
                                             <p className="text-[10px] md:text-lg text-black/40 font-bold leading-tight group-hover:text-brand-dark md:transition-colors">

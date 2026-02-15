@@ -72,7 +72,7 @@ const ServicesPage = () => {
                         </h1>
                         <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none mb-8 relative z-10 text-brand-dark">
                             Услуги <br />
-                            <span className="text-brand-green italic">Для Бизнеса</span>
+                            <span className="text-brand-green">Для Бизнеса</span>
                         </h2>
                         <p className="text-xl md:text-2xl text-brand-dark/40 max-w-2xl font-medium leading-relaxed">
                             Мы не просто моем полы. Мы создаем экосистему чистоты, которая работает на репутацию вашего бренда 24/7.

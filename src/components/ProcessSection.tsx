@@ -151,7 +151,7 @@ const ProcessSection = () => {
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                         <span>Efficiency Path</span>
                     </div>
-                    <h2 className="section-header italic text-brand-dark overflow-visible">
+                    <h2 className="section-header text-brand-dark overflow-visible">
                         ЛЕГКИЙ <span className="text-brand-green">ПУТЬ</span> <br />
                         <span className="relative inline-block polish-trigger">
                             <span className="relative inline-block overflow-hidden px-2 rounded-xl">
@@ -218,7 +218,7 @@ const ProcessSection = () => {
                                                 </span>
                                                 <span className="text-[9px] font-bold text-black/30 uppercase tracking-widest">{step.time}</span>
                                             </div>
-                                            <h3 className="text-sm md:text-2xl font-bold text-brand-dark uppercase tracking-tighter italic group-hover:text-brand-green transition-colors leading-[0.9]">
+                                            <h3 className="text-sm md:text-2xl font-bold text-brand-dark uppercase tracking-tighter group-hover:text-brand-green transition-colors leading-[0.9]">
                                                 {step.title} <br /> {step.subtitle}
                                             </h3>
                                             <p className="text-[11px] md:text-sm text-black/50 font-bold group-hover:text-black/70 transition-colors leading-snug">
@@ -240,7 +240,7 @@ const ProcessSection = () => {
                     <div className="px-6 py-3 md:px-8 md:py-4 rounded-[18px] md:rounded-[28px] bg-brand-dark text-white flex items-center gap-4 shadow-xl relative overflow-hidden group cursor-pointer hover:bg-brand-green transition-colors duration-500">
                         <div className="relative z-10 space-y-0.5">
                             <span className="text-[#7B85A7] text-[7px] font-bold uppercase tracking-[0.4em] group-hover:text-white/70">Ready to Launch</span>
-                            <h4 className="text-lg md:text-xl font-extrabold tracking-tighter uppercase italic leading-none">
+                            <h4 className="text-lg md:text-xl font-extrabold tracking-tighter uppercase leading-none">
                                 Полная интеграция
                             </h4>
                         </div>

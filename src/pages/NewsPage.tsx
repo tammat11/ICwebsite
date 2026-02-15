@@ -93,10 +93,10 @@ const NewsPage = () => {
 
                         <h2 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
                             НОВОСТИ <br />
-                            <span className="text-brand-green italic">И ПРОЕКТЫ</span>
+                            <span className="text-brand-green">И ПРОЕКТЫ</span>
                         </h2>
 
-                        <p className="mt-6 text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium leading-relaxed italic">
+                        <p className="mt-6 text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium leading-relaxed">
                             Следите за развитием IC Group: новые проекты, технологии, достижения и важные события компании.
                         </p>
                     </div>
@@ -143,7 +143,7 @@ const NewsPage = () => {
                                         {article.category}
                                     </div>
 
-                                    <h3 className="text-2xl font-bold uppercase italic tracking-tighter text-brand-dark group-hover:text-brand-green transition-colors leading-[0.9] mb-4">
+                                    <h3 className="text-2xl font-bold uppercase tracking-tighter text-brand-dark group-hover:text-brand-green transition-colors leading-[0.9] mb-4">
                                         {article.title}
                                     </h3>
 
