@@ -3,6 +3,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default {
     plugins: [react(), tailwindcss()],
-    base: '/icdealsonly/',
+    base: '/',
     cacheDir: '/tmp/vite-cache'
 }
