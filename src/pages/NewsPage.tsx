@@ -1,12 +1,19 @@
-import { useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Calendar, ArrowUpRight, TrendingUp, Award, Rocket, Building2, Cpu, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Calendar, ArrowUpRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
-gsap.registerPlugin(ScrollTrigger);
+interface NewsArticle {
+    id: string;
+    title: string;
+    date: string;
+    category: string;
+    desc: string;
+    image: string;
+    tag: string;
+    readTime: string;
+}
 
-const newsArticles = [
+const defaultArticles: NewsArticle[] = [
     {
         id: "01",
         title: "Открытие нового офиса в Астане",
@@ -15,7 +22,6 @@ const newsArticles = [
         desc: "IC Group расширяет географию присутствия. Новый региональный офис позволит обслуживать более 100 объектов в столице и повысить качество сервиса для клиентов в северном регионе.",
         image: "office_leadership.png",
         tag: "Новое",
-        icon: <Rocket size={48} />,
         readTime: "3 мин"
     },
     {
@@ -26,7 +32,6 @@ const newsArticles = [
         desc: "Собственная разработка для мониторинга качества клининга в режиме реального времени. Приложение использует AI для анализа фотоотчетов и автоматического контроля качества уборки.",
         image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=800",
         tag: "Инновации",
-        icon: <Cpu size={48} />,
         readTime: "5 мин"
     },
     {
@@ -37,7 +42,6 @@ const newsArticles = [
         desc: "IC Group получил национальную премию за создание лучших условий труда и развитие персонала. Более 3000 сотрудников компании получают полный социальный пакет и возможности карьерного роста.",
         image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
         tag: "Награда",
-        icon: <Award size={48} />,
         readTime: "4 мин"
     },
     {
@@ -48,7 +52,6 @@ const newsArticles = [
         desc: "Подписан долгосрочный контракт на комплексное обслуживание торгового центра площадью 150,000 м². Проект включает ежедневную уборку, техническое обслуживание и управление отходами.",
         image: "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&q=80&w=800",
         tag: "Проект",
-        icon: <Building2 size={48} />,
         readTime: "6 мин"
     },
     {
@@ -59,7 +62,6 @@ const newsArticles = [
         desc: "Запущена масштабная программа профессиональной подготовки клининг-операторов. Обучение включает теоретические курсы, практические занятия и сертификацию по международным стандартам.",
         image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800",
         tag: "Обучение",
-        icon: <Users size={48} />,
         readTime: "4 мин"
     },
     {
@@ -70,15 +72,23 @@ const newsArticles = [
         desc: "IC Group переходит на использование биоразлагаемых чистящих средств и энергоэффективного оборудования. Новая инициатива позволит снизить углеродный след компании на 40%.",
         image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=800",
         tag: "Эко",
-        icon: <TrendingUp size={48} />,
         readTime: "5 мин"
     }
 ];
 
 const NewsPage = () => {
-    // Animations removed to fix visibility issues
+    const [articles, setArticles] = useState<NewsArticle[]>(defaultArticles);
+
     useEffect(() => {
-        // Static layout
+        // Try to load from API, fallback to defaults
+        fetch('/api/news')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    setArticles(data);
+                }
+            })
+            .catch(() => { /* use defaults */ });
     }, []);
 
     return (
@@ -89,8 +99,6 @@ const NewsPage = () => {
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
                     <div className="mb-12 md:mb-16 relative">
-
-
                         <h2 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
                             НОВОСТИ <br />
                             <span className="text-brand-green">И ПРОЕКТЫ</span>
@@ -103,7 +111,7 @@ const NewsPage = () => {
 
                     {/* News Grid */}
                     <div className="news-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {newsArticles.map((article) => (
+                        {articles.map((article) => (
                             <div key={article.id} className="news-card group rounded-[32px] bg-white border border-black/[0.03] hover:shadow-glass hover:border-brand-green/30 transition-all duration-700 overflow-hidden flex flex-col relative">
                                 {/* Image Overlay for Hover */}
                                 <div className="absolute inset-0 bg-brand-green/0 group-hover:bg-brand-green/[0.02] transition-colors duration-700 pointer-events-none z-0" />

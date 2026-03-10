@@ -13,6 +13,7 @@ import ServicesPage from './pages/ServicesPage';
 import CareersPage from './pages/CareersPage';
 import ContactsPage from './pages/ContactsPage';
 import NewsPage from './pages/NewsPage';
+import AdminPage from './pages/AdminPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
@@ -57,6 +58,7 @@ function App() {
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <AICalculator isOpen={isCalcOpen} onClose={() => setCalcOpen(false)} />
     </>

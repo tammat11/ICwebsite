@@ -36,7 +36,7 @@ const ProcessSection = () => {
                 <div className="text-center mb-28">
                     <h2 className="section-header text-brand-dark">
                         Легкий путь <br />
-                        <span className="text-brand-green italic">К результату</span>
+                        <span className="text-brand-green">К результату</span>
                     </h2>
                 </div>
 
