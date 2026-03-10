@@ -34,7 +34,7 @@ const ProcessSection = () => {
 
                 {/* Header with fixed brush stroke */}
                 <div className="text-center mb-28">
-                    <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-tighter text-brand-dark leading-[0.85]">
+                    <h2 className="section-header text-brand-dark">
                         Легкий путь <br />
                         <span className="text-brand-green italic">К результату</span>
                     </h2>

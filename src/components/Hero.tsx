@@ -75,7 +75,7 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
             <div className="max-w-7xl mx-auto text-center relative z-10 w-full flex flex-col items-center">
                 <div className="hero-fade-in mb-8">
-                    <img src="/logo center back.png" alt="IC GROUP" className="h-24 md:h-32 w-auto object-contain opacity-80" />
+                    <img src="/logo-center-back.png" alt="IC GROUP" className="h-24 md:h-32 w-auto object-contain opacity-80" />
                 </div>
 
                 <h1 className="flex flex-col items-center mb-6 select-none font-bold tracking-tighter uppercase whitespace-nowrap leading-[0.8] relative z-20">
