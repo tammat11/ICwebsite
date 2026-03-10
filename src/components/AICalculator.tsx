@@ -35,13 +35,13 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
     const cardRef = useRef<HTMLDivElement>(null);
 
     // More realistic pricing map (KZT per m2)
-    const priceMap: any = {
+    const priceMap: Record<string, number> = {
         'Office': 180,
         'Retail': 240,
         'Industry': 350
     };
 
-    const chemMap: any = {
+    const chemMap: Record<string, { label: string; mult: number; icon: React.ReactNode }> = {
         'Standard': { label: 'Standard', mult: 1, icon: <FlaskConical size={14} /> },
         'Eco': { label: 'Pure Eco', mult: 1.15, icon: <Microscope size={14} /> },
         'Premium': { label: 'Nano-Tech', mult: 1.35, icon: <Dna size={14} /> }
@@ -73,7 +73,8 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
             );
         } else {
             document.body.style.overflow = 'unset';
-            setStep(1);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            setTimeout(() => setStep(1), 0);
         }
     }, [isOpen]);
 
@@ -250,7 +251,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                                 <FlaskConical size={10} /> КЛАСС ХИМИИ
                                             </p>
                                             <div className="grid grid-cols-3 gap-2">
-                                                {Object.entries(chemMap).map(([key, val]: [string, any]) => (
+                                                {Object.entries(chemMap).map(([key, val]) => (
                                                     <button
                                                         key={key}
                                                         onClick={() => setChemistry(key)}

@@ -84,7 +84,7 @@ const WhyUs = () => {
         }, sectionRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [reasons.length]);
 
 
 

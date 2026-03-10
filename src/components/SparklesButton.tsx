@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import { gsap } from 'gsap';
 
-export default function SparklesButton({ children, onClick, className = '' }: any) {
+export default function SparklesButton({ children, onClick, className = '' }: { children?: React.ReactNode; onClick?: () => void; className?: string }) {
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const handleMouseEnter = (e: React.MouseEvent) => {
+    const handleMouseEnter = () => {
         if (!buttonRef.current) return;
         const rect = buttonRef.current.getBoundingClientRect();
 

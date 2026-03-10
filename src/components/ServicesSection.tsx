@@ -247,8 +247,8 @@ const ServicesSection = () => {
                         if (!slider) return;
                         slider.style.cursor = 'grabbing';
 
-                        let startX = e.pageX - slider.offsetLeft;
-                        let scrollLeft = slider.scrollLeft;
+                        const startX = e.pageX - slider.offsetLeft;
+                        const scrollLeft = slider.scrollLeft;
 
                         const onMouseMove = (e: MouseEvent) => {
                             if (!isDragging.current) return;

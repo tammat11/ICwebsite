@@ -44,7 +44,7 @@ const SolutionSection = () => {
                 isMobile: "(max-width: 767px)",
                 isDesktop: "(min-width: 768px)"
             }, (context) => {
-                const { isMobile } = context.conditions as any;
+                const { isMobile } = (context.conditions as { isMobile?: boolean }) || {};
 
                 if (!isMobile) {
                     gsap.fromTo(cards,

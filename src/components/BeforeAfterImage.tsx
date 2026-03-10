@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 
-export default function BeforeAfterImage({ src, alt, className = '' }: any) {
+export default function BeforeAfterImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [sliderPos, setSliderPos] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
@@ -8,7 +8,7 @@ export default function BeforeAfterImage({ src, alt, className = '' }: any) {
     const handleMove = (x: number) => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
-        let currentX = Math.max(0, Math.min(x - rect.left, rect.width));
+        const currentX = Math.max(0, Math.min(x - rect.left, rect.width));
         setSliderPos((currentX / rect.width) * 100);
     };
 
