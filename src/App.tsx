@@ -16,7 +16,7 @@ import NewsPage from './pages/NewsPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
-// Bubbles import removed
+import ScrollProgress from './components/ScrollProgress';
 import { useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -48,6 +48,7 @@ function App() {
 
   return (
     <>
+      <ScrollProgress />
       <ScrollToTop />
       <Navbar onCalcOpen={() => setCalcOpen(true)} />
       <Routes location={location}>
@@ -157,10 +158,10 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
 
         <PhilosophySection />
 
-        <ContactSection />
+        <ContactSection onCalcOpen={onCalcOpen} />
       </main>
 
-      <Footer />
+      <Footer onCalcOpen={onCalcOpen} />
 
       <style>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }

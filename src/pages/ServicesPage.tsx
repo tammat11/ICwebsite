@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Clock, ShieldCheck, Zap, Sparkles, ArrowUpRight } from 'lucide-react';
+import { Clock, ShieldCheck, Zap, Sparkles, ArrowUpRight, Droplets, Mountain, Flower2, Bug, Settings, Snowflake, Coffee, Waves } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,7 +10,7 @@ const services = [
         id: "01",
         title: "Базовая Уборка",
         eng: "Basic Cleaning",
-        desc: "Комплексная уборка до или после рабочего дня. Идеально для небольших офисов.",
+        desc: "Ежедневное поддержание чистоты помещений для комфортной рабочей среды.",
         time: "1.5-2 часа",
         features: ["Обеспыливание", "Влажная уборка", "Вынос мусора", "Санузлы"],
         icon: <Sparkles size={48} />
@@ -19,7 +19,7 @@ const services = [
         id: "02",
         title: "Поддерживающая",
         eng: "Maintenance",
-        desc: "Чистота в режиме нон-стоп. Специалист находится на объекте весь день.",
+        desc: "Регулярная уборка в течение дня для поддержания идеального порядка.",
         time: "6-8 часов",
         features: ["Ресепшн", "Переговорные", "Кухня", "Дежурство"],
         icon: <Clock size={48} />
@@ -28,7 +28,7 @@ const services = [
         id: "03",
         title: "Генеральная",
         eng: "Deep Cleaning",
-        desc: "Глубокая очистка каждые 3-6 месяцев. Дотянемся до каждого уголка.",
+        desc: "Глубокая очистка всех зон помещения с максимальной детализацией.",
         time: "12-24 часов",
         features: ["Химчистка", "Мойка окон", "Дезинфекция", "Сложные пятна"],
         icon: <ShieldCheck size={48} />
@@ -37,10 +37,82 @@ const services = [
         id: "04",
         title: "После Строя",
         eng: "Post Construction",
-        desc: "Ликвидация последствий ремонта. Вывозим мусор, удаляем цемент и краску.",
+        desc: "Профессиональное удаление строительной пыли, мусора и следов ремонта.",
         time: "1-3 дня",
         features: ["Спецтехника", "Промышленный пылесос", "Роторная чистка", "Вывоз мусора"],
         icon: <Zap size={48} />
+    },
+    {
+        id: "05",
+        title: "Мойка Витражей",
+        eng: "Window Cleaning",
+        desc: "Безопасная очистка стеклянных поверхностей и осветительных приборов на любой высоте.",
+        time: "от 3 часов",
+        features: ["Витражи", "Светильники", "Безопасность", "Чистота"],
+        icon: <Droplets size={48} />
+    },
+    {
+        id: "06",
+        title: "Высотные Работы",
+        eng: "High-Altitude Works",
+        desc: "Специализированные услуги на высоте с применением промышленного альпинизма.",
+        time: "от 4 часов",
+        features: ["Альпинизм", "Фасады", "Безопасность", "Сложный доступ"],
+        icon: <Mountain size={48} />
+    },
+    {
+        id: "07",
+        title: "Флористы",
+        eng: "Florists & Gardeners",
+        desc: "Профессиональный уход за зелёными насаждениями внутри и вокруг здания.",
+        time: "График",
+        features: ["Растения", "Полив", "Уход", "Ландшафт"],
+        icon: <Flower2 size={48} />
+    },
+    {
+        id: "08",
+        title: "Дезинсекция",
+        eng: "Pest Control",
+        desc: "Эффективная дезинсекция и дератизация с гарантированным результатом.",
+        time: "от 2 часов",
+        features: ["Грызуны", "Насекомые", "Гарантия", "Безопасно"],
+        icon: <Bug size={48} />
+    },
+    {
+        id: "09",
+        title: "Инженерные Услуги",
+        eng: "Engineering Services",
+        desc: "Техническое обслуживание инженерных систем для бесперебойной работы объекта.",
+        time: "24/7",
+        features: ["ТО", "Ремонт", "Системы", "Мониторинг"],
+        icon: <Settings size={48} />
+    },
+    {
+        id: "10",
+        title: "Уборка Снега",
+        eng: "Snow Removal",
+        desc: "Оперативная очистка территории от снега и наледи в зимний период.",
+        time: "Срочно",
+        features: ["Спецтехника", "Вывоз", "Чистота", "Оперативность"],
+        icon: <Snowflake size={48} />
+    },
+    {
+        id: "11",
+        title: "Кофеледи",
+        eng: "Coffee-Lady",
+        desc: "Обслуживание кофейных точек и поддержание чистоты барной зоны.",
+        time: "График",
+        features: ["Сервис", "Кофе", "Чистота", "Забота"],
+        icon: <Coffee size={48} />
+    },
+    {
+        id: "12",
+        title: "Химчистка",
+        eng: "Dry Cleaning",
+        desc: "Бережная чистка мебели, ковров и текстиля профессиональными средствами.",
+        time: "от 4 часов",
+        features: ["Мебель", "Ковры", "Текстиль", "Пятновыводка"],
+        icon: <Waves size={48} />
     }
 ];
 
@@ -65,7 +137,7 @@ const ServicesPage = () => {
                     {/* Hero Section */}
                     <div className="mb-32 relative">
                         <span className="text-brand-green font-bold tracking-[0.4em] uppercase text-sm block mb-4">
-                            Our Expertise
+                            Наша Экспертиза
                         </span>
                         <h1 className="page-title text-[15vw] leading-[0.8] font-bold tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
                             Services
@@ -80,9 +152,9 @@ const ServicesPage = () => {
                     </div>
 
                     {/* Services Grid */}
-                    <div className="services-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="services-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         {services.map((s) => (
-                            <div key={s.id} className="service-card group p-8 md:p-14 rounded-[40px] bg-white border border-black/5 hover:bg-brand-green hover:border-transparent transition-all duration-500 relative overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-brand-green/20">
+                            <div key={s.id} className="service-card group p-6 md:p-8 rounded-[30px] md:rounded-[40px] bg-white border border-black/5 hover:bg-brand-green hover:border-transparent transition-all duration-500 relative overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-brand-green/20">
 
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 

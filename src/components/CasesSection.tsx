@@ -39,33 +39,33 @@ const CasesSection = () => {
 
     const cases = [
         {
-            company: "Forte Bank",
-            stat: "−22%",
-            metric: "OPEX REDUCTION",
-            title: "Build unified service standards",
-            desc: "Централизация управления 45 объектами через единую цифровую платформу IC Group. Оптимизация затрат без потери качества.",
-            category: "Financial Sector",
-            icon: <TrendingDown size={20} />,
+            company: "AO «Kaspi Bank»",
+            stat: "Kaspi Bank",
+            metric: "ЦЕНТРАЛИЗАЦИЯ",
+            title: "Организовали централизованный закуп услуг клининга по всему Казахстану.",
+            desc: "Упростили управление процессом клининга — стали единым поставщиком услуг по стране. Стандартизировали качество уборки во всех филиалах.",
+            category: "Banking",
+            icon: <ShieldCheck size={20} />,
+            image: "https://images.unsplash.com/photo-1519567241046-7f570eee3d9f?auto=format&fit=crop&q=80&w=800"
+        },
+        {
+            company: "НК «Астана ЭКСПО-2017»",
+            stat: "500 клинеров",
+            metric: "МОБИЛИЗАЦИЯ",
+            title: "Наняли 500 клинеров и наладили производственные процессы за 3 дня.",
+            desc: "Запустили объект за 3 дня за счет региональной представленности и объемов производства.",
+            category: "Public Sector",
+            icon: <Zap size={20} />,
             image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800"
         },
         {
-            company: "Air Astana",
-            stat: "99.8%",
-            metric: "SLA COMPLIANCE",
-            title: "Automate quality reporting",
-            desc: "Внедрение QR-мониторинга и фото-отчетности в реальном времени для крупнейшего авиаперевозчика региона.",
-            category: "Aviation Tech",
-            icon: <Zap size={20} />,
-            image: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&q=80&w=800"
-        },
-        {
-            company: "Samsung",
-            stat: "Zero",
-            metric: "INCIDENT RATE",
-            title: "Safety standards",
-            desc: "Поддержка чистоты и безопасности на производственных и офисных площадках Samsung по международным стандартам.",
-            category: "Production",
-            icon: <ShieldCheck size={20} />,
+            company: "АО «ТНК Казхром»",
+            stat: "5 млн ₸",
+            metric: "ЭКОНОМИЯ В МЕСЯЦ",
+            title: "Сэкономили 5 млн ₸ ежемесячно.",
+            desc: "Сократили фонд оплаты труда на 28% и сэкономили 5 млн тенге в месяц за счет автоматизации процессов.",
+            category: "Industrial",
+            icon: <TrendingDown size={20} />,
             image: "https://images.unsplash.com/photo-1504384308090-c89e12bf9a51?auto=format&fit=crop&q=80&w=800"
         }
     ];
@@ -78,11 +78,15 @@ const CasesSection = () => {
                 <div className="mb-8 md:mb-12 text-center">
                     <div className="section-tag">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
-                        <span>Proof of Efficiency</span>
+                        <span>Наши результаты</span>
                     </div>
                     <h2 className="section-header text-brand-dark overflow-visible">
                         РЕАЛЬНЫЕ <br />
-                        <span className="text-brand-green">КЕЙСЫ</span>
+                        <span className="relative inline-block">
+                            <span className="relative inline-block overflow-hidden px-2 rounded-xl">
+                                <span className="text-brand-green drop-shadow-[0_0_40px_rgba(131,182,67,0.2)]">КЕЙСЫ</span>
+                            </span>
+                        </span>
                     </h2>
                 </div>
 
@@ -96,12 +100,10 @@ const CasesSection = () => {
                             {/* Image Side */}
                             <div className="w-full md:w-3/5 shrink-0">
                                 <div className="relative h-[220px] md:h-[380px] rounded-[24px] md:rounded-[48px] overflow-hidden border border-black/[0.05] shadow-sm group-hover:shadow-2xl transition-all duration-700">
-                                    <img
-                                        src={item.image}
-                                        alt={item.company}
-                                        className="case-image-inner w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-[1500ms]"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
+                                    <div className="case-image-inner w-full h-full opacity-80 group-hover:opacity-100 transition-all duration-[1500ms]">
+                                        <img src={item.image} alt={item.company} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 pointer-events-none" />
 
                                     {/* Company Label Floating */}
                                     <div className="absolute top-6 left-6">
@@ -157,7 +159,7 @@ const CasesSection = () => {
                         Смотреть все проекты
                         <span className="inline-block ml-4 group-hover:translate-x-1 transition-transform">→</span>
                     </button>
-                    <p className="mt-10 text-[9px] font-bold uppercase tracking-[0.3em] text-black/10">100+ active contracts across Kazakhstan</p>
+                    <p className="mt-10 text-[9px] font-bold uppercase tracking-[0.3em] text-black/10">500+ клиентов по всему Казахстану</p>
                 </div>
             </div>
         </section>

@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, Star } from 'lucide-react';
+import AnimatedWave from './AnimatedWave';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,9 +73,13 @@ const PhilosophySection = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="section-padding-compact bg-white overflow-hidden" id="philosophy">
+        <section ref={sectionRef} className="section-padding-compact bg-white overflow-hidden relative" id="philosophy">
 
-            <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+            <div className="absolute top-0 left-0 w-full rotate-180 transform -translate-y-[1px]">
+                <AnimatedWave />
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center pt-24 md:pt-32">
 
                 {/* 1. The Circular Master Portrait */}
                 <div
@@ -101,8 +106,10 @@ const PhilosophySection = () => {
                     </span>
                     <span className="flex flex-wrap items-center justify-center gap-x-4 md:gap-x-10 mt-1 md:mt-2">
                         <span className="reveal-word block text-black">должно</span>
-                        <span className="reveal-word relative inline-block text-brand-green px-4">
-                            дышать.
+                        <span className="reveal-word relative inline-block px-4">
+                            <span className="relative inline-block overflow-hidden px-2 rounded-xl">
+                                <span className="text-brand-green drop-shadow-[0_0_40px_rgba(131,182,67,0.2)]">дышать.</span>
+                            </span>
                             <div className="absolute inset-x-0 h-[85%] top-[7%] bg-brand-green/15 -z-10 transform -rotate-1 skew-x-[-12deg] scale-y-110" />
                         </span>
                     </span>
@@ -111,17 +118,17 @@ const PhilosophySection = () => {
                 {/* 3. Author / Signature with Animated Lines */}
                 <div className="flex items-center justify-center gap-6 md:gap-12 w-full max-w-full md:max-w-4xl mb-3 md:mb-4">
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-right" />
-                    <p className="reveal-word text-lg md:text-2xl font-semibold text-black whitespace-nowrap tracking-tight">
+                    <p className="reveal-word text-lg md:text-2xl font-medium text-black whitespace-nowrap tracking-tight">
                         Лян Ларион Викторович
                     </p>
                     <div className="sig-line h-[1px] flex-1 bg-brand-secondary/30 origin-left" />
                 </div>
-                <p className="reveal-word text-[9px] md:text-xs font-semibold uppercase tracking-[0.3em] md:tracking-[0.4em] text-brand-dark/30 mb-8 md:mb-12">
+                <p className="reveal-word text-[9px] md:text-xs font-medium uppercase tracking-[0.3em] md:tracking-[0.4em] text-brand-dark/30 mb-8 md:mb-12">
                     Основатель IC GROUP • Лидер отрасли клининга
                 </p>
 
                 {/* 4. Action Link */}
-                <button className="reveal-word group flex items-center gap-4 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
+                <button className="reveal-word group flex items-center gap-4 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
                     Explore Philosophy
                     <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform duration-300" />
                 </button>

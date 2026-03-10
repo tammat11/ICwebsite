@@ -74,7 +74,7 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
 
                     {/* Right side Actions */}
                     <div className="flex items-center gap-2 md:gap-6 shrink-0">
-                        <span className="hidden xl:inline text-[11px] font-bold text-brand-dark">+7 (771) 780-08-41</span>
+                        <span className="hidden xl:inline text-[11px] font-bold text-brand-dark">+7 771 765 6353</span>
                         <button
                             onClick={onCalcOpen}
                             className="btn-premium !px-4 md:!px-6 !py-2 md:!py-2.5 !text-[9px] md:!text-[10px] min-w-fit"
@@ -105,8 +105,8 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                             {link.label}
                         </Link>
                     ))}
-                    <a href="tel:+77717800841" className="mt-8 text-lg font-bold text-brand-dark">
-                        +7 (771) 780-08-41
+                    <a href="tel:+77717656353" className="mt-8 text-lg font-bold text-brand-dark">
+                        +7 771 765 6353
                     </a>
                 </div>
             )}

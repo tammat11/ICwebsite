@@ -1,6 +1,10 @@
 import { Instagram, Linkedin, ArrowUpRight, Facebook, Mail, MapPin, Phone } from 'lucide-react';
 
-const Footer = () => {
+interface FooterProps {
+    onCalcOpen?: () => void;
+}
+
+const Footer = ({ onCalcOpen }: FooterProps) => {
     return (
         <footer className="relative bg-brand-dark text-white pt-16 md:pt-32 pb-8 md:pb-12 overflow-hidden">
 
@@ -17,12 +21,16 @@ const Footer = () => {
                             <span className="text-2xl md:text-3xl font-bold tracking-tighter">IC GROUP</span>
                         </div>
                         <p className="text-white/40 text-base md:text-lg leading-relaxed max-w-sm">
-                            Инновационные решения в сфере Facility Management. Мы создаем стандарты чистоты и комфорта для вашего бизнеса.
+                            Мы предоставляем широкий спектр услуг от ежедневной уборки до производства чистящих средств. Мы поможем вам подобрать комплекс услуг, отвечающий всем пожеланиям и нуждам вашей компании.
                         </p>
                         <div className="flex flex-wrap gap-4">
-                            {[Instagram, Linkedin, Facebook].map((Icon, i) => (
-                                <a key={i} href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:bg-brand-green hover:text-brand-dark hover:border-brand-green transition-all duration-300">
-                                    <Icon size={20} />
+                            {[
+                                { Icon: Instagram, href: "https://www.instagram.com/icgroup.kz/?__pwa=1" },
+                                { Icon: Linkedin, href: "#" },
+                                { Icon: Facebook, href: "#" }
+                            ].map((social, i) => (
+                                <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:bg-brand-green hover:text-brand-dark hover:border-brand-green transition-all duration-300">
+                                    <social.Icon size={20} />
                                 </a>
                             ))}
                         </div>
@@ -51,7 +59,7 @@ const Footer = () => {
                                 <Phone className="mt-1 text-brand-green" size={20} />
                                 <div>
                                     <p className="text-white/40 text-sm mb-1">Горячая линия</p>
-                                    <p className="text-xl font-medium">+7 (771) 780-08-41</p>
+                                    <p className="text-xl font-medium">+7 771 765 6353</p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -65,17 +73,20 @@ const Footer = () => {
                                 <MapPin className="mt-1 text-brand-green" size={20} />
                                 <div>
                                     <p className="text-white/40 text-sm mb-1">Главный офис</p>
-                                    <p className="text-white/80 leading-snug">Казахстан, г. Астана,<br />ул. Достык 18, БЦ "Москва"</p>
+                                    <p className="text-white/80 leading-snug">Алматы, ул. Натарова, 12,<br />050016, Казахстан</p>
                                 </div>
                             </li>
                         </ul>
                     </div>
                 </div>
 
-                {/* Big Footer CTA (Visual element) */}
+                {/* Big Footer CTA */}
                 <div className="border-t border-white/10 flex flex-col md:flex-row justify-center md:justify-end items-center gap-4 md:gap-8 py-8 md:py-12">
-                    <button className="px-8 md:px-10 py-4 md:py-5 bg-brand-green rounded-full text-brand-dark font-bold uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2 text-sm md:text-base w-full md:w-auto text-center">
-                        Скачать презентацию
+                    <button
+                        onClick={onCalcOpen}
+                        className="px-8 md:px-10 py-4 md:py-5 bg-brand-green rounded-full text-brand-dark font-bold uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2 text-sm md:text-base w-full md:w-auto text-center"
+                    >
+                        ОСТАВИТЬ ЗАЯВКУ
                         <ArrowUpRight size={20} />
                     </button>
                 </div>

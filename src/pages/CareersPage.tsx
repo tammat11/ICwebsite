@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import Footer from '../components/Footer';
-import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock, MapPin } from 'lucide-react';
+import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock } from 'lucide-react';
 import ApplicationModal from '../components/ApplicationModal';
 
 const CareersPage = () => {
@@ -50,77 +50,101 @@ const CareersPage = () => {
                 <div className="max-w-7xl mx-auto mb-16 md:mb-32 relative">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/10 rounded-full blur-[100px] pointer-events-none" />
 
-                    <span className="career-subtitle text-brand-green text-[10px] md:text-[11px] font-bold tracking-[0.4em] uppercase block mb-6">
-                        Присоединяйся к нам
+                    <span className="career-subtitle text-brand-green text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase block mb-6 max-w-4xl">
+                        МЫ — IC GROUP ОДНА ИЗ САМЫХ БЫСТРОРАСТУЩИХ КЛИНИНГОВЫХ КОМПАНИИ В КАЗАХСТАНЕ. ЗА 18 ЛЕТ МЫ ПРОШЛИ ПУТЬ ОТ МАЛЕНЬКОЙ КОМАНДЫ ДО ОДНОГО ИЗ КРУПНЕЙШИХ ИГРОКОВ НА РЫНКЕ FM.
                     </span>
                     <h1 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter text-brand-dark leading-[0.9] mb-8">
                         <div className="overflow-hidden"><span className="career-title-line block">СТАНЬ ЧАСТЬЮ</span></div>
                         <div className="overflow-hidden"><span className="career-title-line block text-brand-green uppercase">КОМАНДЫ ЛИДЕРОВ</span></div>
                     </h1>
                     <p className="career-subtitle text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium">
-                        Мы ищем талантливых людей, готовых расти и развиваться вместе с крупнейшей клининговой компанией Казахстана.
+                        Мы расширяем сеть и ищем тех, кто готов расти вместе с нами: надёжных партнёров по клинингу, талантливых специалистов в бэк-офис и ответственных операторов уборки для работы на объектах по всей стране.
                     </p>
                 </div>
 
                 {/* Main Directions */}
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 cards-container mb-32">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 cards-container mb-32">
 
-                    <div className="career-card animate-fade-in opacity-0 group relative p-8 md:p-10 rounded-[32px] bg-[#111] border border-white/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2" style={{ animationDelay: '0.6s' }}>
+                    <div className="career-card animate-fade-in opacity-0 group relative p-6 md:p-8 rounded-[32px] bg-[#111] border border-white/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2" style={{ animationDelay: '0.6s' }}>
                         <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <Briefcase size={200} className="text-white" />
+                            <Briefcase size={160} className="text-white" />
                         </div>
-
                         <div className="relative z-10 h-full flex flex-col justify-between cursor-default">
                             <div>
-                                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-10 text-white">
-                                    <Users size={32} />
+                                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-8 text-white">
+                                    <Users size={28} />
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-6 uppercase">ОФИС</h2>
-                                <p className="text-white/60 text-sm md:text-base mb-8 leading-relaxed">
+                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-4 uppercase">ОФИС</h2>
+                                <p className="text-white/60 text-xs md:text-sm mb-6 leading-relaxed">
                                     Для тех, кто хочет управлять процессами, развивать продажи, внедрять IT-решения и строить стратегию.
                                 </p>
-                                <ul className="space-y-4 mb-10">
-                                    {['Менеджмент и управление', 'Продажи и Маркетинг', 'HR и Рекрутинг', 'IT и Разработка', 'Финансы и Бухгалтерия'].map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3 text-white font-medium text-[13px]">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                                <ul className="space-y-3 mb-8">
+                                    {['Менеджмент', 'Маркетинг', 'HR и Рекрутинг', 'IT Разработка', 'Финансы'].map((item, i) => (
+                                        <li key={i} className="flex items-center gap-3 text-white font-medium text-[12px]">
+                                            <div className="w-1 h-1 rounded-full bg-brand-green" />
                                             {item}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-
-                            <button onClick={() => openModal('Office')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-dark hover:!bg-brand-green hover:!text-white border-none shadow-lg">
-                                Отправить резюме <ArrowUpRight size={18} />
+                            <button onClick={() => openModal('Office')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-dark hover:!bg-brand-green hover:!text-white border-none py-4 text-xs font-bold uppercase tracking-wider">
+                                Отправить резюме <ArrowUpRight size={16} />
                             </button>
                         </div>
                     </div>
 
-                    <div className="career-card animate-fade-in opacity-0 group relative p-8 md:p-10 rounded-[32px] bg-brand-green text-white overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2" style={{ animationDelay: '0.8s' }}>
+                    <div className="career-card animate-fade-in opacity-0 group relative p-6 md:p-8 rounded-[32px] bg-brand-green text-white overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2" style={{ animationDelay: '0.8s' }}>
                         <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <HardHat size={200} />
+                            <HardHat size={160} />
                         </div>
-
                         <div className="relative z-10 h-full flex flex-col justify-between cursor-default">
                             <div>
-                                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-10 text-white">
-                                    <Star size={32} />
+                                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-8 text-white">
+                                    <Star size={28} />
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-6 uppercase">ПРОИЗВОДСТВО</h2>
-                                <p className="text-white/50 text-sm md:text-base mb-8 leading-relaxed">
-                                    Стабильная работа для специалистов на объектах. Достойная оплата, удобный график и униформа.
+                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-4 uppercase">КЛИНИНГ</h2>
+                                <p className="text-white/90 text-xs md:text-sm mb-6 leading-relaxed">
+                                    Стабильная работа для операторов на объектах. Достойная оплата, удобный график и униформа.
                                 </p>
-                                <ul className="space-y-4 mb-10">
-                                    {['Клинеры и Операторы', 'Супервайзеры объектов', 'Технические специалисты', 'Альпинисты', 'Разнорабочие'].map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3 text-white font-medium text-[13px]">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                <ul className="space-y-3 mb-8">
+                                    {['Операторы уборки', 'Супервайзеры', 'Технические специалисты', 'Альпинисты', 'Разнорабочие'].map((item, i) => (
+                                        <li key={i} className="flex items-center gap-3 text-white font-medium text-[12px]">
+                                            <div className="w-1 h-1 rounded-full bg-white" />
                                             {item}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
+                            <button onClick={() => openModal('Cleaning')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-green hover:!bg-brand-dark hover:!text-white border-none py-4 text-xs font-bold uppercase tracking-wider">
+                                Заполнить анкету <ArrowUpRight size={16} />
+                            </button>
+                        </div>
+                    </div>
 
-                            <button onClick={() => openModal('Production')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-green hover:!bg-brand-dark hover:!text-white border-none shadow-lg">
-                                Заполнить анкету <ArrowUpRight size={18} />
+                    <div className="career-card animate-fade-in opacity-0 group relative p-6 md:p-8 rounded-[32px] bg-white border border-brand-dark/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2" style={{ animationDelay: '1.0s' }}>
+                        <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Users size={160} className="text-brand-dark" />
+                        </div>
+                        <div className="relative z-10 h-full flex flex-col justify-between cursor-default">
+                            <div>
+                                <div className="w-14 h-14 bg-brand-green/10 rounded-2xl flex items-center justify-center mb-8 text-brand-green">
+                                    <Star size={28} />
+                                </div>
+                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-brand-dark mb-4 uppercase">ПАРТНЕРСТВО</h2>
+                                <p className="text-brand-dark/60 text-xs md:text-sm mb-6 leading-relaxed">
+                                    Для предпринимателей и компаний, готовых масштабировать бизнес вместе с лидером рынка.
+                                </p>
+                                <ul className="space-y-3 mb-8">
+                                    {['Франчайзинг', 'B2B сотрудничество', 'Поставка материалов', 'Совместные проекты', 'Развитие сети'].map((item, i) => (
+                                        <li key={i} className="flex items-center gap-3 text-brand-dark font-medium text-[12px]">
+                                            <div className="w-1 h-1 rounded-full bg-brand-green" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <button onClick={() => openModal('Partnership')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-brand-dark !text-white hover:!bg-brand-green hover:!text-white border-none py-4 text-xs font-bold uppercase tracking-wider">
+                                Стать партнером <ArrowUpRight size={16} />
                             </button>
                         </div>
                     </div>
@@ -131,9 +155,9 @@ const CareersPage = () => {
                     <h3 className="text-3xl font-bold tracking-tight text-brand-dark mb-12 text-center">ПОЧЕМУ МЫ?</h3>
                     <div className="grid md:grid-cols-3 gap-6">
                         {[
-                            { icon: Clock, title: "Стабильность", desc: "Своевременные выплаты и официальное трудоустройство." },
-                            { icon: Star, title: "Карьера", desc: "Возможность роста от клинера до руководителя региона." },
-                            { icon: MapPin, title: "Масштаб", desc: "Работа в любой точке Казахстана и крупных объектах." }
+                            { icon: Users, title: "Лидеры рынка", desc: "крупнейшая клининговая компания в Казахстане, 27% доли рынка в корпоративном сегменте" },
+                            { icon: Clock, title: "Сильная культура", desc: "Мы строим работу на принципе эффективной корпоративной культуры, чтобы дети и внуки наших сотрудников с честью продолжали это развитие." },
+                            { icon: Star, title: "Точка роста", desc: "Десятки примеров роста с оператора по уборке до партнера компании. Возможности обучения, горизонтального и вертикального роста." }
                         ].map((b, i) => (
                             <div key={i} className="bg-white p-8 rounded-[30px] border border-brand-dark/5 flex flex-col items-center text-center hover:border-brand-green/30 transition-colors">
                                 <div className="w-12 h-12 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center mb-6">
