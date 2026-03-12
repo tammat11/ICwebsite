@@ -194,7 +194,7 @@ const ServicesSection = () => {
             </div>
 
             {/* 4 главных вида услуг */}
-            <div className="max-w-7xl mx-auto px-6 mb-6 md:mb-10">
+            <div className="max-w-6xl mx-auto px-6 mb-4 md:mb-8">
                 <div className="services-grid grid grid-cols-2 gap-3 md:gap-4">
                     {mainServices.map((service) => (
                         <div
@@ -207,7 +207,7 @@ const ServicesSection = () => {
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                            <div className="absolute bottom-0 left-0 right-0 p-2.5 md:p-3.5">
                                 <h3 className="text-white font-bold uppercase text-[11px] md:text-sm leading-tight mb-1">
                                     {service.title}
                                 </h3>
@@ -221,7 +221,7 @@ const ServicesSection = () => {
             </div>
 
             {/* Специализированные услуги — карусель */}
-            <div className="max-w-7xl mx-auto px-6 mb-2">
+            <div className="max-w-6xl mx-auto px-6 mb-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-dark/40 text-center mb-4">
                     Специализированные услуги
                 </p>
