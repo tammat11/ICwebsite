@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run dev --prefix app",
-    "build": "npm run build --prefix app",
+    "build": "npm run build --prefix app && cp -R app/dist dist",
     "lint": "npm run lint --prefix app",
     "preview": "npm run preview --prefix app"
   },
