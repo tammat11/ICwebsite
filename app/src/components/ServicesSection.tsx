@@ -147,11 +147,11 @@ const ServicesSection = () => {
                 <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
                 <div className="overflow-x-auto pb-4 md:pb-6">
-                    <div className="flex gap-3 md:gap-4 px-6 select-none">
+                    <div className="flex gap-4 md:gap-5 px-6 select-none">
                         {allServices.map((service, i) => (
                             <div
                                 key={`${service.id}-${i}`}
-                                className="marquee-card-item flex-shrink-0 w-[140px] md:w-[200px] h-[190px] md:h-[260px] relative rounded-[16px] md:rounded-[24px] overflow-hidden group cursor-pointer bg-brand-dark"
+                                className="marquee-card-item flex-shrink-0 w-[160px] md:w-[220px] h-[210px] md:h-[280px] relative rounded-[18px] md:rounded-[26px] overflow-hidden group cursor-pointer bg-brand-dark"
                             >
                                 <img
                                     src={service.image}
