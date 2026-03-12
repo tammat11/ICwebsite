@@ -110,23 +110,27 @@ const ServicesSection = () => {
 
             {/* 4 главных вида услуг */}
             <div className="max-w-6xl mx-auto px-6 mb-4 md:mb-8">
-                <div className="services-grid grid grid-cols-2 gap-3 md:gap-4">
+                <div className="services-grid grid grid-cols-2 gap-4 md:gap-6">
                     {mainServices.map((service) => (
                         <div
                             key={service.id}
-                            className="service-card-item group relative rounded-xl md:rounded-2xl overflow-hidden bg-brand-dark aspect-[5/3] min-h-[140px] md:min-h-[180px]"
+                            className="service-card-item group relative rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
                         >
-                            <img
-                                src={service.image}
-                                alt={service.title}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-2.5 md:p-3.5">
-                                <h3 className="text-white font-bold uppercase text-[11px] md:text-sm leading-tight mb-1">
+                            <div className="relative h-28 md:h-32 overflow-hidden">
+                                <img
+                                    src={service.image}
+                                    alt={service.title}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <span className="absolute top-2 left-2 px-2 py-1 rounded-full bg-white/90 text-[9px] font-bold tracking-[0.18em] uppercase text-brand-dark">
+                                    {service.id}
+                                </span>
+                            </div>
+                            <div className="flex-1 px-3.5 md:px-4 py-3 md:py-4 flex flex-col gap-1.5 md:gap-2">
+                                <h3 className="text-[11px] md:text-xs font-bold uppercase tracking-[0.16em] text-brand-dark leading-snug">
                                     {service.title}
                                 </h3>
-                                <p className="text-white/70 text-[9px] md:text-[10px] leading-relaxed line-clamp-2">
+                                <p className="text-[10px] md:text-[11px] text-brand-dark/60 leading-snug">
                                     {service.description}
                                 </p>
                             </div>
