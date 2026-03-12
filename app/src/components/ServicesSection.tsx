@@ -172,12 +172,12 @@ const ServicesSection = () => {
     }, []);
 
     return (
-        <section ref={sectionRef} className="py-6 bg-white relative" id="services">
+        <section ref={sectionRef} className="py-4 md:py-6 bg-white relative" id="services">
 
             {/* Decorative background removed */}
 
             {/* Header */}
-            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-8 text-center">
+            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-5 md:mb-6 text-center">
                 <h2 className="section-header text-brand-dark mb-4 overflow-visible">
                     <span className="services-title-word inline-block">НАШИ</span>{' '}
                     <span className="services-title-word inline-block">
@@ -194,12 +194,12 @@ const ServicesSection = () => {
             </div>
 
             {/* 4 главных вида услуг */}
-            <div className="max-w-7xl mx-auto px-6 mb-10 md:mb-14">
-                <div className="services-grid grid grid-cols-2 gap-4 md:gap-6">
+            <div className="max-w-7xl mx-auto px-6 mb-6 md:mb-10">
+                <div className="services-grid grid grid-cols-2 gap-3 md:gap-4">
                     {mainServices.map((service) => (
                         <div
                             key={service.id}
-                            className="service-card-item group relative rounded-2xl md:rounded-3xl overflow-hidden bg-brand-dark aspect-[3/4] min-h-[200px] md:min-h-[280px]"
+                            className="service-card-item group relative rounded-xl md:rounded-2xl overflow-hidden bg-brand-dark aspect-[5/3] min-h-[140px] md:min-h-[180px]"
                         >
                             <img
                                 src={service.image}
@@ -207,11 +207,11 @@ const ServicesSection = () => {
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                                <h3 className="text-white font-bold uppercase text-sm md:text-base leading-tight mb-1.5 md:mb-2">
+                            <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                                <h3 className="text-white font-bold uppercase text-[11px] md:text-sm leading-tight mb-1">
                                     {service.title}
                                 </h3>
-                                <p className="text-white/70 text-[10px] md:text-xs leading-relaxed line-clamp-2 md:line-clamp-3">
+                                <p className="text-white/70 text-[9px] md:text-[10px] leading-relaxed line-clamp-2">
                                     {service.description}
                                 </p>
                             </div>
@@ -239,7 +239,7 @@ const ServicesSection = () => {
                         {allServices.map((service, i) => (
                             <div
                                 key={`${service.id}-${i}`}
-                                className="marquee-card-item flex-shrink-0 w-[160px] md:w-[240px] h-[220px] md:h-[330px] relative rounded-[24px] md:rounded-[40px] overflow-hidden group cursor-pointer bg-brand-dark"
+                                className="marquee-card-item flex-shrink-0 w-[140px] md:w-[200px] h-[190px] md:h-[260px] relative rounded-[16px] md:rounded-[24px] overflow-hidden group cursor-pointer bg-brand-dark"
                             >
                                 <img
                                     src={service.image}
@@ -248,11 +248,11 @@ const ServicesSection = () => {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                                <div className="absolute bottom-4 left-4 max-w-[92%]">
-                                    <h4 className="text-white font-bold uppercase text-sm md:text-base leading-tight drop-shadow-md mb-1.5 md:mb-2">
+                                <div className="absolute bottom-3 left-3 max-w-[92%]">
+                                    <h4 className="text-white font-bold uppercase text-[10px] md:text-xs leading-tight drop-shadow-md mb-1">
                                         {service.title}
                                     </h4>
-                                    <p className="text-white/60 text-[10px] line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <p className="text-white/60 text-[9px] line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                         {service.description}
                                     </p>
                                 </div>
