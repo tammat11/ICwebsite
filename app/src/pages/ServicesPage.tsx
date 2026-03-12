@@ -1,9 +1,5 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { Clock, ShieldCheck, Zap, Sparkles, ArrowUpRight, Droplets, Mountain, Flower2, Bug, Settings, Snowflake, Coffee, Waves } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const services = [
     {
@@ -93,41 +89,8 @@ const services = [
 ];
 
 const ServicesPage = () => {
-    const rootRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        gsap.to(".page-title", {
-            y: 100,
-            ease: "none",
-            scrollTrigger: {
-                trigger: "body",
-                start: "top top",
-                end: "bottom top",
-                scrub: 1
-            }
-        });
-    }, []);
-
-    useLayoutEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.fromTo(
-                ".services-hero-reveal",
-                { y: 40, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.8,
-                    stagger: 0.12,
-                    ease: "power3.out",
-                }
-            );
-        }, rootRef);
-
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <div ref={rootRef} className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
+        <div className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
             <main className="pt-40 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}

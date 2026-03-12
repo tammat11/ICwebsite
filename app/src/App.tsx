@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -19,10 +19,6 @@ import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
 import ScrollProgress from './components/ScrollProgress';
 import { useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -67,83 +63,8 @@ function App() {
 }
 
 function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
-  const mainRef = useRef(null);
-
-  useEffect(() => {
-    const refreshTrigger = () => {
-      ScrollTrigger.refresh();
-    };
-
-    window.addEventListener('load', refreshTrigger);
-    window.addEventListener('resize', refreshTrigger);
-    window.addEventListener('orientationchange', refreshTrigger);
-
-    // Multiple refreshes to catch lazy-loaded content or layout shifts
-    const timeouts = [
-      setTimeout(refreshTrigger, 100),
-      setTimeout(refreshTrigger, 500),
-      setTimeout(refreshTrigger, 1000),
-      setTimeout(refreshTrigger, 2000),
-      setTimeout(refreshTrigger, 5000),
-    ];
-
-    const ctx = gsap.context(() => {
-      // reveal-section logic
-      const reveals = document.querySelectorAll('.reveal-section');
-      reveals.forEach((el) => {
-        gsap.fromTo(el,
-          { opacity: 0, y: 50 },
-          {
-            scrollTrigger: {
-              trigger: el,
-              start: "top 110%",
-              toggleActions: "play none none none",
-              once: true
-            },
-            y: 0,
-            opacity: 1,
-            duration: 1.2,
-            ease: "power3.out"
-          }
-        );
-      });
-
-      ScrollTrigger.refresh();
-
-      const blobs = document.querySelectorAll('.bg-blob');
-      blobs.forEach((blob) => {
-        const speed = parseFloat(blob.getAttribute('data-speed') || '0.5');
-        gsap.to(blob, {
-          y: () => -ScrollTrigger.maxScroll(window) * (speed * 0.1),
-          ease: "none",
-          scrollTrigger: {
-            trigger: mainRef.current,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true
-          }
-        });
-      });
-
-      const refreshTimeout = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 1000);
-
-      return () => clearTimeout(refreshTimeout);
-    }, mainRef);
-
-    return () => {
-      ctx.revert();
-      ScrollTrigger.refresh();
-      window.removeEventListener('load', refreshTrigger);
-      window.removeEventListener('resize', refreshTrigger);
-      window.removeEventListener('orientationchange', refreshTrigger);
-      timeouts.forEach(clearTimeout);
-    };
-  }, []);
-
   return (
-    <div ref={mainRef} className="min-h-screen bg-white relative selection:bg-brand-green/20 overflow-x-hidden w-full">
+    <div className="min-h-screen bg-white relative selection:bg-brand-green/20 overflow-x-hidden w-full">
 
       {/* Global background elements removed for maximum cleanliness and performance */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-white" />

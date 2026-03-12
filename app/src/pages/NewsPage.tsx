@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import { useEffect, useRef, useState } from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
@@ -22,8 +21,6 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     const [articles, setArticles] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const rootRef = useRef<HTMLDivElement>(null);
-    const heroTitleRef = useRef<HTMLHeadingElement>(null);
-    const heroDescRef = useRef<HTMLParagraphElement>(null);
 
     useEffect(() => {
         fetch('/api/news')
@@ -33,24 +30,6 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
             .finally(() => setLoading(false));
     }, []);
 
-    useLayoutEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.fromTo(
-                [heroTitleRef.current, heroDescRef.current],
-                { y: 28, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: "power3.out" }
-            );
-            if (articles.length > 0) {
-                gsap.fromTo(
-                    ".news-card",
-                    { y: 40, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.8, stagger: 0.12, ease: "power3.out", delay: 0.2 }
-                );
-            }
-        }, rootRef);
-        return () => ctx.revert();
-    }, [articles.length]);
-
     return (
         <div ref={rootRef} className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
             <Navbar alwaysVisible />
@@ -59,12 +38,12 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
                     <div className="mb-12 md:mb-16 relative">
-                        <h2 ref={heroTitleRef} className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
+                        <h2 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
                             НОВОСТИ <br />
                             <span className="text-brand-green">И ПРОЕКТЫ</span>
                         </h2>
 
-                        <p ref={heroDescRef} className="mt-6 text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium leading-relaxed">
+                        <p className="mt-6 text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium leading-relaxed">
                             Следите за развитием IC Group: новые проекты, технологии, достижения и важные события компании.
                         </p>
                     </div>

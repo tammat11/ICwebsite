@@ -1,13 +1,4 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
-
 const ServicesSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-    const marqueeRef = useRef<HTMLDivElement>(null);
-
     interface Service {
         id: string;
         title: string;
@@ -95,84 +86,8 @@ const ServicesSection = () => {
 
     const allServices = [...specializedServices, ...specializedServices];
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-
-            // === HEADER: Clip-path sliding reveal ===
-            gsap.fromTo(".services-tag",
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1, y: 0, duration: 0.8, ease: "power3.out",
-                    scrollTrigger: { trigger: sectionRef.current, start: "top 110%" }
-                }
-            );
-
-            gsap.fromTo(".services-title-word",
-                { clipPath: "inset(100% 0% 0% 0%)", y: 60 },
-                {
-                    clipPath: "inset(0% 0% 0% 0%)",
-                    y: 0,
-                    duration: 1.2,
-                    stagger: 0.15,
-                    ease: "expo.out",
-                    scrollTrigger: { trigger: sectionRef.current, start: "top 80%" }
-                }
-            );
-
-            gsap.fromTo(".services-subtitle",
-                { opacity: 0, letterSpacing: "0.8em" },
-                {
-                    opacity: 1, letterSpacing: "0.4em", duration: 1, ease: "power3.out", delay: 0.3,
-                    scrollTrigger: { trigger: sectionRef.current, start: "top 80%" }
-                }
-            );
-
-            // === CARDS: Each comes from a different direction ===
-            const cards = gsap.utils.toArray<HTMLElement>(".service-card-item");
-            const directions = [
-                { x: -80, y: 60, rotate: -6 },
-                { x: 0, y: 100, rotate: 0 },
-                { x: 80, y: 60, rotate: 6 },
-                { x: 0, y: 80, rotate: -3 },
-            ];
-
-            cards.forEach((card, i) => {
-                const dir = directions[i % directions.length];
-                gsap.fromTo(card,
-                    { x: dir.x, y: dir.y, opacity: 0, rotate: dir.rotate, scale: 0.92 },
-                    {
-                        x: 0, y: 0, opacity: 1, rotate: 0, scale: 1,
-                        duration: 0.4,
-                        delay: i * 0.04,
-                        ease: "expo.out",
-                        scrollTrigger: {
-                            trigger: ".services-grid",
-                            start: "top 85%",
-                        }
-                    }
-                );
-            });
-
-            // === Медленное автодвижение карусели услуг влево ===
-            if (marqueeRef.current) {
-                gsap.to(marqueeRef.current, {
-                    xPercent: -50,
-                    duration: 60,
-                    ease: "none",
-                    repeat: -1,
-                });
-            }
-
-            // === REFINED ARCHES ===
-            // Decorative background removed
-
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <section ref={sectionRef} className="py-4 md:py-6 bg-white relative" id="services">
+        <section className="py-4 md:py-6 bg-white relative" id="services">
 
             {/* Decorative background removed */}
 
@@ -232,10 +147,7 @@ const ServicesSection = () => {
                 <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
                 <div className="overflow-x-auto pb-4 md:pb-6">
-                    <div
-                        ref={marqueeRef}
-                        className="flex gap-3 md:gap-4 px-6 select-none will-change-transform"
-                    >
+                    <div className="flex gap-3 md:gap-4 px-6 select-none">
                         {allServices.map((service, i) => (
                             <div
                                 key={`${service.id}-${i}`}

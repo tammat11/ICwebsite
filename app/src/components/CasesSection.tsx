@@ -1,47 +1,8 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { ArrowUpRight, ShieldCheck, TrendingDown, Zap } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const CasesSection = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.utils.toArray<HTMLElement>(".case-card-v").forEach((card) => {
-                gsap.fromTo(card,
-                    { y: 60, opacity: 0 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 1,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 130%"
-                        }
-                    }
-                );
-
-                gsap.fromTo(card.querySelector(".case-image-inner"),
-                    { scale: 1.15 },
-                    {
-                        scale: 1,
-                        duration: 2,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 85%",
-                            scrub: true
-                        }
-                    }
-                );
-            });
-        }, sectionRef);
-        return () => ctx.revert();
-    }, []);
 
     const cases = [
         {

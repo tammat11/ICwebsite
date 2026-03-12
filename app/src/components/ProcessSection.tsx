@@ -1,32 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { Search, Calculator, CalendarCheck, Sparkles } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const ProcessSection = () => {
     const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Cascade cards entrance
-            gsap.from(".process-card-anim", {
-                y: 80,
-                opacity: 0,
-                duration: 1,
-                stagger: 0.15,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: ".process-grid",
-                    start: "top 85%",
-                }
-            });
-
-            // Decorative background removed
-        }, containerRef);
-        return () => ctx.revert();
-    }, []);
     const steps = [
         {
             id: "01",

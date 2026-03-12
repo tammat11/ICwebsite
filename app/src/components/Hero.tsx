@@ -1,72 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import SparklesButton from './SparklesButton';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     const root = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Main entrance animation
-            gsap.fromTo(".hero-title-reveal",
-                { y: 30, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 1,
-                    stagger: 0.1,
-                    ease: "power2.out"
-                }
-            );
-
-            gsap.fromTo(".hero-fade-in",
-                { opacity: 0, y: 10 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    delay: 0.4,
-                    ease: "power2.out",
-                    stagger: 0.1
-                }
-            );
-
-
-
-            const cleaningTl = gsap.timeline({ delay: 1.8 });
-
-            cleaningTl
-                .fromTo(".cleaning-hand",
-                    { x: 300, y: 100, rotate: 30, opacity: 0 },
-                    { x: 20, y: -5, rotate: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
-                )
-                .to(".cleaning-hand", {
-                    x: -20, y: 5, rotate: -5, duration: 0.2, repeat: 3, yoyo: true, ease: "sine.inOut"
-                })
-                .to(".clean-dirt", {
-                    opacity: 0, scale: 1.1, filter: "blur(20px)", duration: 0.4, ease: "power2.in"
-                }, "-=0.6")
-                .to(".cleaning-hand", {
-                    x: -1200, y: 800, rotate: -60, opacity: 0, duration: 0.8, ease: "power2.in"
-                })
-                .fromTo(".clean-sparkle",
-                    { scale: 0, opacity: 0, rotate: -45 },
-                    { scale: 1.5, opacity: 1, rotate: 45, duration: 0.5, ease: "back.out(3)" },
-                    "-=0.4"
-                )
-                .to(".clean-sparkle", {
-                    opacity: 0, scale: 0, duration: 0.4, delay: 0.2
-                });
-
-            {/* Decorative arches removed as requested */ }
-
-        }, root);
-
-        return () => ctx.revert();
-    }, []);
 
     return (
         <section ref={root} className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-white pt-24 md:pt-28">

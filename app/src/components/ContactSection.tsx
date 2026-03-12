@@ -1,84 +1,11 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
-
 const ContactSection = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-    const gridRef = useRef<HTMLDivElement>(null);
-    const bigTextRef = useRef<HTMLSpanElement>(null);
-    const glowRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // GSAP quickTo for zero-rerender mouse tracking
-            const gridXTo = gsap.quickTo(gridRef.current, "x", { duration: 0.5, ease: "power2.out" });
-            const gridYTo = gsap.quickTo(gridRef.current, "y", { duration: 0.5, ease: "power2.out" });
-            const bigTextXTo = gsap.quickTo(bigTextRef.current, "x", { duration: 0.8, ease: "power2.out" });
-            // Setting initial center for the glow
-            gsap.set(glowRef.current, { xPercent: -50, yPercent: -50 });
-            const glowXTo = gsap.quickTo(glowRef.current, "x", { duration: 1, ease: "power2.out" });
-            const glowYTo = gsap.quickTo(glowRef.current, "y", { duration: 1, ease: "power2.out" });
-
-            const handleMouseMove = (e: MouseEvent) => {
-                if (!sectionRef.current) return;
-                const rect = sectionRef.current.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const y = (e.clientY - rect.top) / rect.height;
-
-                gridXTo((x - 0.5) * 40);
-                gridYTo((y - 0.5) * 40);
-                bigTextXTo((x - 0.5) * -100);
-                glowXTo(e.clientX - rect.left);
-                glowYTo(e.clientY - rect.top);
-            };
-
-            window.addEventListener('mousemove', handleMouseMove);
-
-            gsap.fromTo(".contact-reveal",
-                { y: 80, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    stagger: 0.12,
-                    duration: 1.2,
-                    ease: "power4.out",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 85%",
-                        once: true
-                    }
-                }
-            );
-
-            gsap.fromTo(".drone-anim",
-                { x: 300, y: -200, opacity: 0, rotation: -15, scale: 0.5 },
-                {
-                    x: 0, y: 0, opacity: 1, rotation: 0, scale: 1,
-                    duration: 1.5, ease: "back.out(1.2)", delay: 0.2,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 80%",
-                        once: true
-                    }
-                }
-            );
-
-            // Decorative background removed
-
-            return () => window.removeEventListener('mousemove', handleMouseMove);
-        }, sectionRef);
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <section ref={sectionRef} id="contacts" className="relative py-12 md:py-16 bg-white text-center transform-gpu">
+        <section id="contacts" className="relative py-12 md:py-16 bg-white text-center transform-gpu">
 
             {/* Decorative background removed */}
 
             <div className="relative z-10 max-w-7xl mx-auto px-6">
-                <div className="relative inline-flex flex-col items-center w-full max-w-4xl mx-auto mb-12 contact-reveal mt-8">
+                <div className="relative inline-flex flex-col items-center w-full max-w-4xl mx-auto mb-12 mt-8">
                     {/* Floating Drone Decor */}
                     <img 
                         src="/decor/decor1.png" 
@@ -95,10 +22,10 @@ const ContactSection = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                     </h2>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 contact-reveal">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
                     <button
                         onClick={onCalcOpen}
-                        className="group relative inline-flex items-center gap-4 bg-brand-dark text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-green transition-all duration-500 overflow-hidden shadow-2xl"
+                        className="hidden md:inline-flex group relative items-center gap-4 bg-brand-dark text-white px-10 py-5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-green transition-all duration-500 overflow-hidden shadow-2xl"
                     >
                         <span className="relative z-10">Оставить заявку</span>
                     </button>
