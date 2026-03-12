@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev --prefix app",
-    "build": "npm run build --prefix app",
-    "lint": "npm run lint --prefix app",
-    "preview": "npm run preview --prefix app"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@vercel/blob": "^2.3.1",
     "gsap": "^3.14.2",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
