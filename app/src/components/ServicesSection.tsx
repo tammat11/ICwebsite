@@ -110,29 +110,29 @@ const ServicesSection = () => {
             </div>
 
             {/* 4 главных вида услуг — сетка */}
-            <div className="max-w-7xl mx-auto px-4 md:px-6 mb-4 md:mb-6">
-                <div className="services-grid grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+            <div className="max-w-6xl mx-auto px-4 md:px-6 mb-4 md:mb-6">
+                <div className="services-grid grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
                     {mainServices.map((service, i) => (
                         <div
                             key={service.id}
-                            className="service-card-item group relative rounded-[20px] md:rounded-[32px] bg-white border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col aspect-[4/5] sm:aspect-square md:aspect-[3.5/5] lg:aspect-[4/5] reveal-on-scroll"
+                            className="service-card-item group relative rounded-[20px] md:rounded-[28px] bg-white border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col aspect-[4/5] sm:aspect-square md:aspect-[4/5] lg:aspect-[3.8/5] reveal-on-scroll"
                             style={{ animationDelay: `${0.1 + i * 0.08}s` }}
                         >
-                            <div className="relative flex-[0.8] md:flex-[1] min-h-0 overflow-hidden">
+                            <div className="relative flex-[0.7] md:flex-[0.85] min-h-0 overflow-hidden">
                                 <img
                                     src={service.image}
                                     alt={service.title}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-white/90 text-[7px] md:text-[9px] font-bold tracking-[0.1em] uppercase text-brand-dark">
+                                <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-white/90 text-[7px] md:text-[8px] font-bold tracking-[0.1em] uppercase text-brand-dark">
                                     {service.id}
                                 </span>
                             </div>
-                            <div className="shrink-0 px-2.5 md:px-4 py-2.5 md:py-4 flex flex-col gap-1 md:gap-2 border-t border-black/5 min-h-[60px] md:min-h-[90px]">
-                                <h3 className="text-[9px] md:text-[11px] lg:text-xs font-bold uppercase tracking-[0.12em] text-brand-dark leading-tight md:leading-snug">
+                            <div className="shrink-0 px-2.5 md:px-3.5 py-2.5 md:py-3.5 flex flex-col gap-1 md:gap-1.5 border-t border-black/5 min-h-[55px] md:min-h-[80px]">
+                                <h3 className="text-[9px] md:text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.12em] text-brand-dark leading-tight md:leading-snug">
                                     {service.title}
                                 </h3>
-                                <p className="text-[8px] md:text-[10px] lg:text-[11px] text-brand-dark/50 leading-tight line-clamp-2">
+                                <p className="text-[8px] md:text-[9.5px] lg:text-[10.5px] text-brand-dark/50 leading-tight line-clamp-2">
                                     {service.description}
                                 </p>
                             </div>
