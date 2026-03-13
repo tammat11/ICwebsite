@@ -23,6 +23,8 @@ import {
     Building
 } from 'lucide-react';
 
+import { createBitrixLead } from '../utils/bitrix';
+
 interface AICalculatorProps {
     isOpen: boolean;
     onClose: () => void;
@@ -56,22 +58,48 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
         { id: 'food', label: 'Общепит', icon: <Utensils size={22} /> }
     ];
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'unset';
-            setTimeout(() => setStep(1), 0);
+            setTimeout(() => {
+                setStep(1);
+                setCompany('');
+                setPhone('');
+                setComment('');
+                setIsSubmitting(false);
+            }, 0);
         }
     }, [isOpen]);
 
     if (!isOpen) return null;
 
-    const handleSubmit = () => {
-        // Here you would handle sending the request
-        console.log({ type, size, company, phone, comment });
-        onClose();
-        alert('Заявка успешно отправлена!');
+    const handleSubmit = async () => {
+        if (!phone) {
+            alert('Пожалуйста, введите номер телефона');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const sectorLabel = sectorTypes.find(s => s.id === type)?.label || type;
+            await createBitrixLead({
+                title: `Калькулятор: ${sectorLabel} (${size} м²)`,
+                company: company,
+                phone: phone,
+                comments: `Тип объекта: ${sectorLabel}\nПлощадь: ${size} м²\nКомментарий: ${comment}`,
+            });
+            
+            alert('Заявка успешно отправлена!');
+            onClose();
+        } catch (error) {
+            alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -258,11 +286,12 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                 ) : (
                                     <button
                                         onClick={handleSubmit}
-                                        className="group flex flex-1 ml-3 sm:ml-4 items-center justify-center gap-2 lg:gap-3 py-4 rounded-full bg-brand-green text-white text-[9px] sm:text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-[0_15px_30px_rgba(131,182,67,0.4)] transition-all active:scale-95 relative overflow-hidden"
+                                        disabled={isSubmitting}
+                                        className={`group flex flex-1 ml-3 sm:ml-4 items-center justify-center gap-2 lg:gap-3 py-4 rounded-full bg-brand-green text-white text-[9px] sm:text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-[0_15px_30px_rgba(131,182,67,0.4)] transition-all active:scale-95 relative overflow-hidden ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                                     >
                                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                                        <span className="relative z-10 mt-0.5">ОТПРАВИТЬ</span>
-                                        <Check size={16} strokeWidth={3} className="relative z-10 sm:w-[18px] sm:h-[18px] group-hover:scale-125 transition-transform" />
+                                        <span className="relative z-10 mt-0.5">{isSubmitting ? 'ОТПРАВКА...' : 'ОТПРАВИТЬ'}</span>
+                                        {!isSubmitting && <Check size={16} strokeWidth={3} className="relative z-10 sm:w-[18px] sm:h-[18px] group-hover:scale-125 transition-transform" />}
                                     </button>
                                 )}
                             </div>

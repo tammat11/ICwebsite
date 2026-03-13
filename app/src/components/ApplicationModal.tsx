@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { X } from 'lucide-react';
+import { createBitrixLead } from '../utils/bitrix';
 
 interface ApplicationModalProps {
     isOpen: boolean;
@@ -7,8 +9,44 @@ interface ApplicationModalProps {
     category?: string;
 }
 
-const ApplicationModal = ({ isOpen, onClose, position }: ApplicationModalProps) => {
+const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationModalProps) => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [message, setMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     if (!isOpen) return null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!name || !phone) {
+            alert('Пожалуйста, заполните обязательные поля (Имя и Телефон)');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await createBitrixLead({
+                title: `Отклик: ${category || 'Общий'} - ${position || 'Без позиции'}`,
+                name: name,
+                email: email,
+                phone: phone,
+                comments: `Категория: ${category}\nПозиция: ${position}\n\nСообщение: ${message}`,
+            });
+
+            alert('Заявка успешно отправлена!');
+            onClose();
+            setName('');
+            setEmail('');
+            setPhone('');
+            setMessage('');
+        } catch (error) {
+            alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -25,11 +63,14 @@ const ApplicationModal = ({ isOpen, onClose, position }: ApplicationModalProps) 
                     <p className="text-brand-green font-bold mb-6">{position}</p>
                 )}
 
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-bold mb-2">Имя</label>
+                        <label className="block text-sm font-bold mb-2">Имя *</label>
                         <input
                             type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
                             placeholder="Ваше имя"
                         />
@@ -39,31 +80,30 @@ const ApplicationModal = ({ isOpen, onClose, position }: ApplicationModalProps) 
                         <label className="block text-sm font-bold mb-2">Email</label>
                         <input
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
                             placeholder="your@email.com"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold mb-2">Телефон</label>
+                        <label className="block text-sm font-bold mb-2">Телефон *</label>
                         <input
                             type="tel"
+                            required
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
                             placeholder="+7 (___) ___-__-__"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold mb-2">Резюме (опционально)</label>
-                        <input
-                            type="file"
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
-                        />
-                    </div>
-
-                    <div>
                         <label className="block text-sm font-bold mb-2">Сопроводительное письмо</label>
                         <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none h-32"
                             placeholder="Расскажите о себе..."
                         />
@@ -71,9 +111,10 @@ const ApplicationModal = ({ isOpen, onClose, position }: ApplicationModalProps) 
 
                     <button
                         type="submit"
-                        className="w-full bg-brand-green text-white py-4 rounded-xl font-bold hover:bg-brand-green/90 transition-colors"
+                        disabled={isSubmitting}
+                        className={`w-full bg-brand-green text-white py-4 rounded-xl font-bold hover:bg-brand-green/90 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                        Отправить заявку
+                        {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
                     </button>
                 </form>
             </div>

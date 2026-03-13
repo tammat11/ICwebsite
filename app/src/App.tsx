@@ -50,7 +50,7 @@ function App() {
       <Navbar onCalcOpen={() => setCalcOpen(true)} />
       <Routes location={location}>
         <Route path="/" element={<Home onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services" element={<ServicesPage onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/news" element={<NewsPage onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/contacts" element={<ContactsPage />} />

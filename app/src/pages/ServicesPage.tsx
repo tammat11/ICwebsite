@@ -88,7 +88,7 @@ const services = [
     }
 ];
 
-const ServicesPage = () => {
+const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     const [rootRef, inView] = useInView();
     return (
         <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
@@ -141,7 +141,10 @@ const ServicesPage = () => {
                                 "Сложный" объект? <br />
                                 <span className="text-brand-dark/40">Мы любим вызовы.</span>
                             </h2>
-                            <button className="bg-brand-dark text-white px-10 py-5 rounded-xl text-lg font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-xl">
+                            <button 
+                                onClick={onCalcOpen}
+                                className="bg-brand-dark text-white px-10 py-5 rounded-xl text-lg font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-xl"
+                            >
                                 Рассчитать смету
                             </button>
                         </div>
