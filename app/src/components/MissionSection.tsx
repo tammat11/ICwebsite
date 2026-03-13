@@ -1,68 +1,13 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { Target, Eye, Heart, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const MissionSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
+    const [sectionRef, inView] = useInView();
     const triggerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // 1. Sticky Title Animation (desktop only)
-            if (window.innerWidth >= 1024) {
-                gsap.to(".mission-title-sticky", {
-                    scrollTrigger: {
-                        trigger: triggerRef.current,
-                        start: "top 20%",
-                        end: "bottom bottom",
-                        pin: ".mission-title-container",
-                        pinSpacing: false,
-                        scrub: 1
-                    }
-                });
-            }
-
-            // 2. Connector Line Growth
-            gsap.fromTo(".mission-connector-line",
-                { scaleY: 0 },
-                {
-                    scaleY: 1,
-                    transformOrigin: "top center",
-                    scrollTrigger: {
-                        trigger: triggerRef.current,
-                        start: "top 70%",
-                        end: "bottom bottom",
-                        scrub: 0.5
-                    }
-                }
-            );
-
-            // 3. Staggered reveal for blocks
-            gsap.utils.toArray<HTMLElement>(".mission-block-entry").forEach((block) => {
-                gsap.fromTo(block,
-                    { y: 100, opacity: 0 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 1,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: block,
-                            start: "top 85%",
-                        }
-                    }
-                );
-            });
-
-        }, sectionRef);
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <section ref={sectionRef} className="bg-white relative overflow-hidden" id="mission">
+        <section ref={sectionRef} className={`bg-white relative overflow-hidden ${inView ? 'in-view' : ''}`} id="mission">
             <div ref={triggerRef} className="max-w-7xl mx-auto px-6 py-12 md:py-32 flex flex-col lg:flex-row gap-10 lg:gap-20">
 
                 {/* L E F T : Sticky Info (The Context) */}
@@ -94,10 +39,10 @@ const MissionSection = () => {
                 <div className="w-full lg:w-2/3 space-y-16 md:space-y-32 relative">
 
                     {/* Vertical Connecting Cable */}
-                    <div className="mission-connector-line hidden lg:block absolute -left-10 top-0 w-[1px] h-full bg-gradient-to-b from-brand-green via-brand-dark/10 to-transparent origin-top" />
+                    <div className="mission-connector-line hidden lg:block absolute -left-10 top-0 w-[1px] h-full bg-gradient-to-b from-brand-green via-brand-dark/10 to-transparent origin-top animate-line-grow" />
 
                     {/* BLOCK 1: MISSION (Massive Impact) */}
-                    <div className="mission-block-entry relative pl-0 lg:pl-10">
+                    <div className="mission-block-entry relative pl-0 lg:pl-10 reveal-on-scroll" style={{ animationDelay: '0.2s' }}>
                         <div className="absolute -left-2 top-0 opacity-[0.05] select-none">
                             <span className="text-[6rem] md:text-[10rem] font-bold leading-none">01</span>
                         </div>
@@ -120,7 +65,7 @@ const MissionSection = () => {
                     </div>
 
                     {/* BLOCK 2: VISION (Split Layout) */}
-                    <div className="mission-block-entry relative pl-0 lg:pl-10">
+                    <div className="mission-block-entry relative pl-0 lg:pl-10 reveal-on-scroll" style={{ animationDelay: '0.4s' }}>
                         <div className="absolute -left-2 top-0 opacity-[0.05] select-none">
                             <span className="text-[6rem] md:text-[10rem] font-bold leading-none">02</span>
                         </div>
@@ -148,7 +93,7 @@ const MissionSection = () => {
                     </div>
 
                     {/* BLOCK 3: VALUES (Grid Detail) */}
-                    <div className="mission-block-entry relative pl-0 lg:pl-10 pb-20">
+                    <div className="mission-block-entry relative pl-0 lg:pl-10 pb-20 reveal-on-scroll" style={{ animationDelay: '0.6s' }}>
                         <div className="absolute -left-2 top-0 opacity-[0.05] select-none">
                             <span className="text-[6rem] md:text-[10rem] font-bold leading-none">03</span>
                         </div>

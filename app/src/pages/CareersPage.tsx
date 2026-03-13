@@ -1,62 +1,33 @@
-import { useLayoutEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import { useState } from 'react';
 import Footer from '../components/Footer';
 import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock } from 'lucide-react';
 import ApplicationModal from '../components/ApplicationModal';
+import { useInView } from '../hooks/useInView';
 
 const CareersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [category, setCategory] = useState<string>('Office');
-    const root = useRef<HTMLDivElement>(null);
+    const [root, inView] = useInView();
 
     const openModal = (cat: string) => {
         setCategory(cat);
         setIsModalOpen(true);
     };
 
-    useLayoutEffect(() => {
-        const ctx = gsap.context(() => {
-            // Initial hide to prevent flash
-            gsap.set(".career-title-line, .career-subtitle", { opacity: 0, y: 50 });
-
-            // Header Animation - Line by Line
-            gsap.to(".career-title-line", {
-                y: 0,
-                opacity: 1,
-                duration: 1,
-                stagger: 0.15,
-                ease: "power3.out",
-                delay: 0.2
-            });
-
-            gsap.to(".career-subtitle", {
-                opacity: 1,
-                y: 0,
-                duration: 1,
-                delay: 0.8,
-                ease: "power2.out"
-            });
-
-
-        }, root);
-
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <div ref={root} className="min-h-screen bg-brand-light selection:bg-brand-green/20">
+        <div ref={root} className={`min-h-screen bg-brand-light selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
             <main className="pt-24 sm:pt-32 pb-20 px-6">
                 {/* Hero Section */}
                 <div className="max-w-7xl mx-auto mb-16 md:mb-32 relative">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/10 rounded-full blur-[100px] pointer-events-none" />
 
-                    <span className="career-subtitle text-brand-green text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase block mb-6 max-w-4xl">
+                    <span className="career-subtitle text-brand-green text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase block mb-6 max-w-4xl reveal-on-scroll" style={{ animationDelay: '0.1s' }}>
                     </span>
                     <h1 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter text-brand-dark leading-[0.9] mb-8">
-                        <div className="overflow-hidden"><span className="career-title-line block">СТАНЬ ЧАСТЬЮ</span></div>
-                        <div className="overflow-hidden"><span className="career-title-line block text-brand-green uppercase">КОМАНДЫ ЛИДЕРОВ</span></div>
+                        <div className="overflow-hidden"><span className="career-title-line block reveal-on-scroll" style={{ animationDelay: '0.2s' }}>СТАНЬ ЧАСТЬЮ</span></div>
+                        <div className="overflow-hidden"><span className="career-title-line block text-brand-green uppercase reveal-on-scroll" style={{ animationDelay: '0.35s' }}>КОМАНДЫ ЛИДЕРОВ</span></div>
                     </h1>
-                    <p className="career-subtitle text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium">
+                    <p className="career-subtitle text-lg md:text-xl text-brand-dark/50 max-w-2xl font-medium reveal-on-scroll" style={{ animationDelay: '0.8s' }}>
                         Мы расширяем сеть и ищем тех, кто готов расти вместе с нами: надёжных партнёров по клинингу, талантливых специалистов в бэк-офис и ответственных операторов уборки для работы на объектах по всей стране.
                     </p>
                 </div>
@@ -64,7 +35,7 @@ const CareersPage = () => {
                 {/* Main Directions */}
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 cards-container mb-32">
 
-                    <div className="career-card animate-fade-in opacity-0 group relative p-6 md:p-8 rounded-[32px] bg-[#111] border border-white/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:600ms]">
+                    <div className="career-card reveal-on-scroll group relative p-6 md:p-8 rounded-[32px] bg-[#111] border border-white/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:600ms]">
                         <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Briefcase size={160} className="text-white" />
                         </div>
@@ -92,7 +63,7 @@ const CareersPage = () => {
                         </div>
                     </div>
 
-                    <div className="career-card animate-fade-in opacity-0 group relative p-6 md:p-8 rounded-[32px] bg-brand-green text-white overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:800ms]">
+                    <div className="career-card reveal-on-scroll group relative p-6 md:p-8 rounded-[32px] bg-brand-green text-white overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:800ms]">
                         <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                             <HardHat size={160} />
                         </div>
@@ -120,7 +91,7 @@ const CareersPage = () => {
                         </div>
                     </div>
 
-                    <div className="career-card animate-fade-in opacity-0 group relative p-6 md:p-8 rounded-[32px] bg-white border border-brand-dark/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:1000ms]">
+                    <div className="career-card reveal-on-scroll group relative p-6 md:p-8 rounded-[32px] bg-white border border-brand-dark/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:1000ms]">
                         <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Users size={160} className="text-brand-dark" />
                         </div>

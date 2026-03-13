@@ -1,6 +1,3 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-
 const clients = [
     { name: "Magnum", domain: "magnum.kz" },
     { name: "Kaspi Bank", domain: "kaspi.kz" },
@@ -18,30 +15,13 @@ const clients = [
     { name: "Samsung", domain: "samsung.com" },
 ];
 
+import { useInView } from '../hooks/useInView';
+
 const ClientsMarquee = () => {
-    const marqueeRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const marquee = marqueeRef.current;
-        if (!marquee) return;
-
-        const totalWidth = marquee.scrollWidth / 3;
-
-        const anim = gsap.to(marquee, {
-            x: -totalWidth,
-            duration: 40,
-            repeat: -1,
-            ease: "none"
-        });
-
-        return () => {
-            anim.kill();
-        };
-    }, []);
-
+    const [sectionRef, inView] = useInView();
     return (
-        <section className="py-20 bg-white border-y border-black/5 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-6 mb-12">
+        <section ref={sectionRef} className={`py-20 bg-white border-y border-black/5 overflow-hidden ${inView ? 'in-view' : ''}`}>
+            <div className="max-w-7xl mx-auto px-6 mb-12 reveal-on-scroll" style={{ animationDelay: '0s' }}>
                 <div className="flex items-center gap-6">
                     <span className="text-[12px] font-black uppercase tracking-[0.3em] text-brand-dark/30 whitespace-nowrap">Наши ключевые партнеры</span>
                     <div className="h-px w-full bg-black/5" />
@@ -49,8 +29,8 @@ const ClientsMarquee = () => {
             </div>
 
             <div className="relative">
-                <div ref={marqueeRef} className="flex whitespace-nowrap gap-12 md:gap-24 items-center w-max">
-                    {[1, 2, 3].map((set) => (
+                <div className="flex whitespace-nowrap gap-12 md:gap-24 items-center w-max animate-marquee">
+                    {[1, 2].map((set) => (
                         <div key={set} className="flex items-center gap-12 md:gap-24">
                             {clients.map((client, i) => (
                                 <div

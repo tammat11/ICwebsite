@@ -1,7 +1,9 @@
 import { useRef } from 'react';
 import { Search, Calculator, CalendarCheck, Sparkles } from 'lucide-react';
+import { useInView } from '../hooks/useInView';
 
 const ProcessSection = () => {
+    const [sectionRef, inView] = useInView();
     const containerRef = useRef<HTMLDivElement>(null);
     const steps = [
         {
@@ -31,13 +33,11 @@ const ProcessSection = () => {
     ];
 
     return (
-        <section ref={containerRef} className="pt-4 pb-10 bg-white relative overflow-hidden" id="process">
-            {/* Decorative background removed */}
-
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <section ref={sectionRef} className={`pt-4 pb-10 bg-white relative overflow-hidden ${inView ? 'in-view' : ''}`} id="process">
+            <div className="max-w-7xl mx-auto px-6 relative z-10" ref={containerRef}>
 
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 reveal-on-scroll" style={{ animationDelay: '0s' }}>
                     <h2 className="section-header text-brand-dark">
                         ЛЕГКИЙ ПУТЬ <br />
                         <span className="text-brand-green">К РЕЗУЛЬТАТУ</span>
@@ -49,18 +49,18 @@ const ProcessSection = () => {
 
                     <div className="process-grid grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 relative z-10">
                         {steps.map((step, i) => (
-                            <div key={i} className="process-card-anim group relative flex flex-col">
+                            <div key={i} className="process-card-anim group relative flex flex-col reveal-on-scroll" style={{ animationDelay: `${0.1 + i * 0.1}s` }}>
 
                                 {/* Card Body */}
-                                <div className="mt-8 relative bg-white border border-gray-100 rounded-[40px] p-8 md:p-10 h-full min-h-[300px] flex flex-col transition-all duration-700 hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] hover:border-brand-green/30 group-hover:-translate-y-3">
+                                <div className="mt-4 md:mt-6 relative bg-white border border-gray-100 rounded-[30px] md:rounded-[40px] p-6 md:p-8 h-full min-h-[220px] md:min-h-[260px] flex flex-col transition-all duration-700 hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] hover:border-brand-green/30 group-hover:-translate-y-3">
 
                                     {/* Large Background ID */}
-                                    <div className="absolute top-6 right-8 text-8xl font-black text-gray-50/80 group-hover:text-brand-green/[0.06] transition-colors duration-700 select-none italic">
+                                    <div className="absolute top-1 right-3 md:top-4 md:right-6 text-5xl md:text-7xl font-black text-gray-50/80 group-hover:text-brand-green/[0.06] transition-colors duration-700 select-none italic">
                                         {step.id}
                                     </div>
 
                                     {/* Elevated Icon */}
-                                    <div className="mb-10 w-20 h-20 bg-gray-50 rounded-[24px] flex items-center justify-center text-brand-dark shadow-sm transition-all duration-500 group-hover:bg-brand-green group-hover:text-white group-hover:shadow-[0_20px_40px_rgba(131,182,67,0.3)] group-hover:scale-110 group-hover:rotate-6">
+                                    <div className="mb-6 md:mb-8 w-14 h-14 md:w-16 md:h-16 bg-gray-50 rounded-[18px] md:rounded-[22px] flex items-center justify-center text-brand-dark shadow-sm transition-all duration-500 group-hover:bg-brand-green group-hover:text-white group-hover:shadow-[0_20px_40px_rgba(131,182,67,0.3)] group-hover:scale-110 group-hover:rotate-6">
                                         <div className="transform transition-transform duration-500 group-hover:scale-110">
                                             {step.icon}
                                         </div>
@@ -68,7 +68,7 @@ const ProcessSection = () => {
 
                                     {/* Content */}
                                     <div className="mt-auto relative z-10">
-                                        <h3 className="text-lg md:text-2xl font-black uppercase tracking-tight text-brand-dark mb-3 md:mb-4 transition-colors duration-500 group-hover:text-brand-green leading-snug md:leading-none min-h-[2.5rem] md:min-h-[3rem] flex items-end">
+                                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-brand-dark mb-2 md:mb-3 transition-colors duration-500 group-hover:text-brand-green leading-snug md:leading-none min-h-[2rem] md:min-h-[2.5rem] flex items-end">
                                             {step.title}
                                         </h3>
                                         <p className="text-[10px] md:text-xs font-medium text-gray-400 leading-snug md:leading-relaxed uppercase tracking-[0.18em] md:tracking-wider group-hover:text-gray-500 transition-colors">

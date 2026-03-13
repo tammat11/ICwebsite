@@ -1,95 +1,11 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { Shield, Lock, BadgeCheck, Users, Zap } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const GuaranteeSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
+    const [sectionRef, inView] = useInView();
     const sealRef = useRef<HTMLDivElement>(null);
     const rotatingTextRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // 1. Seal floating animation
-            gsap.to([sealRef.current, rotatingTextRef.current], {
-                y: -20,
-                rotationZ: 1,
-                duration: 4,
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut"
-            });
-
-            // 2. Cards layout: Peeking from behind the large circle
-            const cards = gsap.utils.toArray<HTMLElement>(".guarantee-card");
-
-            // Initial state: Hidden behind the seal
-            // We set z-index to 10 so they are above the rotating text (z-5) but below the seal (z-20)
-            gsap.set(cards, {
-                scale: 0.5,
-                opacity: 0,
-                x: 0,
-                y: 0,
-                rotate: 0,
-                zIndex: 10
-            });
-
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse"
-                }
-            });
-
-            tl.to(cards, {
-                opacity: 1,
-                scale: 1,
-                duration: 1.5,
-                ease: "expo.out",
-                stagger: 0.1,
-                x: (i) => {
-                    if (window.innerWidth < 768) {
-                        const mobileX = [-85, 85, -85, 85];
-                        return mobileX[i];
-                    }
-                    const xPositions = [-440, -360, 360, 440];
-                    return xPositions[i];
-                },
-                y: (i) => {
-                    if (window.innerWidth < 768) {
-                        const mobileY = [240, 240, 410, 410];
-                        return mobileY[i];
-                    }
-                    const yPositions = [-160, 180, -160, 180];
-                    return yPositions[i];
-                },
-                rotate: (i) => {
-                    if (window.innerWidth < 768) return 0;
-                    const rotations = [-10, -5, 5, 10];
-                    return rotations[i];
-                }
-            });
-
-            // 3. Seal Entrance
-            gsap.from([sealRef.current, rotatingTextRef.current], {
-                scale: 0.8,
-                opacity: 0,
-                duration: 1.5,
-                ease: "power4.out",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 90%",
-                    once: true
-                }
-            });
-
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
 
     const guarantees = [
         {
@@ -115,7 +31,7 @@ const GuaranteeSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="relative py-12 md:py-20 bg-brand-light overflow-hidden perspective-2000">
+        <section ref={sectionRef} className={`relative py-12 md:py-20 bg-brand-light overflow-hidden perspective-2000 ${inView ? 'in-view' : ''}`}>
 
             {/* Background Base */}
             <div className="absolute inset-0 bg-brand-light" />
@@ -135,7 +51,7 @@ const GuaranteeSection = () => {
                 <div className="relative flex flex-col items-center justify-center w-full min-h-[750px] md:h-[600px]">
 
                     {/* 1. LAYER: Rotating Text & Orbital Paths (Technical background) */}
-                    <div ref={rotatingTextRef} className="absolute top-0 md:inset-0 flex items-center justify-center z-[5] pointer-events-none opacity-[0.15] md:opacity-20 transform -translate-y-20 md:translate-y-0">
+                    <div ref={rotatingTextRef} className="absolute top-0 md:inset-0 flex items-center justify-center z-[5] pointer-events-none opacity-[0.15] md:opacity-20 -translate-y-20 md:translate-y-0">
                         <div className="w-[300px] h-[300px] md:w-[640px] md:h-[640px] relative">
                             {/* Orbital Path Lines - Subtle technical detail */}
                             <div className="absolute inset-0 border border-brand-secondary/10 rounded-full scale-[0.85]" />
@@ -155,11 +71,18 @@ const GuaranteeSection = () => {
                     </div>
 
                     {/* 2. LAYER: The Cards (Peeking with precise offsets for beauty) */}
-                    <div className="absolute top-0 md:inset-0 flex items-center justify-center z-30 pointer-events-none transform -translate-y-20 md:translate-y-0">
-                        {guarantees.map((item, i) => {
-                            // Precise offsets for a 'flower' or 'orbit' effect
-                            return (
-                                <div key={i} className="guarantee-card absolute w-[160px] md:w-[340px] pointer-events-auto">
+                    <div className="absolute top-0 md:inset-0 flex items-center justify-center z-30 pointer-events-none -translate-y-20 md:translate-y-0">
+                        {guarantees.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className={`guarantee-card absolute w-[160px] md:w-[340px] pointer-events-auto z-10 reveal-on-scroll ${[
+                                        'translate-x-[-85px] translate-y-[240px] md:translate-x-[-440px] md:translate-y-[-160px] md:rotate-[-10deg]',
+                                        'translate-x-[85px] translate-y-[240px] md:translate-x-[-360px] md:translate-y-[180px] md:rotate-[-5deg]',
+                                        'translate-x-[-85px] translate-y-[410px] md:translate-x-[360px] md:translate-y-[-160px] md:rotate-[5deg]',
+                                        'translate-x-[85px] translate-y-[410px] md:translate-x-[440px] md:translate-y-[180px] md:rotate-[10deg]',
+                                    ][i]}`}
+                                    style={{ animationDelay: `${0.2 + i * 0.1}s` }}
+                                >
                                     <div className={`bg-white/95 backdrop-blur-3xl border border-black/5 p-4 md:p-10 rounded-[32px] md:rounded-[50px] shadow-[0_30px_70px_rgba(0,0,0,0.05)] transition-all duration-700 ${i % 2 === 0 ? 'hover:border-brand-green/30' : 'hover:border-brand-secondary/30'} hover:-translate-y-4 group ring-1 ring-black/5 relative overflow-hidden h-[160px] md:h-auto flex flex-col justify-center`}>
 
                                         {/* Internal Glow on Hover */}
@@ -178,12 +101,11 @@ const GuaranteeSection = () => {
                                         </p>
                                     </div>
                                 </div>
-                            );
-                        })}
+                        ))}
                     </div>
 
                     {/* 3. LAYER: Central Seal Main Body (Heavier Depth) */}
-                    <div ref={sealRef} className="relative z-20 w-64 h-64 md:w-[520px] md:h-[520px] flex items-center justify-center transform -translate-y-24 md:translate-y-0">
+                    <div ref={sealRef} className="relative z-20 w-64 h-64 md:w-[520px] md:h-[520px] flex items-center justify-center -translate-y-24 md:translate-y-0 reveal-scale-in" style={{ animationDelay: '0.15s' }}>
 
                         {/* 3D Glass Layers - More pronounced depth */}
                         <div className="absolute inset-0 bg-white/60 backdrop-blur-xl rounded-full border border-white/40 ring-1 ring-black/5 shadow-2xl" />

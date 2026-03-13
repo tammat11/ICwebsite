@@ -1,11 +1,14 @@
+import { useInView } from '../hooks/useInView';
+
 const ContactSection = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
+    const [sectionRef, inView] = useInView();
     return (
-        <section id="contacts" className="relative py-12 md:py-16 bg-white text-center transform-gpu">
+        <section ref={sectionRef} id="contacts" className={`relative py-12 md:py-16 bg-white text-center transform-gpu ${inView ? 'in-view' : ''}`}>
 
             {/* Decorative background removed */}
 
             <div className="relative z-10 max-w-7xl mx-auto px-6">
-                <div className="relative inline-flex flex-col items-center w-full max-w-4xl mx-auto mb-12 mt-8">
+                <div className="relative inline-flex flex-col items-center w-full max-w-4xl mx-auto mb-12 mt-8 reveal-on-scroll" style={{ animationDelay: '0s' }}>
                     {/* Floating Drone Decor */}
                     <img 
                         src="/decor/decor1.png" 
@@ -31,7 +34,7 @@ const ContactSection = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                     </button>
                 </div>
 
-                <div className="mt-12 md:mt-20 flex flex-wrap justify-center gap-x-8 md:gap-x-16 gap-y-6 md:gap-y-8 contact-reveal">
+                <div className="mt-12 md:mt-20 flex flex-wrap justify-center gap-x-8 md:gap-x-16 gap-y-6 md:gap-y-8 reveal-on-scroll" style={{ animationDelay: '0.2s' }}>
                     <div className="flex flex-col items-center md:items-start gap-2">
                         <span className="text-[10px] font-black uppercase tracking-widest text-black/20">Продажи</span>
                         <a href="tel:+77770087360" className="text-xl md:text-2xl font-bold hover:text-brand-green transition-colors">+7 777 008 73 60</a>

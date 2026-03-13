@@ -1,43 +1,11 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BarChart3, CheckCircle2, ShieldCheck, LayoutDashboard, Globe, Zap, Cpu } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const PainSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-
-
-            // 2. Bento Cards Entrance - Pop in with bounce
-            gsap.fromTo(".bento-card",
-                { y: 60, opacity: 0, scale: 0.98 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    scale: 1,
-                    stagger: 0.15,
-                    duration: 1.5,
-                    ease: "elastic.out(1, 0.8)",
-                    scrollTrigger: {
-                        trigger: ".benefit-cards-grid",
-                        start: "top 95%",
-                    }
-                }
-            );
-
-
-
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
+    const [sectionRef, inView] = useInView();
 
     return (
-        <section ref={sectionRef} className="relative py-12 md:py-16 bg-white overflow-hidden text-brand-dark" id="benefits">
+        <section ref={sectionRef} className={`relative py-12 md:py-16 bg-white overflow-hidden text-brand-dark ${inView ? 'in-view' : ''}`} id="benefits">
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
@@ -48,7 +16,7 @@ const PainSection = () => {
                 <div className="benefit-cards-grid grid grid-cols-1 sm:grid-cols-12 gap-4 md:gap-10">
 
                     {/* CARD 1: CONTROL (Puffy Glass Style) */}
-                    <div className="bento-card col-span-1 sm:col-span-7 group relative">
+                    <div className="bento-card col-span-1 sm:col-span-7 group relative reveal-on-scroll" style={{ animationDelay: '0.1s' }}>
                         <div className="h-full bg-slate-50 border border-black/[0.04] rounded-[24px] md:rounded-[40px] p-5 md:p-10 flex flex-col justify-between overflow-hidden relative shadow-sm hover:shadow-xl hover:bg-white transition-all duration-700">
                             <div className="relative z-10 max-w-sm">
                                 <div className="w-16 h-1 rounded-[22px] bg-brand-green/10 flex items-center justify-center text-brand-green mb-8 group-hover:rotate-12 transition-transform">
@@ -70,7 +38,7 @@ const PainSection = () => {
                     </div>
 
                     {/* CARD 2: SLA (The Strong Accent) */}
-                    <div className="bento-card col-span-1 sm:col-span-5 group relative h-[220px] md:h-[350px]">
+                    <div className="bento-card col-span-1 sm:col-span-5 group relative h-[220px] md:h-[350px] reveal-on-scroll" style={{ animationDelay: '0.25s' }}>
                         <div className="h-full bg-brand-dark rounded-[24px] md:rounded-[40px] p-5 md:p-10 flex flex-col justify-between overflow-hidden relative shadow-2xl transition-all duration-700 hover:scale-[1.02]">
                             <div className="relative z-10">
                                 <div className="text-[11px] font-bold text-white/30 mb-12 tracking-[0.4em]">QUALITY_GURU</div>
@@ -93,7 +61,7 @@ const PainSection = () => {
                     </div>
 
                     {/* CARD 3: LEGAL (The Trust Layer) */}
-                    <div className="bento-card col-span-1 sm:col-span-5 group relative h-[220px] md:h-[350px]">
+                    <div className="bento-card col-span-1 sm:col-span-5 group relative h-[220px] md:h-[350px] reveal-on-scroll" style={{ animationDelay: '0.4s' }}>
                         <div className="h-full bg-white border border-black/[0.04] rounded-[24px] md:rounded-[40px] p-5 md:p-10 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-1000">
                             <div className="relative z-10">
                                 <div className="w-16 h-16 rounded-[22px] bg-brand-secondary/10 flex items-center justify-center text-brand-secondary mb-10">
@@ -117,7 +85,7 @@ const PainSection = () => {
                     </div>
 
                     {/* CARD 4: BUDGET (The Efficiency King) */}
-                    <div className="bento-card col-span-1 sm:col-span-7 group relative h-[220px] md:h-[350px]">
+                    <div className="bento-card col-span-1 sm:col-span-7 group relative h-[220px] md:h-[350px] reveal-on-scroll" style={{ animationDelay: '0.55s' }}>
                         <div className="h-full bg-slate-50 border border-black/[0.04] rounded-[24px] md:rounded-[40px] p-5 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-8 overflow-hidden relative shadow-sm hover:shadow-xl hover:bg-white transition-all duration-700">
 
                             <div className="relative z-10 flex-1">

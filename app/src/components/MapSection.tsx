@@ -1,50 +1,8 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Building2, Navigation } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const MapSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-
-            // Map Tilt Effect
-            gsap.from(".map-container", {
-                rotationX: 20,
-                opacity: 0,
-                scale: 0.9,
-                duration: 1.5,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 90%",
-                    toggleActions: "play none none none",
-                    once: true
-                }
-            });
-
-            // Pins Pop-up
-            gsap.from(".map-pin", {
-                scale: 0,
-                y: 20,
-                opacity: 0,
-                stagger: 0.1,
-                duration: 0.8,
-                ease: "back.out(2)",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none none",
-                    once: true
-                }
-            });
-
-        }, sectionRef);
-        return () => ctx.revert();
-    }, []);
+    const [sectionRef, inView] = useInView();
 
     const cities = [
         { name: "Astana", top: "40%", left: "45%", size: "w-8 h-8", type: "HQ" },
@@ -57,7 +15,7 @@ const MapSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-24 bg-gray-50 relative overflow-hidden perspective-1000">
+        <section ref={sectionRef} className={`py-24 bg-gray-50 relative overflow-hidden perspective-1000 ${inView ? 'in-view' : ''}`}>
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                 <div className="text-center mb-16">
@@ -82,7 +40,7 @@ const MapSection = () => {
                     </div>
                 </div>
 
-                <div className="map-container relative w-full aspect-[16/9] md:aspect-[2.2/1] bg-white rounded-[40px] shadow-2xl overflow-hidden border border-gray-100 transform-gpu hover:scale-[1.02] transition-transform duration-700">
+                <div className="map-container relative w-full aspect-[16/9] md:aspect-[2.2/1] bg-white rounded-[40px] shadow-2xl overflow-hidden border border-gray-100 transform-gpu hover:scale-[1.02] transition-transform duration-700 reveal-scale-in" style={{ animationDelay: '0.1s' }}>
 
                     {/* Isometric Grid */}
                     <div className="absolute inset-0 opacity-[0.3]"
@@ -101,7 +59,7 @@ const MapSection = () => {
 
                     {/* Cities Pins */}
                     {cities.map((city, i) => (
-                        <div key={i} className="map-pin absolute group cursor-pointer z-10" style={{ top: city.top, left: city.left }}>
+                        <div key={i} className="map-pin absolute group cursor-pointer z-10 reveal-on-scroll" style={{ top: city.top, left: city.left, animationDelay: `${0.3 + i * 0.08}s` }}>
                             <div className="relative flex flex-col items-center">
                                 {/* Pin Head */}
                                 <div className={`${city.size} rounded-full ${city.type === 'HQ' ? 'bg-brand-green shadow-green-500/50' : 'bg-white border-2 border-brand-green'} shadow-lg flex items-center justify-center group-hover:scale-125 transition-transform duration-300 relative z-10`}>

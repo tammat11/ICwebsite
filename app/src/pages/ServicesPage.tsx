@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Clock, ShieldCheck, Zap, Sparkles, ArrowUpRight, Droplets, Mountain, Flower2, Bug, Settings, Snowflake, Coffee, Waves } from 'lucide-react';
+import { Clock, ShieldCheck, Zap, Sparkles, Droplets, Mountain, Flower2, Bug, Settings, Snowflake, Coffee, Waves } from 'lucide-react';
+import { useInView } from '../hooks/useInView';
 
 const services = [
     {
@@ -89,19 +89,20 @@ const services = [
 ];
 
 const ServicesPage = () => {
+    const [rootRef, inView] = useInView();
     return (
-        <div className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
+        <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
             <main className="pt-40 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
-                    <div className="mb-32 relative">
-                        <span className="services-hero-reveal text-brand-green font-bold tracking-[0.4em] uppercase text-sm block mb-4">
+                    <div className="mb-32 relative reveal-on-scroll" style={{ animationDelay: '0s' }}>
+                        <span className="text-brand-green font-bold tracking-[0.4em] uppercase text-sm block mb-4">
                             Наша Экспертиза
                         </span>
                         <h1 className="page-title text-[15vw] leading-[0.8] font-bold tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
                             Services
                         </h1>
-                        <h2 className="services-hero-reveal text-5xl md:text-8xl font-bold uppercase leading-none mb-8 relative z-10 text-brand-dark">
+                        <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none mb-8 relative z-10 text-brand-dark">
                             Услуги <br />
                             <span className="text-brand-green">Для Бизнеса</span>
                         </h2>
@@ -109,8 +110,8 @@ const ServicesPage = () => {
 
                     {/* Services Grid */}
                     <div className="services-grid grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4">
-                        {services.map((s) => (
-                            <div key={s.id} className="service-card group min-h-[220px] rounded-[24px] bg-white border border-black/5 hover:border-brand-green/30 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-xl p-6 flex flex-col justify-between">
+                        {services.map((s, i) => (
+                            <div key={s.id} className="service-card group min-h-[220px] rounded-[24px] bg-white border border-black/5 hover:border-brand-green/30 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-xl p-6 flex flex-col justify-between reveal-on-scroll" style={{ animationDelay: `${0.1 + i * 0.05}s` }}>
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="w-12 h-12 rounded-xl bg-brand-green/10 flex items-center justify-center text-brand-green transition-colors duration-500 group-hover:bg-brand-green group-hover:text-white">
                                         {s.icon}
@@ -133,7 +134,7 @@ const ServicesPage = () => {
                     </div>
 
                     {/* CTA Footer */}
-                    <div className="mt-32 p-10 md:p-16 rounded-[2rem] bg-brand-green relative overflow-hidden text-center shadow-2xl">
+                    <div className="mt-32 p-10 md:p-16 rounded-[2rem] bg-brand-green relative overflow-hidden text-center shadow-2xl reveal-on-scroll" style={{ animationDelay: '0.2s' }}>
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
                         <div className="relative z-10 flex flex-col items-center">
                             <h2 className="text-3xl md:text-5xl font-bold uppercase mb-8 leading-tight text-white max-w-3xl">

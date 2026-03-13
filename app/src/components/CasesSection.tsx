@@ -1,8 +1,9 @@
 import { useRef } from 'react';
 import { ArrowUpRight, ShieldCheck, TrendingDown, Zap } from 'lucide-react';
+import { useInView } from '../hooks/useInView';
 
 const CasesSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
+    const [sectionRef, inView] = useInView();
 
     const cases = [
         {
@@ -38,11 +39,11 @@ const CasesSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-8 md:py-12 bg-brand-light overflow-hidden relative" id="cases">
+        <section ref={sectionRef} className={`py-8 md:py-12 bg-brand-light overflow-hidden relative ${inView ? 'in-view' : ''}`} id="cases">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Header */}
-                <div className="mb-8 md:mb-12 text-center">
+                <div className="mb-8 md:mb-12 text-center reveal-on-scroll" style={{ animationDelay: '0s' }}>
                     <div className="section-tag">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
                         <span>Наши результаты</span>
@@ -62,7 +63,8 @@ const CasesSection = () => {
                     {cases.map((item, i) => (
                         <div
                             key={i}
-                            className={`case-card-v group flex flex-col md:flex-row ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} gap-6 md:gap-12 items-center py-2 md:py-4`}
+                            className={`case-card-v group flex flex-col md:flex-row ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} gap-6 md:gap-12 items-center py-2 md:py-4 reveal-on-scroll`}
+                            style={{ animationDelay: `${0.15 + i * 0.12}s` }}
                         >
                             {/* Image Side */}
                             <div className="w-full md:w-1/2 shrink-0">

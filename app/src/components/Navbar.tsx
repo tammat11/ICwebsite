@@ -41,11 +41,11 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
         <>
             <nav
                 ref={navRef}
-                className={`fixed top-0 left-0 w-full z-[110] transition-all duration-700 ease-expo px-3 md:px-6 
-                ${scrolled ? 'py-3 md:py-5' : 'py-4 md:py-8'}`}
+                className={`fixed top-0 left-0 w-full z-[110] transition-all duration-700 ease-expo px-2 md:px-6 
+                ${scrolled ? 'py-2 md:py-5' : 'py-3 md:py-8'}`}
             >
                 <div
-                    className={`max-w-5xl mx-auto flex items-center gap-2 md:gap-4 px-3 md:px-6 py-3 md:py-5 
+                    className={`max-w-5xl mx-auto flex items-center gap-0.5 md:gap-4 px-2 md:px-6 py-1.5 md:py-5 
                     rounded-full border transition-all duration-700 ease-expo backdrop-blur-xl relative
                     ${scrolled
                             ? 'bg-white/80 border-black/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.1)]'
@@ -59,27 +59,27 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                     <div className="flex items-center gap-3 md:gap-4 relative z-10 flex-shrink-0">
                         <Link
                             to="/"
-                            className={`flex items-center gap-1.5 md:gap-2 shrink-0 transition-all duration-500 transform
+                            className={`flex items-center gap-1 md:gap-2 shrink-0 transition-all duration-500 transform
                             ${logoVisible ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 -translate-x-4 pointer-events-none'}`}
                         >
-                            <img src="/logo_IC_group.png" alt="IC GROUP" className="h-6 md:h-9 w-auto object-contain filter saturate-[1.1]" />
+                            <img src="/logo_IC_group.png" alt="IC GROUP" className="h-5 md:h-9 w-auto object-contain filter saturate-[1.1]" />
                         </Link>
                     </div>
 
                     {/* Middle: Main Nav (visible on all breakpoints) */}
                     <div className="flex-1 flex items-center justify-center">
-                        <div className="flex items-center gap-0.5 md:gap-2 lg:gap-4 px-1 py-0.5 md:px-1.5 md:py-1 bg-black/[0.03] rounded-full relative z-10">
+                        <div className="flex items-center gap-0 md:gap-2 lg:gap-4 px-0.5 py-0.5 md:px-1.5 md:py-1 bg-black/[0.03] rounded-full relative z-10">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.to}
                                 to={link.to}
-                                className={`relative px-2 md:px-4 py-0.5 md:py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-[0.14em] md:tracking-widest transition-all duration-500
+                                className={`relative flex items-center justify-center px-1.5 md:px-4 py-1 md:py-2 rounded-full text-[7.5px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-widest transition-all duration-500
                                 ${location.pathname === link.to
                                         ? 'text-white bg-black shadow-lg scale-105'
                                         : 'text-brand-dark/50 hover:text-brand-dark hover:bg-white/50'
                                     }`}
                             >
-                                {link.label}
+                                <span className="pt-[1.5px] leading-none">{link.label}</span>
                             </Link>
                         ))}
                         </div>
@@ -102,11 +102,11 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
 
                         <button
                             onClick={onCalcOpen}
-                            className={`relative px-2 md:px-4 py-0.5 md:py-1 rounded-full overflow-hidden group transition-all duration-500 hover:shadow-[0_15px_30px_rgba(162,192,55,0.3)]
+                            className={`relative flex items-center justify-center px-1.5 md:px-4 py-1 md:py-2 rounded-full overflow-hidden group transition-all duration-500 hover:shadow-[0_15px_30px_rgba(162,192,55,0.3)]
                             ${scrolled ? 'bg-brand-green text-white' : 'bg-brand-dark text-white'}`}
                         >
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                            <span className="relative z-10 text-[8px] md:text-[10px] font-black uppercase tracking-[0.14em] md:tracking-widest leading-none">
+                            <span className="relative z-10 text-[7.5px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-widest leading-none pt-[1.5px]">
                                 Заявка
                             </span>
                         </button>

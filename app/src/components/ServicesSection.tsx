@@ -1,4 +1,7 @@
+import { useInView } from '../hooks/useInView';
+
 const ServicesSection = () => {
+    const [sectionRef, inView] = useInView();
     interface Service {
         id: string;
         title: string;
@@ -87,12 +90,10 @@ const ServicesSection = () => {
     const allServices = [...specializedServices, ...specializedServices];
 
     return (
-        <section className="py-4 md:py-6 bg-white relative" id="services">
-
-            {/* Decorative background removed */}
+        <section ref={sectionRef} className={`py-4 md:py-6 bg-white relative ${inView ? 'in-view' : ''}`} id="services">
 
             {/* Header */}
-            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-5 md:mb-6 text-center">
+            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-5 md:mb-6 text-center reveal-on-scroll" style={{ animationDelay: '0s' }}>
                 <h2 className="section-header text-brand-dark mb-4 overflow-visible">
                     <span className="services-title-word inline-block">НАШИ</span>{' '}
                     <span className="services-title-word inline-block">
@@ -108,15 +109,16 @@ const ServicesSection = () => {
                 </p>
             </div>
 
-            {/* 4 главных вида услуг */}
+            {/* 4 главных вида услуг — вертикальные прямоугольники */}
             <div className="max-w-6xl mx-auto px-6 mb-4 md:mb-8">
                 <div className="services-grid grid grid-cols-2 gap-4 md:gap-6">
-                    {mainServices.map((service) => (
+                    {mainServices.map((service, i) => (
                         <div
                             key={service.id}
-                            className="service-card-item group relative rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                            className="service-card-item group relative rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col aspect-[3/4] min-h-[200px] md:min-h-[280px] reveal-on-scroll"
+                            style={{ animationDelay: `${0.1 + i * 0.08}s` }}
                         >
-                            <div className="relative h-28 md:h-32 overflow-hidden">
+                            <div className="relative flex-1 min-h-0 overflow-hidden">
                                 <img
                                     src={service.image}
                                     alt={service.title}
@@ -126,11 +128,11 @@ const ServicesSection = () => {
                                     {service.id}
                                 </span>
                             </div>
-                            <div className="flex-1 px-3.5 md:px-4 py-3 md:py-4 flex flex-col gap-1.5 md:gap-2">
+                            <div className="shrink-0 px-3.5 md:px-4 py-3 md:py-4 flex flex-col gap-1.5 md:gap-2 border-t border-black/5 min-h-[85px] md:min-h-[100px]">
                                 <h3 className="text-[11px] md:text-xs font-bold uppercase tracking-[0.16em] text-brand-dark leading-snug">
                                     {service.title}
                                 </h3>
-                                <p className="text-[10px] md:text-[11px] text-brand-dark/60 leading-snug">
+                                <p className="text-[10px] md:text-[11px] text-brand-dark/60 leading-snug line-clamp-2">
                                     {service.description}
                                 </p>
                             </div>
@@ -150,12 +152,12 @@ const ServicesSection = () => {
                 <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
-                <div className="overflow-x-auto pb-4 md:pb-6">
-                    <div className="flex gap-4 md:gap-5 px-6 select-none">
+                <div className="overflow-hidden pb-4 md:pb-6 reveal-on-scroll-right" style={{ animationDelay: '0.1s' }}>
+                    <div className="animate-marquee select-none">
                         {allServices.map((service, i) => (
                             <div
                                 key={`${service.id}-${i}`}
-                                className="marquee-card-item flex-shrink-0 w-[160px] md:w-[220px] h-[210px] md:h-[280px] relative rounded-[18px] md:rounded-[26px] overflow-hidden group cursor-pointer bg-brand-dark"
+                                className="marquee-card-item flex-shrink-0 w-[160px] md:w-[220px] h-[210px] md:h-[280px] relative rounded-[18px] md:rounded-[26px] overflow-hidden group cursor-pointer bg-brand-dark mr-4 md:mr-5"
                             >
                                 <img
                                     src={service.image}

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { useInView } from '../hooks/useInView';
 
 interface NewsArticle {
     id: string;
@@ -20,7 +21,7 @@ interface NewsPageProps {
 const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     const [articles, setArticles] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
-    const rootRef = useRef<HTMLDivElement>(null);
+    const [rootRef, inView] = useInView();
 
     useEffect(() => {
         fetch('/api/news')
@@ -31,13 +32,13 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     }, []);
 
     return (
-        <div ref={rootRef} className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">
+        <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
             <Navbar alwaysVisible />
 
             <main className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
-                    <div className="mb-12 md:mb-16 relative">
+                    <div className="mb-12 md:mb-16 relative reveal-on-scroll" style={{ animationDelay: '0s' }}>
                         <h2 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
                             НОВОСТИ <br />
                             <span className="text-brand-green">И ПРОЕКТЫ</span>
@@ -61,8 +62,8 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                         </div>
                     ) : (
                     <div className="news-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {articles.map((article) => (
-                            <div key={article.id} className="news-card group rounded-[32px] bg-white border border-black/[0.03] hover:shadow-glass hover:border-brand-green/30 transition-all duration-700 overflow-hidden flex flex-col relative">
+                        {articles.map((article, i) => (
+                            <div key={article.id} className="news-card group rounded-[32px] bg-white border border-black/[0.03] hover:shadow-glass hover:border-brand-green/30 transition-all duration-700 overflow-hidden flex flex-col relative reveal-on-scroll" style={{ animationDelay: `${0.08 + i * 0.06}s` }}>
                                 {/* Image Overlay for Hover */}
                                 <div className="absolute inset-0 bg-brand-green/0 group-hover:bg-brand-green/[0.02] transition-colors duration-700 pointer-events-none z-0" />
 
@@ -124,7 +125,7 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                     )}
 
                     {/* CTA Footer - Оставить заявку */}
-                    <div className="mt-20 p-8 md:p-12 rounded-[2.5rem] bg-brand-green relative overflow-hidden text-center shadow-2xl">
+                    <div className="mt-20 p-8 md:p-12 rounded-[2.5rem] bg-brand-green relative overflow-hidden text-center shadow-2xl reveal-on-scroll" style={{ animationDelay: '0.15s' }}>
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
                         <div className="relative z-10 flex flex-col items-center">
                             <h2 className="text-2xl md:text-3xl font-bold uppercase mb-6 leading-tight text-white">

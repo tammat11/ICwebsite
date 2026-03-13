@@ -1,45 +1,17 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const ManifestoSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.fromTo(".reveal-manifesto",
-                { y: 60, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 1.2,
-                    ease: "power4.out",
-                    stagger: 0.2,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 85%",
-                        once: true
-                    }
-                }
-            );
-
-            // Arches animations removed
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
+    const [sectionRef, inView] = useInView();
 
     return (
-        <section ref={sectionRef} className="relative py-24 md:py-32 bg-brand-light flex flex-col items-center justify-center">
+        <section ref={sectionRef} className={`relative py-24 md:py-32 bg-brand-light flex flex-col items-center justify-center ${inView ? 'in-view' : ''}`}>
 
             {/* Decorative arches removed */}
 
             <div className="max-w-7xl mx-auto px-6 w-full text-center">
 
                 {/* 1. Header Info- Styled with new brand-secondary */}
-                <div className="reveal-manifesto mb-12 flex items-center justify-center gap-4">
+                <div className="reveal-manifesto mb-12 flex items-center justify-center gap-4 reveal-on-scroll" style={{ animationDelay: '0.1s' }}>
                     <span className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-secondary">Философия</span>
                     <div className="w-1.5 h-1.5 rounded-full bg-brand-secondary animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-secondary">Стандарты чистоты</span>
@@ -48,26 +20,26 @@ const ManifestoSection = () => {
                 {/* 2. Main Slogan - High Impact & Robust Layout */}
                 <h2 className="flex flex-col items-center gap-2 md:gap-4">
                     <div className="overflow-hidden">
-                        <span className="reveal-manifesto block text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark leading-[0.9] tracking-tighter uppercase">
+                        <span className="reveal-manifesto block text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark leading-[0.9] tracking-tighter uppercase reveal-on-scroll" style={{ animationDelay: '0.2s' }}>
                             МЫ СОЗДАЕМ
                         </span>
                     </div>
 
                     <div className="overflow-hidden">
-                        <span className="reveal-manifesto block text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-green leading-[0.8] tracking-[-0.05em] uppercase px-4">
+                        <span className="reveal-manifesto block text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-green leading-[0.8] tracking-[-0.05em] uppercase px-4 reveal-on-scroll" style={{ animationDelay: '0.35s' }}>
                             СТАНДАРТЫ
                         </span>
                     </div>
 
                     <div className="overflow-hidden">
-                        <span className="reveal-manifesto block text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark leading-[0.9] tracking-tighter uppercase shadow-text">
+                        <span className="reveal-manifesto block text-[clamp(2.5rem,8vw,120px)] font-[1000] text-brand-dark leading-[0.9] tracking-tighter uppercase shadow-text reveal-on-scroll" style={{ animationDelay: '0.5s' }}>
                             ЧИСТОТЫ<span className="text-brand-secondary"></span>
                         </span>
                     </div>
                 </h2>
 
                 {/* 3. The Impact Statement */}
-                <div className="mt-20 md:mt-32 reveal-manifesto">
+                <div className="mt-20 md:mt-32 reveal-manifesto reveal-on-scroll" style={{ animationDelay: '0.7s' }}>
                     <p className="text-xl md:text-3xl font-[1000] text-brand-dark/20 uppercase tracking-tighter leading-[0.8]">
                         КОТОРЫЕ МЕНЯЮТ ИНДУСТРИЮ <br />
                         <span className="text-brand-secondary drop-shadow-[0_0_30px_rgba(123,133,167,0.3)]">КАЗАХСТАНА ЕЖЕДНЕВНО.</span>

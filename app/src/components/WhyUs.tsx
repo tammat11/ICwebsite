@@ -1,12 +1,9 @@
 import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ShieldCheck, Zap, Users, BarChart3, Settings2, Globe2 } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const WhyUs = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
+    const [sectionRef, inView] = useInView();
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const reasons = [
@@ -69,36 +66,18 @@ const WhyUs = () => {
 
         // Center the card in the viewport
         scrollContainer.scrollLeft = middleOffset - (window.innerWidth / 2 - (cardTotal - 24) / 2);
-
-        const ctx = gsap.context(() => {
-            gsap.fromTo(".why-big-title",
-                { y: 100, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 1.5,
-                    ease: "power4.out",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 85%",
-                    }
-                }
-            );
-        }, sectionRef);
-
-        return () => ctx.revert();
     }, [reasons.length]);
 
 
 
     return (
-        <section ref={sectionRef} className="py-24 md:py-40 bg-white relative overflow-hidden" id="why-us">
+        <section ref={sectionRef} className={`py-24 md:py-40 bg-white relative overflow-hidden ${inView ? 'in-view' : ''}`} id="why-us">
             <div className="max-w-7xl mx-auto px-6 relative z-30 mb-20">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green/10 rounded-full mb-8">
                     <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">Why IC Group</span>
                 </div>
-                <h2 className="why-big-title text-[clamp(2.5rem,8vw,100px)] font-[1000] uppercase leading-[0.9] tracking-tighter text-brand-dark">
+                <h2 className="why-big-title text-[clamp(2.5rem,8vw,100px)] font-[1000] uppercase leading-[0.9] tracking-tighter text-brand-dark reveal-on-scroll" style={{ animationDelay: '0.15s' }}>
                     СТАНДАРТ <br />
                     <span className="text-brand-green">ПРЕВОСХОДСТВА</span>
                 </h2>

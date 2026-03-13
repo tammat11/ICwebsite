@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
 import {
     X,
     ChevronRight,
@@ -40,7 +39,6 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
     const [comment, setComment] = useState('');
 
     const modalRef = useRef<HTMLDivElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
 
     const sectorTypes = [
@@ -61,29 +59,11 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            gsap.fromTo(modalRef.current,
-                { opacity: 0, scale: 1.05 },
-                { opacity: 1, scale: 1, duration: 0.8, ease: "power4.out" }
-            );
-            gsap.fromTo(cardRef.current,
-                { x: 50, opacity: 0 },
-                { x: 0, opacity: 1, duration: 1, ease: "expo.out", delay: 0.2 }
-            );
         } else {
             document.body.style.overflow = 'unset';
-            // eslint-disable-next-line react-hooks/exhaustive-deps
             setTimeout(() => setStep(1), 0);
         }
     }, [isOpen]);
-
-    useEffect(() => {
-        if (contentRef.current) {
-            gsap.fromTo(contentRef.current,
-                { opacity: 0, y: 15, filter: "blur(8px)" },
-                { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "power2.out" }
-            );
-        }
-    }, [step]);
 
     if (!isOpen) return null;
 
@@ -97,7 +77,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
     return (
         <div
             ref={modalRef}
-            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl font-sans overflow-y-auto"
+            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl font-sans overflow-y-auto animate-modal-backdrop"
         >
             {/* Header with Close Switch - FIXED to viewport */}
             <div className="fixed top-4 right-4 md:top-8 md:right-8 z-[300] flex items-center gap-4 md:gap-6">
@@ -119,13 +99,13 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                     {/* Step-by-Step Engine */}
                     <div
                         ref={cardRef}
-                        className="relative bg-white/95 backdrop-blur-xl rounded-[28px] md:rounded-[50px] shadow-[0_0_50px_rgba(131,182,67,0.15)] overflow-hidden border border-white/20 min-h-[500px] lg:min-h-[680px] flex flex-col w-full"
+                        className="relative bg-white/95 backdrop-blur-xl rounded-[28px] md:rounded-[50px] shadow-[0_0_50px_rgba(131,182,67,0.15)] overflow-hidden border border-white/20 min-h-[500px] lg:min-h-[680px] flex flex-col w-full animate-modal-card"
                     >
                         {/* Interior Blueprint Overlay */}
                         <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
                             style={{ backgroundImage: 'linear-gradient(#000 1.5px, transparent 1.5px), linear-gradient(90deg, #000 1.5px, transparent 1.5px)', backgroundSize: '48px 48px md:64px md:64px' }} />
 
-                        <div className="relative z-10 flex-1 p-5 sm:p-8 md:p-10 lg:p-14 flex flex-col h-full" ref={contentRef}>
+                        <div className="relative z-10 flex-1 p-5 sm:p-8 md:p-10 lg:p-14 flex flex-col h-full">
 
                             {/* Phase Indicator */}
                             <div className="flex justify-between items-center mb-6 md:mb-10 px-2 md:px-0">
@@ -139,7 +119,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
 
                             <div className="flex-1 flex flex-col justify-center">
                                 {step === 1 && (
-                                    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 flex flex-col justify-center w-full">
+                                    <div key="step1" className="space-y-6 md:space-y-8 animate-step-content flex flex-col justify-center w-full">
                                         <div className="text-center space-y-1.5 md:space-y-3">
                                             <div className="inline-flex items-center gap-2 bg-brand-green/10 px-3 md:px-4 py-1.5 rounded-full">
                                                 <Building2 size={12} className="text-brand-green" />
@@ -167,7 +147,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                 )}
 
                                 {step === 2 && (
-                                    <div className="space-y-8 md:space-y-12 animate-in fade-in duration-500 flex flex-col justify-center w-full h-full">
+                                    <div key="step2" className="space-y-8 md:space-y-12 animate-step-content flex flex-col justify-center w-full h-full">
                                         <div className="text-center space-y-2 md:space-y-3">
                                             <div className="inline-flex items-center gap-2 bg-brand-green/10 px-3 md:px-4 py-1.5 rounded-full">
                                                 <CircleDashed size={12} className="text-brand-green animate-spin-slow" />
@@ -205,7 +185,7 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                 )}
 
                                 {step === 3 && (
-                                    <div className="space-y-6 sm:space-y-8 md:space-y-10 animate-in fade-in duration-500 w-full h-full flex flex-col justify-center">
+                                    <div key="step3" className="space-y-6 sm:space-y-8 md:space-y-10 animate-step-content w-full h-full flex flex-col justify-center">
                                         <div className="text-center space-y-2 md:space-y-3">
                                             <div className="inline-flex items-center gap-2 bg-brand-green/10 px-3 md:px-4 py-1.5 rounded-full">
                                                 <Send size={12} className="text-brand-green" />

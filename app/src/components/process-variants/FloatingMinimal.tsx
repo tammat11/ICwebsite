@@ -1,22 +1,8 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef } from 'react';
 import { Search, Calculator, CalendarCheck, Sparkles } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const FloatingMinimal = () => {
     const container = useRef(null);
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from(".m-step", {
-                x: -100, opacity: 0, stagger: 0.1, duration: 1.5, ease: "power4.out",
-                scrollTrigger: { trigger: ".m-grid", start: "top 80%" }
-            });
-            gsap.to(".m-icon", { y: -10, duration: 2, repeat: -1, yoyo: true, ease: "sine.inOut" });
-        }, container);
-        return () => ctx.revert();
-    }, []);
 
     const steps = [
         { id: "01", title: "Технический аудит", desc: "Анализируем объект за 1 день.", icon: <Search size={28} /> },
@@ -29,7 +15,7 @@ export const FloatingMinimal = () => {
         <div ref={container} className="relative py-20 px-6">
             <div className="m-grid max-w-7xl mx-auto space-y-12">
                 {steps.map((s, i) => (
-                    <div key={i} className="m-step flex flex-col md:flex-row items-center gap-12 group">
+                    <div key={i} className="m-step flex flex-col md:flex-row items-center gap-12 group opacity-0 animate-fade-in-up" style={{ animationDelay: `${0.1 + i * 0.1}s` }}>
                         <div className="m-icon relative w-24 h-24 bg-brand-light border border-brand-dark/[0.05] rounded-[32px] flex items-center justify-center flex-shrink-0 group-hover:bg-brand-green/10 transition-colors duration-500 shadow-premium">
                             <span className="text-brand-green">{s.icon}</span>
                             <div className="absolute -inset-1 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-brand-green/20" />

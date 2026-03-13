@@ -1,40 +1,8 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ClipboardCheck, Camera, BarChart4, UserCheck } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const QualityControl = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from(".quality-step", {
-                x: -50,
-                opacity: 0,
-                stagger: 0.1,
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 95%",
-                    toggleActions: "play none none none",
-                    once: true
-                }
-            });
-            gsap.from(".quality-image", {
-                scale: 0.8,
-                opacity: 0,
-                duration: 1,
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 90%",
-                    toggleActions: "play none none none",
-                    once: true
-                }
-            });
-        }, sectionRef);
-        return () => ctx.revert();
-    }, []);
+    const [sectionRef, inView] = useInView();
 
     const steps = [
         {
@@ -60,7 +28,7 @@ const QualityControl = () => {
     ];
 
     return (
-        <section ref={sectionRef} className="py-24 bg-brand-light relative overflow-hidden" id="quality">
+        <section ref={sectionRef} className={`py-24 bg-brand-light relative overflow-hidden ${inView ? 'in-view' : ''}`} id="quality">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
                 {/* Left: Content */}
@@ -77,7 +45,7 @@ const QualityControl = () => {
 
                     <div className="space-y-8">
                         {steps.map((step, i) => (
-                            <div key={i} className="quality-step flex gap-6 group">
+                            <div key={i} className="quality-step flex gap-6 group reveal-on-scroll" style={{ animationDelay: `${0.1 + i * 0.1}s` }}>
                                 <div className="w-12 h-12 rounded-xl bg-gray-50 flex-shrink-0 flex items-center justify-center border border-gray-100 group-hover:bg-brand-green group-hover:text-white transition-colors duration-300">
                                     {step.icon}
                                 </div>
@@ -93,7 +61,7 @@ const QualityControl = () => {
                 </div>
 
                 {/* Right: Visual Mockup */}
-                <div className="quality-image relative">
+                <div className="quality-image relative reveal-on-scroll" style={{ animationDelay: '0.35s' }}>
                     <div className="relative z-10 bg-white border border-gray-100 rounded-[40px] shadow-2xl p-6 md:p-10 transform rotate-3 hover:rotate-0 transition-transform duration-700">
                         {/* Fake App Interface */}
                         <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">

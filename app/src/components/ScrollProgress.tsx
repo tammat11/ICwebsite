@@ -1,24 +1,23 @@
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState } from 'react';
 
 export default function ScrollProgress() {
-    const progressRef = useRef(null);
+    const progressRef = useRef<HTMLDivElement | null>(null);
+    const [scale, setScale] = useState(0);
 
     useEffect(() => {
-        gsap.to(progressRef.current, {
-            scaleY: 1,
-            transformOrigin: "top",
-            ease: "none",
-            scrollTrigger: {
-                trigger: document.body,
-                start: "top top",
-                end: "bottom bottom",
-                scrub: 0.1
+        const update = () => {
+            const h = document.documentElement.scrollHeight - window.innerHeight;
+            if (h <= 0) {
+                setScale(1);
+                return;
             }
-        });
+            const p = Math.min(1, window.scrollY / h);
+            setScale(p);
+        };
+
+        update();
+        window.addEventListener('scroll', update, { passive: true });
+        return () => window.removeEventListener('scroll', update);
     }, []);
 
     return (
@@ -26,8 +25,8 @@ export default function ScrollProgress() {
             <div className="w-full h-full bg-black/5" />
             <div
                 ref={progressRef}
-                className="absolute top-0 w-full h-full bg-brand-green origin-top"
-                style={{ transform: 'scaleY(0)' }}
+                className="absolute top-0 w-full h-full bg-brand-green origin-top transition-transform duration-75 ease-out"
+                style={{ transform: `scaleY(${scale})` }}
             />
         </div>
     );

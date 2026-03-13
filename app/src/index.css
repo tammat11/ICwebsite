@@ -172,6 +172,111 @@
   animation: fadeIn 0.8s ease-out forwards;
 }
 
+/* Simple entrance animations (replacing GSAP) */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes trainEntrance {
+  0% { opacity: 0; transform: translateX(1000px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes modalBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalCard {
+  from { opacity: 0; transform: translateX(16px) scale(0.98); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes stepContent {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes lineGrow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes sparkle {
+  0% { opacity: 0; transform: scale(0); }
+  45% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.5s ease-out forwards; }
+
+/* Появление при скролле: родитель с .in-view, дети с .reveal-on-scroll */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.in-view .reveal-on-scroll {
+  animation: fadeInUp 0.65s ease-out forwards;
+}
+.reveal-scale-in { opacity: 0; transform: scale(0.96); }
+.in-view .reveal-scale-in { animation: scaleIn 0.55s ease-out forwards; }
+
+.reveal-on-scroll-right {
+  opacity: 0;
+  transform: translateX(1000px);
+}
+.in-view .reveal-on-scroll-right {
+  animation: trainEntrance 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-right { animation: slideInRight 0.5s ease-out forwards; }
+.animate-modal-backdrop { animation: modalBackdrop 0.3s ease-out forwards; }
+.animate-modal-card { animation: modalCard 0.5s ease-out 0.08s forwards; opacity: 0; }
+.animate-step-content { animation: stepContent 0.35s ease-out forwards; }
+.animate-line-grow { animation: lineGrow 0.8s ease-out forwards; transform-origin: top center; }
+.animate-sparkle { animation: sparkle 0.6s ease-out forwards; }
+.group:hover .sparkle-dot { animation: sparkle 0.6s ease-out forwards; }
+
+/* Щетка в блоке процесса — появление */
+@keyframes brushReveal {
+  from { opacity: 0; transform: scaleX(0); transform-origin: left center; }
+  to { opacity: 0.4; transform: scaleX(1); transform-origin: left center; }
+}
+.v-brush, .b-brush {
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: brushReveal 1s ease-out 0.4s forwards;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+  animation-play-state: paused;
+  animation-delay: 1.8s;
+  will-change: transform;
+}
+
+.in-view .animate-marquee {
+  animation-play-state: running;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 .service-img {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;

@@ -1,91 +1,11 @@
-import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef, useState } from 'react';
 import { Cpu, Dna, Activity, Zap, ArrowRight, Shield, Radio, ArrowDown } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useInView } from '../hooks/useInView';
 
 const SolutionSection = () => {
-    const sectionRef = useRef<HTMLDivElement>(null);
-    const [cardOrder, setCardOrder] = useState([0, 1, 2]); // Initial order of card indices [bottom-to-top]
+    const [sectionRef, inView] = useInView();
+    const [cardOrder, setCardOrder] = useState([0, 1, 2]);
     const [isAnimating, setIsAnimating] = useState(false);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // 1. Background Monolith Text Parallax
-            gsap.to(".monolith-text", {
-                yPercent: -15,
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 120%",
-                    end: "bottom top",
-                    scrub: 1
-                }
-            });
-
-            // 2. Title Reveal (Once)
-            gsap.from(".vibe-header-anim", {
-                y: 50,
-                opacity: 0,
-                duration: 0.8,
-                ease: "expo.out",
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 120%",
-                    once: true
-                }
-            });
-
-            // 3. Stacked Cards Entrance
-            const cards = gsap.utils.toArray<HTMLElement>(".magnetic-card");
-            const mm = gsap.matchMedia();
-
-            mm.add({
-                isMobile: "(max-width: 767px)",
-                isDesktop: "(min-width: 768px)"
-            }, (context) => {
-                const { isMobile } = (context.conditions as { isMobile?: boolean }) || {};
-
-                if (!isMobile) {
-                    gsap.fromTo(cards,
-                        { y: 150, opacity: 0, scale: 0.8, x: 0, rotate: 0 },
-                        {
-                            y: 0, opacity: 1, scale: 1,
-                            x: (i) => [-380, 0, 380][i],
-                            rotate: (i) => [-12, 0, 12][i],
-                            stagger: 0.05,
-                            duration: 0.8,
-                            ease: "back.out(1.2)",
-                            scrollTrigger: {
-                                trigger: sectionRef.current,
-                                start: "top 120%",
-                                once: true
-                            }
-                        }
-                    );
-                } else {
-                    gsap.fromTo(cards,
-                        { y: 150, opacity: 0, scale: 0.8 },
-                        {
-                            y: 0, opacity: 1, scale: 1,
-                            stagger: 0.1,
-                            duration: 0.8,
-                            ease: "power3.out",
-                            scrollTrigger: {
-                                trigger: sectionRef.current,
-                                start: "top 100%",
-                                once: true
-                            }
-                        }
-                    );
-                }
-            });
-
-            ScrollTrigger.refresh();
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
 
     const data = [
         {
@@ -120,67 +40,15 @@ const SolutionSection = () => {
     const shuffleCards = () => {
         if (isAnimating) return;
         setIsAnimating(true);
-
         const currentOrder = [...cardOrder];
         const topIdx = currentOrder[currentOrder.length - 1];
-        const cardElement = document.querySelector(`.card-index-${topIdx}`) as HTMLElement;
-
-        if (cardElement) {
-            // Kill any previous animations on this specific element just in case
-            gsap.killTweensOf(cardElement);
-
-            const tl = gsap.timeline({
-                onComplete: () => {
-                    const newOrder = [topIdx, ...currentOrder.slice(0, -1)];
-                    // Sync state AFTER animation to avoid React render fighting GSAP
-                    setCardOrder(newOrder);
-                    gsap.set(cardElement, { clearProps: "all" });
-                    setIsAnimating(false);
-                }
-            });
-
-            // Fast, physical swing-out
-            tl.to(cardElement, {
-                x: 140,
-                y: -30,
-                rotate: 15,
-                scale: 1.05,
-                duration: 0.3,
-                ease: "power2.out"
-            })
-                // Change Z-index exactly when it's out of the deck
-                .set(cardElement, { zIndex: 0 })
-                // Snap back underneath
-                .to(cardElement, {
-                    x: 0,
-                    y: 0,
-                    rotate: 0,
-                    scale: 0.8,
-                    duration: 0.4,
-                    ease: "back.out(1.2)"
-                });
-
-            // Nudge reaction for other cards
-            currentOrder.slice(0, -1).forEach((idx) => {
-                const el = document.querySelector(`.card-index-${idx}`);
-                if (el) {
-                    gsap.killTweensOf(el);
-                    gsap.to(el, {
-                        y: "+=5",
-                        duration: 0.2,
-                        yoyo: true,
-                        repeat: 1,
-                        ease: "sine.inOut"
-                    });
-                }
-            });
-        } else {
-            setIsAnimating(false);
-        }
+        const newOrder = [topIdx, ...currentOrder.slice(0, -1)];
+        setCardOrder(newOrder);
+        setTimeout(() => setIsAnimating(false), 400);
     };
 
     return (
-        <section ref={sectionRef} className="relative py-12 md:py-20 bg-brand-light overflow-hidden z-20" id="solution">
+        <section ref={sectionRef} className={`relative py-12 md:py-20 bg-brand-light overflow-hidden z-20 ${inView ? 'in-view' : ''}`} id="solution">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(123,133,167,0.08)_0%,transparent_100%)]" />
 
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.03] overflow-hidden">
@@ -191,7 +59,7 @@ const SolutionSection = () => {
 
             <div className="max-w-7xl mx-auto px-6 relative z-10 w-full overflow-hidden">
                 {/* 1. Header */}
-                <div className="vibe-header-anim mb-20 md:mb-32 space-y-4 text-center">
+                <div className="vibe-header-anim mb-20 md:mb-32 space-y-4 text-center reveal-on-scroll" style={{ animationDelay: '0.1s' }}>
                     <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-black/5 border border-black/5 rounded-full mb-6">
                         <Zap size={10} className="text-brand-secondary" />
                         <span className="text-[8px] font-black uppercase tracking-[0.5em] text-black/40">Facility Service Ecosystem</span>
@@ -219,10 +87,12 @@ const SolutionSection = () => {
                             <div
                                 key={item.id}
                                 className={`magnetic-card absolute card-index-${i} w-[260px] md:w-[340px] aspect-[1/1.4] 
+                                           reveal-on-scroll
                                            ${!isAnimating ? 'md:transition-all md:duration-500 hover:!z-[100] md:hover:!rotate-0 md:hover:-translate-y-12 md:hover:scale-110' : ''} 
                                            group cursor-pointer pointer-events-auto`}
                                 style={{
                                     zIndex: orderPos * 10,
+                                    animationDelay: `${0.25 + i * 0.08}s`,
                                     transform: typeof window !== 'undefined' && window.innerWidth < 768
                                         ? `translate(${mobileX}px, ${mobileY}px) rotate(${mobileRotate}deg) scale(${mobileScale})`
                                         : undefined,
