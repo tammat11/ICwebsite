@@ -99,10 +99,10 @@ const ServicesPage = () => {
                         <span className="text-brand-green font-bold tracking-[0.4em] uppercase text-sm block mb-4">
                             Наша Экспертиза
                         </span>
-                        <h1 className="page-title text-[15vw] leading-[0.8] font-bold tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
+                        <h1 className="page-title text-[12vw] leading-[0.8] font-bold tracking-tighter uppercase text-black mix-blend-multiply opacity-[0.03] select-none pointer-events-none absolute top-0 left-0 -z-10 blur-sm">
                             Services
                         </h1>
-                        <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none mb-8 relative z-10 text-brand-dark">
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold uppercase leading-none mb-8 relative z-10 text-brand-dark">
                             Услуги <br />
                             <span className="text-brand-green">Для Бизнеса</span>
                         </h2>

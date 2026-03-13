@@ -23,7 +23,7 @@ const CareersPage = () => {
 
                     <span className="career-subtitle text-brand-green text-[9px] md:text-[10px] font-bold tracking-[0.3em] uppercase block mb-6 max-w-4xl reveal-on-scroll" style={{ animationDelay: '0.1s' }}>
                     </span>
-                    <h1 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter text-brand-dark leading-[0.9] mb-8">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-brand-dark leading-[0.9] mb-8">
                         <div className="overflow-hidden"><span className="career-title-line block reveal-on-scroll" style={{ animationDelay: '0.2s' }}>СТАНЬ ЧАСТЬЮ</span></div>
                         <div className="overflow-hidden"><span className="career-title-line block text-brand-green uppercase reveal-on-scroll" style={{ animationDelay: '0.35s' }}>КОМАНДЫ ЛИДЕРОВ</span></div>
                     </h1>

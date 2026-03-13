@@ -20,7 +20,7 @@ const ContactsPage = () => {
                     <span className="text-brand-green font-bold tracking-[0.4em] uppercase text-xs md:text-sm block mb-6">
                         Контакты
                     </span>
-                    <h1 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] mb-8">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9] mb-8">
                         СВЯЖИТЕСЬ <br />
                         <span className="text-brand-green">С НАМИ</span>
                     </h1>

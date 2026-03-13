@@ -39,7 +39,7 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
                     <div className="mb-12 md:mb-16 relative reveal-on-scroll" style={{ animationDelay: '0s' }}>
-                        <h2 className="text-[clamp(2.5rem,7vw,80px)] font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
                             НОВОСТИ <br />
                             <span className="text-brand-green">И ПРОЕКТЫ</span>
                         </h2>
