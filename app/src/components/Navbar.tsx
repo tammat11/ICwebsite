@@ -45,7 +45,7 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                 ${scrolled ? 'py-2 md:py-5' : 'py-3 md:py-8'}`}
             >
                 <div
-                    className={`max-w-5xl mx-auto flex items-center gap-0.5 md:gap-4 px-2 md:px-6 py-1.5 md:py-5 
+                    className={`max-w-5xl mx-auto flex items-center gap-1 md:gap-4 px-3 md:px-6 py-2 md:py-5 
                     rounded-full border transition-all duration-700 ease-expo backdrop-blur-xl relative
                     ${scrolled
                             ? 'bg-white/80 border-black/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.1)]'
@@ -68,7 +68,7 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
 
                     {/* Middle: Main Nav (visible on all breakpoints) */}
                     <div className="flex-1 flex items-center justify-center">
-                        <div className="flex items-center gap-0 md:gap-2 lg:gap-4 px-0.5 py-0.5 md:px-1.5 md:py-1 bg-black/[0.03] rounded-full relative z-10">
+                        <div className="flex items-center gap-0.5 md:gap-2 lg:gap-4 px-1 py-0.5 md:px-1.5 md:py-1 bg-black/[0.03] rounded-full relative z-10">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.to}
