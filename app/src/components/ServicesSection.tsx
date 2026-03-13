@@ -90,49 +90,49 @@ const ServicesSection = () => {
     const allServices = [...specializedServices, ...specializedServices];
 
     return (
-        <section ref={sectionRef} className={`py-4 md:py-6 bg-white relative ${inView ? 'in-view' : ''}`} id="services">
+        <section ref={sectionRef} className={`py-3 md:py-10 bg-white relative ${inView ? 'in-view' : ''}`} id="services">
 
             {/* Header */}
-            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-5 md:mb-6 text-center reveal-on-scroll" style={{ animationDelay: '0s' }}>
-                <h2 className="section-header text-brand-dark mb-4 overflow-visible">
+            <div className="max-w-7xl mx-auto px-6 relative z-30 mb-4 md:mb-6 text-center reveal-on-scroll" style={{ animationDelay: '0s' }}>
+                <h2 className="section-header text-brand-dark mb-2 overflow-visible !text-2xl md:!text-4xl lg:!text-5xl">
                     <span className="services-title-word inline-block">НАШИ</span>{' '}
                     <span className="services-title-word inline-block">
                         <span className="relative inline-block">
-                            <span className="relative inline-block overflow-hidden px-2 rounded-xl">
+                            <span className="relative inline-block overflow-hidden px-1 md:px-2 rounded-xl">
                                 <span className="text-brand-green drop-shadow-[0_0_40px_rgba(143,198,64,0.2)]">УСЛУГИ</span>
                             </span>
                         </span>
                     </span>
                 </h2>
-                <p className="services-subtitle text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] text-brand-secondary">
+                <p className="services-subtitle text-[8px] md:text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] text-brand-secondary">
                     СОЗДАЕМ ЧИСТОТУ ПО ВСЕМУ КАЗАХСТАНУ
                 </p>
             </div>
 
-            {/* 4 главных вида услуг — вертикальные прямоугольники */}
-            <div className="max-w-6xl mx-auto px-6 mb-4 md:mb-8">
-                <div className="services-grid grid grid-cols-2 gap-4 md:gap-6">
+            {/* 4 главных вида услуг — сетка */}
+            <div className="max-w-7xl mx-auto px-4 md:px-6 mb-4 md:mb-6">
+                <div className="services-grid grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
                     {mainServices.map((service, i) => (
                         <div
                             key={service.id}
-                            className="service-card-item group relative rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col aspect-[3/4] min-h-[200px] md:min-h-[280px] reveal-on-scroll"
+                            className="service-card-item group relative rounded-[20px] md:rounded-[32px] bg-white border border-black/5 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col aspect-[4/5] sm:aspect-square md:aspect-[3.5/5] lg:aspect-[4/5] reveal-on-scroll"
                             style={{ animationDelay: `${0.1 + i * 0.08}s` }}
                         >
-                            <div className="relative flex-1 min-h-0 overflow-hidden">
+                            <div className="relative flex-[0.8] md:flex-[1] min-h-0 overflow-hidden">
                                 <img
                                     src={service.image}
                                     alt={service.title}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <span className="absolute top-2 left-2 px-2 py-1 rounded-full bg-white/90 text-[9px] font-bold tracking-[0.18em] uppercase text-brand-dark">
+                                <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-white/90 text-[7px] md:text-[9px] font-bold tracking-[0.1em] uppercase text-brand-dark">
                                     {service.id}
                                 </span>
                             </div>
-                            <div className="shrink-0 px-3.5 md:px-4 py-3 md:py-4 flex flex-col gap-1.5 md:gap-2 border-t border-black/5 min-h-[85px] md:min-h-[100px]">
-                                <h3 className="text-[11px] md:text-xs font-bold uppercase tracking-[0.16em] text-brand-dark leading-snug">
+                            <div className="shrink-0 px-2.5 md:px-4 py-2.5 md:py-4 flex flex-col gap-1 md:gap-2 border-t border-black/5 min-h-[60px] md:min-h-[90px]">
+                                <h3 className="text-[9px] md:text-[11px] lg:text-xs font-bold uppercase tracking-[0.12em] text-brand-dark leading-tight md:leading-snug">
                                     {service.title}
                                 </h3>
-                                <p className="text-[10px] md:text-[11px] text-brand-dark/60 leading-snug line-clamp-2">
+                                <p className="text-[8px] md:text-[10px] lg:text-[11px] text-brand-dark/50 leading-tight line-clamp-2">
                                     {service.description}
                                 </p>
                             </div>
@@ -142,13 +142,13 @@ const ServicesSection = () => {
             </div>
 
             {/* Специализированные услуги — карусель */}
-            <div className="max-w-6xl mx-auto px-6 mb-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-dark/40 text-center mb-4">
+            <div className="max-w-7xl mx-auto px-6 mb-2">
+                <p className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.3em] text-brand-dark/30 text-center mb-2 md:mb-4">
                     Специализированные услуги
                 </p>
             </div>
             {/* Marquee Section */}
-            <div className="marquee-section relative w-full">
+            <div className="marquee-section relative w-full mb-6 md:mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
