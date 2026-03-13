@@ -10,31 +10,21 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Main entrance animation
-            gsap.fromTo(".hero-title-reveal",
+            const tl = gsap.timeline();
+
+            // All major elements start together with slight staggers
+            tl.fromTo([".hero-fade-in", ".hero-title-reveal"],
                 { y: 30, opacity: 0 },
                 {
                     y: 0,
                     opacity: 1,
-                    duration: 1,
-                    stagger: 0.1,
-                    ease: "power2.out"
+                    duration: 0.9,
+                    stagger: 0.05, // very fast stagger for high sync
+                    ease: "power4.out"
                 }
             );
 
-            gsap.fromTo(".hero-fade-in",
-                { opacity: 0, y: 10 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    delay: 0.4,
-                    ease: "power2.out",
-                    stagger: 0.1
-                }
-            );
-
-            const cleaningTl = gsap.timeline({ delay: 1.8 });
+            const cleaningTl = gsap.timeline({ delay: 1.4 });
 
             cleaningTl
                 .fromTo(".cleaning-hand",
