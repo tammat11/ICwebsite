@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowUpRight, ShieldCheck, TrendingDown, Zap } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
 

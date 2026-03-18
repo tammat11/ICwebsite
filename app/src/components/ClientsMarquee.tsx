@@ -16,6 +16,7 @@ const clients = [
 ];
 
 import { useRef, useState, useEffect } from 'react';
+import { useInView } from '../hooks/useInView';
 
 const ClientsMarquee = () => {
     const [sectionRef, inView] = useInView();
