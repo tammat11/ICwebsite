@@ -62,7 +62,8 @@ const AdminPage = () => {
     const [token, setToken] = useState<string | null>(localStorage.getItem('gh_token'));
     const [isAuthed, setIsAuthed] = useState(!!localStorage.getItem('admin_authenticated'));
     const [phone, setPhone] = useState('');
-    const [inputCode, setInputToken] = useState('');
+    const [inputCode, setInputCode] = useState('');
+    const [inputToken, setInputToken] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
     const [step, setStep] = useState<'phone' | 'code'>('phone');
     const [news, setNews] = useState<NewsArticle[]>([]);
@@ -231,7 +232,7 @@ const AdminPage = () => {
                                 <input
                                     type="text"
                                     value={inputCode}
-                                    onChange={e => setInputToken(e.target.value)}
+                                    onChange={e => setInputCode(e.target.value)}
                                     placeholder="000000"
                                     maxLength={6}
                                     className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-3xl font-bold tracking-[0.5em] text-center focus:outline-none focus:ring-2 focus:ring-brand-green/30"
@@ -268,16 +269,16 @@ const AdminPage = () => {
                         <div className="space-y-4">
                             <input
                                 type="password"
-                                value={inputCode}
+                                value={inputToken}
                                 onChange={e => setInputToken(e.target.value)}
                                 placeholder="ghp_xxxxxxxxxxxx"
                                 className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             />
                             <button
                                 onClick={() => {
-                                    if (inputCode.trim()) {
-                                        localStorage.setItem('gh_token', inputCode.trim());
-                                        setToken(inputCode.trim());
+                                    if (inputToken.trim()) {
+                                        localStorage.setItem('gh_token', inputToken.trim());
+                                        setToken(inputToken.trim());
                                         setInputToken('');
                                     }
                                 }}

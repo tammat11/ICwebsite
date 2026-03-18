@@ -47,7 +47,7 @@ function App() {
     <>
       <ScrollProgress />
       <ScrollToTop />
-      <Navbar onCalcOpen={() => setCalcOpen(true)} />
+      {location.pathname !== '/admin' && <Navbar onCalcOpen={() => setCalcOpen(true)} />}
       <Routes location={location}>
         <Route path="/" element={<Home onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/services" element={<ServicesPage onCalcOpen={() => setCalcOpen(true)} />} />
