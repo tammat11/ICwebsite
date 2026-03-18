@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useInView } from '../hooks/useInView';
+import newsData from '../data/news.json';
 
 interface NewsArticle {
     id: string;
@@ -19,17 +20,9 @@ interface NewsPageProps {
 }
 
 const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
-    const [articles, setArticles] = useState<NewsArticle[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [articles] = useState<NewsArticle[]>(newsData as NewsArticle[]);
+    const [loading] = useState(false);
     const [rootRef, inView] = useInView();
-
-    useEffect(() => {
-        fetch('/api/news')
-            .then(res => res.json())
-            .then(data => setArticles(Array.isArray(data) ? data : []))
-            .catch(() => setArticles([]))
-            .finally(() => setLoading(false));
-    }, []);
 
     return (
         <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
