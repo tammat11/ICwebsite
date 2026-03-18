@@ -103,7 +103,11 @@ const CasesSection = () => {
                 {/* Vertical Cases */}
                 <div className="space-y-8 md:space-y-12">
                     {cases.map((item, i) => (
-                                <Link to="/news" className="group flex flex-col md:flex-row ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} gap-6 md:gap-12 items-center py-2 md:py-4 reveal-on-scroll">
+                        <Link 
+                            key={item.id} 
+                            to="/news" 
+                            className={`group flex flex-col md:flex-row ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'} gap-6 md:gap-12 items-center py-2 md:py-4 reveal-on-scroll`}
+                        >
                             {/* Image Side */}
                             <div className="w-full md:w-1/2 shrink-0">
                                 <div className="relative h-[180px] md:h-[280px] rounded-[20px] md:rounded-[32px] overflow-hidden border border-black/[0.05] shadow-sm group-hover:shadow-2xl transition-all duration-700">
