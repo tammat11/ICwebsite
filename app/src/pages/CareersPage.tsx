@@ -63,29 +63,29 @@ const CareersPage = () => {
                         </div>
                     </div>
 
-                    <div className="career-card reveal-on-scroll group relative p-6 md:p-8 rounded-[32px] bg-brand-green text-white overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:800ms]">
+                    <div className="career-card reveal-on-scroll group relative p-6 md:p-8 rounded-[32px] bg-white border border-brand-dark/10 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 [animation-delay:800ms] hover:bg-brand-green hover:border-brand-green group/card">
                         <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <HardHat size={160} />
+                            <HardHat size={160} className="text-brand-dark group-hover/card:text-white" />
                         </div>
                         <div className="relative z-10 h-full flex flex-col justify-between cursor-default">
                             <div>
-                                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-8 text-white">
+                                <div className="w-14 h-14 bg-brand-green/10 rounded-2xl flex items-center justify-center mb-8 text-brand-green group-hover/card:bg-white/20 group-hover/card:text-white">
                                     <Star size={28} />
                                 </div>
-                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-4 uppercase">КЛИНИНГ</h2>
-                                <p className="text-white/90 text-xs md:text-sm mb-6 leading-relaxed">
+                                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-brand-dark mb-4 uppercase group-hover/card:text-white">КЛИНИНГ</h2>
+                                <p className="text-brand-dark/60 text-xs md:text-sm mb-6 leading-relaxed group-hover/card:text-white/90">
                                     Стабильная работа для операторов на объектах. Достойная оплата, удобный график и униформа.
                                 </p>
                                 <ul className="space-y-3 mb-8">
                                     {['Операторы уборки', 'Супервайзеры', 'Технические специалисты', 'Альпинисты', 'Разнорабочие'].map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3 text-white font-medium text-[12px]">
-                                            <div className="w-1 h-1 rounded-full bg-white" />
+                                        <li key={i} className="flex items-center gap-3 text-brand-dark font-medium text-[12px] group-hover/card:text-white">
+                                            <div className="w-1 h-1 rounded-full bg-brand-green group-hover/card:bg-white" />
                                             {item}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-                            <button onClick={() => openModal('Cleaning')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-green hover:!bg-brand-dark hover:!text-white border-none py-4 text-xs font-bold uppercase tracking-wider">
+                            <button onClick={() => openModal('Cleaning')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-brand-dark !text-white hover:!bg-white hover:!text-brand-green border-none py-4 text-xs font-bold uppercase tracking-wider group-hover/card:!bg-white group-hover/card:!text-brand-green">
                                 Заполнить анкету <ArrowUpRight size={16} />
                             </button>
                         </div>

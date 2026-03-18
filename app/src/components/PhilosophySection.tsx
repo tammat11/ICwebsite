@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { ArrowRight, Star } from 'lucide-react';
 import AnimatedWave from './AnimatedWave';
 import { useInView } from '../hooks/useInView';
@@ -12,9 +11,11 @@ const PhilosophySection = () => {
             <div className="absolute top-0 left-0 w-full rotate-180 transform -translate-y-[1px]">
                 <AnimatedWave />
             </div>
+            <div className="pointer-events-none absolute right-[10%] top-24 h-24 w-24 rounded-full bg-brand-green/8 blur-3xl animate-pulse-glow" />
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center text-center pt-24 md:pt-32">
-                <div className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full overflow-hidden border-[10px] md:border-[16px] border-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] mb-8 md:mb-12 relative bg-gray-50 flex-shrink-0 group reveal-on-scroll" style={{ animationDelay: '0s' }}>
+                <div className="w-[220px] h-[220px] md:w-[320px] md:h-[320px] rounded-full overflow-hidden border-[10px] md:border-[16px] border-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] mb-8 md:mb-12 relative bg-gray-50 flex-shrink-0 group reveal-on-scroll animate-bob-soft" style={{ animationDelay: '0s' }}>
+                    <div className="absolute inset-y-0 -left-1/3 z-20 w-1/3 bg-gradient-to-r from-transparent via-white/75 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                     <img
                         src={photoPath}
                         alt="Larion Lyan"
@@ -23,7 +24,7 @@ const PhilosophySection = () => {
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-brand-green/30" />
                     </svg>
-                    <div className="absolute top-4 right-4 md:top-10 md:right-10 text-brand-secondary animate-pulse">
+                    <div className="absolute top-4 right-4 md:top-10 md:right-10 text-brand-secondary animate-pulse-glow">
                         <Star className="w-6 h-6 md:w-10 md:h-10" fill="currentColor" />
                     </div>
                 </div>
@@ -55,7 +56,7 @@ const PhilosophySection = () => {
                     Основатель IC GROUP • Лидер отрасли клининга
                 </p>
 
-                <button className="group flex items-center gap-4 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors">
+                <button className="group flex items-center gap-4 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.3em] md:tracking-[0.5em] text-brand-secondary hover:text-brand-green transition-colors animate-bob-soft-alt">
                     Узнать больше о философии
                     <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform duration-300" />
                 </button>

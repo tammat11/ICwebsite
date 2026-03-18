@@ -156,6 +156,32 @@
   animation: float 8s ease-in-out infinite;
 }
 
+@keyframes bobSoft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes bobSoftAlt {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes shimmerPass {
+  0% { transform: translateX(-140%) skewX(-18deg); opacity: 0; }
+  15% { opacity: 0.55; }
+  100% { transform: translateX(240%) skewX(-18deg); opacity: 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes logoDrift {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-6px) scale(1.03); }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -170,6 +196,26 @@
 
 .animate-fade-in {
   animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-bob-soft {
+  animation: bobSoft 6s ease-in-out infinite;
+}
+
+.animate-bob-soft-alt {
+  animation: bobSoftAlt 5.2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4.6s ease-in-out infinite;
+}
+
+.animate-logo-drift {
+  animation: logoDrift 6s ease-in-out infinite;
+}
+
+.sheen-pass {
+  animation: shimmerPass 2.8s ease-in-out infinite;
 }
 
 /* Simple entrance animations (replacing GSAP) */

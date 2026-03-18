@@ -78,8 +78,8 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
     if (!isOpen) return null;
 
     const handleSubmit = async () => {
-        if (!phone) {
-            alert('Пожалуйста, введите номер телефона');
+        if (!phone || phone.length < 10) {
+            alert('Пожалуйста, введите корректный номер телефона (минимум 10 цифр)');
             return;
         }
 
@@ -242,8 +242,11 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                                                 <input 
                                                     type="tel" 
                                                     value={phone}
-                                                    onChange={(e) => setPhone(e.target.value)}
-                                                    placeholder="Телефон *" 
+                                                    onChange={(e) => {
+                                                        const val = e.target.value.replace(/[^\d+]/g, '');
+                                                        if (val.length <= 12) setPhone(val);
+                                                    }}
+                                                    placeholder="Телефон (напр. +77...)*" 
                                                     className="w-full bg-gray-50 border-[2px] border-black/5 rounded-[16px] sm:rounded-[20px] py-3.5 sm:py-4 pl-11 sm:pl-12 pr-4 text-sm font-bold placeholder:text-black/30 outline-none focus:border-brand-green focus:bg-brand-green/5 focus:shadow-[0_0_20px_rgba(131,182,67,0.1)] transition-all"
                                                 />
                                             </div>

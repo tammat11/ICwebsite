@@ -34,6 +34,7 @@ const ProcessSection = () => {
 
     return (
         <section ref={sectionRef} className={`pt-4 pb-10 bg-white relative overflow-hidden ${inView ? 'in-view' : ''}`} id="process">
+            <div className="pointer-events-none absolute left-[12%] top-10 h-20 w-20 rounded-full bg-brand-green/8 blur-3xl animate-pulse-glow" />
             <div className="max-w-7xl mx-auto px-6 relative z-10" ref={containerRef}>
 
                 {/* Header */}
@@ -52,7 +53,8 @@ const ProcessSection = () => {
                             <div key={i} className="process-card-anim group relative flex flex-col reveal-on-scroll" style={{ animationDelay: `${0.1 + i * 0.1}s` }}>
 
                                 {/* Card Body */}
-                                <div className="mt-4 md:mt-6 relative bg-white border border-gray-100 rounded-[30px] md:rounded-[40px] p-6 md:p-8 h-full min-h-[220px] md:min-h-[260px] flex flex-col transition-all duration-700 hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] hover:border-brand-green/30 group-hover:-translate-y-3">
+                                <div className={`mt-4 md:mt-6 relative bg-white border border-gray-100 rounded-[30px] md:rounded-[40px] p-6 md:p-8 h-full min-h-[220px] md:min-h-[260px] flex flex-col transition-all duration-700 hover:shadow-[0_40px_100px_rgba(0,0,0,0.08)] hover:border-brand-green/30 group-hover:-translate-y-3 overflow-hidden ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`}>
+                                    <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
 
                                     {/* Large Background ID */}
                                     <div className="absolute top-1 right-3 md:top-4 md:right-6 text-5xl md:text-7xl font-black text-gray-50/80 group-hover:text-brand-green/[0.06] transition-colors duration-700 select-none italic">
@@ -67,8 +69,8 @@ const ProcessSection = () => {
                                     </div>
 
                                     {/* Content */}
-                                    <div className="mt-auto relative z-10">
-                                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-brand-dark mb-2 md:mb-3 transition-colors duration-500 group-hover:text-brand-green leading-snug md:leading-none min-h-[2rem] md:min-h-[2.5rem] flex items-end">
+                                    <div className="mt-auto relative z-10 text-center">
+                                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-brand-dark mb-2 md:mb-3 transition-colors duration-500 group-hover:text-brand-green leading-snug md:leading-none min-h-[1.5rem] md:min-h-[2rem] flex items-center justify-center">
                                             {step.title}
                                         </h3>
                                         <p className="text-[10px] md:text-xs font-medium text-gray-400 leading-snug md:leading-relaxed uppercase tracking-[0.18em] md:tracking-wider group-hover:text-gray-500 transition-colors">

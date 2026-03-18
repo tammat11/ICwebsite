@@ -143,7 +143,7 @@ const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                             </h2>
                             <button 
                                 onClick={onCalcOpen}
-                                className="bg-brand-dark text-white px-10 py-5 rounded-xl text-lg font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-xl"
+                                className="bg-brand-dark text-white px-7 py-3.5 md:px-8 md:py-4 rounded-xl text-sm md:text-base font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-xl active:scale-95"
                             >
                                 Рассчитать смету
                             </button>

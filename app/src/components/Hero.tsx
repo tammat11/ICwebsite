@@ -93,8 +93,6 @@ const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
 
                 <div className="hero-fade-in max-w-2xl mb-8 px-6 text-center z-20">
                     <p className="text-lg md:text-xl font-bold leading-snug tracking-tight">
-                        <span className="text-brand-dark">Профессиональный клининг.</span>
-                        <br />
                         <span className="text-brand-dark/45 font-medium text-base md:text-lg">
                             IC Group — самая крупная компания, предоставляющая{' '}
                             <br className="hidden md:block" />

@@ -124,23 +124,6 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                     </div>
                     )}
 
-                    {/* CTA Footer - Оставить заявку */}
-                    <div className="mt-20 p-8 md:p-12 rounded-[2.5rem] bg-brand-green relative overflow-hidden text-center shadow-2xl reveal-on-scroll" style={{ animationDelay: '0.15s' }}>
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-                        <div className="relative z-10 flex flex-col items-center">
-                            <h2 className="text-2xl md:text-3xl font-bold uppercase mb-6 leading-tight text-white">
-                                Хотите узнать больше? <br />
-                                <span className="text-brand-dark/30">Оставьте заявку</span>
-                            </h2>
-                            <button
-                                type="button"
-                                onClick={() => onCalcOpen?.()}
-                                className="bg-brand-dark text-white px-8 py-4 rounded-xl text-sm font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-xl"
-                            >
-                                Оставить заявку
-                            </button>
-                        </div>
-                    </div>
 
                 </div>
             </main>

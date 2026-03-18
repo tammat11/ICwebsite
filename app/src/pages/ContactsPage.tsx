@@ -11,6 +11,8 @@ const ContactsPage = () => {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const [phone, setPhone] = useState('');
+
     const departments = [
         { title: "Отдел продаж", email: "sales@ic-group.kz", phone: "+7 777 008 73 60", icon: Building2 },
         { title: "HR Департамент", email: "hr@ic-group.kz", phone: "+7 771 780 2366", icon: Globe },
@@ -19,8 +21,8 @@ const ContactsPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name || !email) {
-            alert('Пожалуйста, заполните Имя и Email');
+        if (!name || !email || !phone || phone.length < 10) {
+            alert('Пожалуйста, заполните Имя, Email и корректный Телефон (минимум 10 цифр)');
             return;
         }
 
@@ -30,12 +32,14 @@ const ContactsPage = () => {
                 title: `Обратная связь: ${name}`,
                 name: name,
                 email: email,
+                phone: phone,
                 comments: message,
             });
 
             alert('Сообщение успешно отправлено!');
             setName('');
             setEmail('');
+            setPhone('');
             setMessage('');
         } catch (error) {
             alert('Произошла ошибка при отправке. Пожалуйста, попробуйте позже.');
@@ -101,6 +105,17 @@ const ContactsPage = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Email" 
+                                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-6 py-4 placeholder:text-white/30 focus:outline-none focus:border-brand-green transition-colors" 
+                                />
+                                <input 
+                                    type="tel" 
+                                    required
+                                    value={phone}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/[^\d+]/g, '');
+                                        if (val.length <= 12) setPhone(val);
+                                    }}
+                                    placeholder="Телефон (напр. +77...)*" 
                                     className="w-full bg-white/10 border border-white/10 rounded-2xl px-6 py-4 placeholder:text-white/30 focus:outline-none focus:border-brand-green transition-colors" 
                                 />
                                 <textarea 

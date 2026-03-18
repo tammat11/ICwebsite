@@ -20,8 +20,8 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name || !phone) {
-            alert('Пожалуйста, заполните обязательные поля (Имя и Телефон)');
+        if (!name || !phone || phone.length < 10) {
+            alert('Пожалуйста, заполните Имя и корректный Телефон (минимум 10 цифр)');
             return;
         }
 
@@ -93,9 +93,12 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
                             type="tel"
                             required
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
-                            placeholder="+7 (___) ___-__-__"
+                            onChange={(e) => {
+                                const val = e.target.value.replace(/[^\d+]/g, '');
+                                if (val.length <= 12) setPhone(val);
+                            }}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none font-bold"
+                            placeholder="+77XXXXXXXXX"
                         />
                     </div>
 

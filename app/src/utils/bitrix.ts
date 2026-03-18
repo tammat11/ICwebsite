@@ -13,36 +13,39 @@ export interface LeadData {
 
 export const createBitrixLead = async (data: LeadData) => {
     try {
-        const fields: Record<string, string> = {
-            'TITLE': data.title,
-            'SOURCE_ID': 'WEB',
-        };
+        const params = new URLSearchParams();
+        params.append('fields[TITLE]', data.title);
+        params.append('fields[SOURCE_ID]', 'WEB');
 
-        if (data.name) fields['NAME'] = data.name;
-        if (data.lastName) fields['LAST_NAME'] = data.lastName;
-        if (data.company) fields['COMPANY_TITLE'] = data.company;
-        if (data.comments) fields['COMMENTS'] = data.comments;
+        if (data.name) params.append('fields[NAME]', data.name);
+        if (data.lastName) params.append('fields[LAST_NAME]', data.lastName);
+        if (data.company) params.append('fields[COMPANY_TITLE]', data.company);
+        if (data.comments) params.append('fields[COMMENTS]', data.comments);
         
-        // Complex fields for phone and email
         if (data.phone) {
-            fields['PHONE'] = [{ 'VALUE': data.phone, 'VALUE_TYPE': 'WORK' }] as any;
+            params.append('fields[PHONE][0][VALUE]', data.phone);
+            params.append('fields[PHONE][0][VALUE_TYPE]', 'WORK');
         }
         if (data.email) {
-            fields['EMAIL'] = [{ 'VALUE': data.email, 'VALUE_TYPE': 'WORK' }] as any;
+            params.append('fields[EMAIL][0][VALUE]', data.email);
+            params.append('fields[EMAIL][0][VALUE_TYPE]', 'WORK');
         }
+
+        params.append('params[REGISTER_SONET_EVENT]', 'Y');
 
         const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.lead.add.json`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
-                fields: fields,
-                params: { "REGISTER_SONET_EVENT": "Y" }
-            }),
+            body: params.toString(),
         });
 
         const result = await response.json();
+        console.log('Bitrix Response:', result);
+        if (result.error) {
+            console.error('Bitrix Error:', result.error_description || result.error);
+        }
         return result;
     } catch (error) {
         console.error('Error creating Bitrix lead:', error);

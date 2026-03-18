@@ -90,7 +90,9 @@ const ServicesSection = () => {
     const allServices = [...specializedServices, ...specializedServices];
 
     return (
-        <section ref={sectionRef} className={`py-3 md:py-10 bg-white relative ${inView ? 'in-view' : ''}`} id="services">
+        <section ref={sectionRef} className={`py-3 md:py-10 bg-white relative overflow-hidden ${inView ? 'in-view' : ''}`} id="services">
+            <div className="pointer-events-none absolute left-[6%] top-16 h-28 w-28 rounded-full bg-brand-green/7 blur-3xl animate-pulse-glow" />
+            <div className="pointer-events-none absolute right-[8%] bottom-20 h-32 w-32 rounded-full bg-brand-dark/5 blur-3xl animate-bob-soft-alt" />
 
             {/* Header */}
             <div className="max-w-7xl mx-auto px-6 relative z-30 mb-4 md:mb-6 text-center reveal-on-scroll" style={{ animationDelay: '0s' }}>
@@ -119,11 +121,13 @@ const ServicesSection = () => {
                             style={{ animationDelay: `${0.1 + i * 0.08}s` }}
                         >
                             <div className="relative flex-[0.7] md:flex-[0.85] min-h-0 overflow-hidden">
+                                <div className="absolute inset-y-0 -left-1/3 z-20 w-1/3 bg-gradient-to-r from-transparent via-white/75 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                                 <img
                                     src={service.image}
                                     alt={service.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`}
                                 />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-40" />
                                 <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-white/90 text-[7px] md:text-[8px] font-bold tracking-[0.1em] uppercase text-brand-dark">
                                     {service.id}
                                 </span>
@@ -144,7 +148,7 @@ const ServicesSection = () => {
             {/* Специализированные услуги — карусель */}
             <div className="max-w-7xl mx-auto px-6 mb-2">
                 <p className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.3em] text-brand-dark/30 text-center mb-2 md:mb-4">
-                    Специализированные услуги
+                    Дополнительные услуги
                 </p>
             </div>
             {/* Marquee Section */}
@@ -159,10 +163,11 @@ const ServicesSection = () => {
                                 key={`${service.id}-${i}`}
                                 className="marquee-card-item flex-shrink-0 w-[160px] md:w-[220px] h-[210px] md:h-[280px] relative rounded-[18px] md:rounded-[26px] overflow-hidden group cursor-pointer bg-brand-dark mr-4 md:mr-5"
                             >
+                                <div className="absolute inset-y-0 -left-1/3 z-20 w-1/3 bg-gradient-to-r from-transparent via-white/65 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                                 <img
                                     src={service.image}
                                     alt={service.title}
-                                    className="service-img w-full h-full object-cover opacity-100 transition-all duration-500 group-hover:scale-102"
+                                    className={`service-img w-full h-full object-cover opacity-100 transition-all duration-500 group-hover:scale-110 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
