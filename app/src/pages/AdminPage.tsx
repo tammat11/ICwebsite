@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogIn, Plus, Pencil, Trash2, Save, Image as ImageIcon, Send, Loader2, ArrowLeft, Newspaper, ExternalLink, LogOut, Key } from 'lucide-react';
+import { LogIn, Plus, Pencil, Trash2, Save, Image as ImageIcon, Send, Loader2, ArrowLeft, Newspaper, ExternalLink, LogOut, Key, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const REPO_OWNER = 'tammat11';
@@ -20,6 +20,10 @@ interface NewsArticle {
     image: string;
     tag: string;
     readTime: string;
+    // Case specific fields
+    company?: string;
+    stat?: string;
+    metric?: string;
 }
 
 const AdminLayout = ({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) => (
@@ -72,6 +76,7 @@ const AdminPage = () => {
     const [editingArticle, setEditingArticle] = useState<Partial<NewsArticle> | null>(null);
     const [isNew, setIsNew] = useState(false);
     const [saveLoading, setSaveLoading] = useState(false);
+    const [uploadLoading, setUploadLoading] = useState(false);
     const [error, setError] = useState('');
 
     const fetchFromGitHub = async () => {
@@ -196,6 +201,48 @@ const AdminPage = () => {
         if (!confirm('Удалить новость?')) return;
         const updatedNews = news.filter(n => n.id !== id);
         saveToGitHub(updatedNews);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadLoading(true);
+        try {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64Content = (reader.result as string).split(',')[1];
+                const fileName = `upload_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const path = `app/public/uploads/${fileName}`;
+
+                const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `CMS: Upload image ${fileName}`,
+                        content: base64Content
+                    })
+                });
+
+                if (!res.ok) throw new Error('Ошибка загрузки изображения на GitHub');
+                const data = await res.json();
+                
+                // Construct the public URL for the uploaded image
+                // Assuming the repo is deployed and images in public/uploads are accessible via /uploads/
+                const publicUrl = `/uploads/${fileName}`;
+                setEditingArticle(prev => prev ? { ...prev, image: publicUrl } : null);
+                alert('Изображение загружено!');
+            };
+        } catch (err: any) {
+            alert('Ошибка: ' + err.message);
+        } finally {
+            setUploadLoading(false);
+        }
     };
 
     if (!isAuthed) {
@@ -327,17 +374,22 @@ const AdminPage = () => {
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Категория</label>
-                                    <input
-                                        type="text"
-                                        value={editingArticle.category || ''}
-                                        onChange={e => setEditingArticle({ ...editingArticle, category: e.target.value })}
-                                        placeholder="Напр. Проекты"
-                                        className="w-full px-5 py-3.5 bg-brand-light rounded-xl border border-black/5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30"
-                                    />
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Проекты', 'Новости', 'Кейсы'].map(cat => (
+                                            <button
+                                                key={cat}
+                                                type="button"
+                                                onClick={() => setEditingArticle({ ...editingArticle, category: cat })}
+                                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${editingArticle.category === cat ? 'bg-brand-green text-white shadow-md' : 'bg-brand-light text-brand-dark/40 hover:bg-brand-green/10'}`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                             <div>
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Изображение (URL)</label>
+                                <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Изображение (URL или загрузка)</label>
                                 <div className="relative group">
                                     {editingArticle.image ? (
                                         <img src={editingArticle.image} alt="" className="w-full h-[116px] object-cover rounded-xl border border-black/5 mb-2" />
@@ -346,16 +398,62 @@ const AdminPage = () => {
                                             <ImageIcon className="text-brand-dark/10" size={32} />
                                         </div>
                                     )}
-                                    <input
-                                        type="url"
-                                        value={editingArticle.image || ''}
-                                        onChange={e => setEditingArticle({ ...editingArticle, image: e.target.value })}
-                                        placeholder="https://..."
-                                        className="w-full px-5 py-3.5 bg-brand-light rounded-xl border border-black/5 text-[10px] focus:outline-none focus:ring-2 focus:ring-brand-green/30 font-mono"
-                                    />
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="url"
+                                            value={editingArticle.image || ''}
+                                            onChange={e => setEditingArticle({ ...editingArticle, image: e.target.value })}
+                                            placeholder="https://..."
+                                            className="flex-1 px-5 py-3.5 bg-brand-light rounded-xl border border-black/5 text-[10px] focus:outline-none focus:ring-2 focus:ring-brand-green/30 font-mono"
+                                        />
+                                        <label className={`cursor-pointer ${uploadLoading ? 'bg-gray-400' : 'bg-brand-green'} text-white px-4 py-2 rounded-xl flex items-center justify-center hover:bg-brand-dark transition-all shadow-sm`}>
+                                            {uploadLoading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadLoading} />
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        {/* Case Specific Fields */}
+                        {editingArticle.category === 'Кейсы' && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5 bg-brand-green/[0.03] rounded-3xl border border-brand-green/10">
+                                <div className="col-span-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-green mb-1">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
+                                    Данные кейса
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Компания</label>
+                                    <input
+                                        type="text"
+                                        value={editingArticle.company || ''}
+                                        onChange={e => setEditingArticle({ ...editingArticle, company: e.target.value })}
+                                        placeholder="Напр. Kaspi Bank"
+                                        className="w-full px-4 py-3 bg-white rounded-xl border border-black/5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Показатель</label>
+                                    <input
+                                        type="text"
+                                        value={editingArticle.stat || ''}
+                                        onChange={e => setEditingArticle({ ...editingArticle, stat: e.target.value })}
+                                        placeholder="Напр. 500 клинеров"
+                                        className="w-full px-4 py-3 bg-white rounded-xl border border-black/5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Метрика</label>
+                                    <input
+                                        type="text"
+                                        value={editingArticle.metric || ''}
+                                        onChange={e => setEditingArticle({ ...editingArticle, metric: e.target.value })}
+                                        placeholder="Напр. Экономия"
+                                        className="w-full px-4 py-3 bg-white rounded-xl border border-black/5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-3 gap-4">
                             <div>

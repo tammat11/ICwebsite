@@ -1,43 +1,82 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, ShieldCheck, TrendingDown, Zap } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
+import newsData from '../data/news.json';
+
+interface NewsArticle {
+    id: string;
+    title: string;
+    date: string;
+    category: string;
+    desc: string;
+    image: string;
+    tag: string;
+    readTime: string;
+    company?: string;
+    stat?: string;
+    metric?: string;
+}
 
 const CasesSection = () => {
     const [sectionRef, inView] = useInView();
+    const [cases, setCases] = useState<NewsArticle[]>([]);
 
-    const cases = [
-        {
-            company: "AO «Kaspi Bank»",
-            stat: "Kaspi Bank",
-            metric: "ЦЕНТРАЛИЗАЦИЯ",
-            title: "Организовали централизованный закуп услуг клининга по всему Казахстану.",
-            desc: "Упростили управление процессом клининга — стали единым поставщиком услуг по стране. Стандартизировали качество уборки во всех филиалах.",
-            category: "Banking",
-            icon: <ShieldCheck size={20} />,
-            image: "/cases/kaspi.jpeg"
-        },
-        {
-            company: "НК «Астана ЭКСПО-2017»",
-            stat: "500 клинеров",
-            metric: "ЗАПУСК ПРОЕКТА",
-            title: "Наняли 500 клинеров и наладили производственные процессы за 3 дня.",
-            desc: "Запустили объект за 3 дня за счет региональной представленности и объемов производства.",
-            category: "Public Sector",
-            icon: <Zap size={20} />,
-            image: "/cases/казхром.jpg"
-        },
-        {
-            company: "АО «ТНК Казхром»",
-            stat: "5 млн ₸",
-            metric: "ЭКОНОМИЯ В МЕСЯЦ",
-            title: "Сэкономили 5 млн ₸ ежемесячно.",
-            desc: "Сократили фонд оплаты труда на 28% и сэкономили 5 млн тенге в месяц за счет автоматизации процессов.",
-            category: "Industrial",
-            icon: <TrendingDown size={20} />,
-            image: "/cases/экспо.jpg"
+    useEffect(() => {
+        const filteredCases = (newsData as NewsArticle[]).filter(item => item.category === 'Кейсы');
+        if (filteredCases.length > 0) {
+            setCases(filteredCases);
+        } else {
+            // Fallback to initial data if json is empty
+            setCases([
+                {
+                    id: "default-1",
+                    company: "AO «Kaspi Bank»",
+                    stat: "Kaspi Bank",
+                    metric: "ЦЕНТРАЛИЗАЦИЯ",
+                    title: "Организовали централизованный закуп услуг клининга по всему Казахстану.",
+                    desc: "Упростили управление процессом клининга — стали единым поставщиком услуг по стране. Стандартизировали качество уборки во всех филиалах.",
+                    category: "Кейсы",
+                    tag: "Banking",
+                    image: "/cases/kaspi.jpeg",
+                    date: "12.03.2026",
+                    readTime: "3 мин"
+                },
+                {
+                    id: "default-2",
+                    company: "НК «Астана ЭКСПО-2017»",
+                    stat: "500 клинеров",
+                    metric: "ЗАПУСК ПРОЕКТА",
+                    title: "Наняли 500 клинеров и наладили производственные процессы за 3 дня.",
+                    desc: "Запустили объект за 3 дня за счет региональной представленности и объемов производства.",
+                    category: "Кейсы",
+                    tag: "Public Sector",
+                    image: "/cases/казхром.jpg",
+                    date: "12.03.2026",
+                    readTime: "3 мин"
+                },
+                {
+                    id: "default-3",
+                    company: "АО «ТНК Казхром»",
+                    stat: "5 млн ₸",
+                    metric: "ЭКОНОМИЯ В МЕСЯЦ",
+                    title: "Сэкономили 5 млн ₸ ежемесячно.",
+                    desc: "Сократили фонд оплаты труда на 28% и сэкономили 5 млн тенге в месяц за счет автоматизации процессов.",
+                    category: "Кейсы",
+                    tag: "Industrial",
+                    image: "/cases/экспо.jpg",
+                    date: "12.03.2026",
+                    readTime: "3 мин"
+                }
+            ]);
         }
-    ];
+    }, []);
+
+    const getIcon = (tag?: string) => {
+        if (tag?.includes('Banking')) return <ShieldCheck size={20} />;
+        if (tag?.includes('Sector')) return <Zap size={20} />;
+        return <TrendingDown size={20} />;
+    };
 
     return (
         <section ref={sectionRef} className={`py-8 md:py-12 bg-brand-light overflow-hidden relative ${inView ? 'in-view' : ''}`} id="cases">
@@ -70,7 +109,7 @@ const CasesSection = () => {
                                 <div className="relative h-[180px] md:h-[280px] rounded-[20px] md:rounded-[32px] overflow-hidden border border-black/[0.05] shadow-sm group-hover:shadow-2xl transition-all duration-700">
                                     <div className="absolute inset-y-0 -left-1/3 z-20 w-1/3 bg-gradient-to-r from-transparent via-white/65 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                                     <div className="case-image-inner w-full h-full opacity-90 group-hover:opacity-100 transition-all duration-[1500ms]">
-                                        <img src={item.image} alt={item.company} className={`w-full h-full object-cover transition-transform duration-[1400ms] group-hover:scale-110 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`} />
+                                        <img src={item.image} alt={item.company || item.title} className={`w-full h-full object-cover transition-transform duration-[1400ms] group-hover:scale-110 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`} />
                                     </div>
                                     {/* Subtle gradients for text readability (bottom-left focus) */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 pointer-events-none" />
@@ -79,24 +118,24 @@ const CasesSection = () => {
                                     {/* Company Label Floating */}
                                     <div className="absolute top-4 left-4 z-20">
                                         <div className={`px-3 py-1.5 ${i === 1 ? 'bg-brand-secondary/90' : 'bg-brand-green/90'} backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-[0.2em] rounded-full shadow-lg border border-white/20 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`}>
-                                            {item.company}
+                                            {item.company || item.title}
                                         </div>
                                     </div>
 
                                     <div className="absolute top-4 right-4 z-20">
                                         <div className="w-11 h-11 rounded-full bg-white/12 backdrop-blur-md border border-white/15 text-white flex items-center justify-center animate-pulse-glow">
-                                            {item.icon}
+                                            {getIcon(item.tag)}
                                         </div>
                                     </div>
 
                                     {/* Fast Stat Overlay */}
                                     <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1.5 z-20 text-left">
                                         <div className="text-3xl md:text-5xl font-bold text-white tracking-tighter leading-none drop-shadow-md">
-                                            {item.stat}
+                                            {item.stat || item.title}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-3 h-px bg-white/60" />
-                                            <div className="text-[10px] font-bold text-white uppercase tracking-wider drop-shadow-md">{item.metric}</div>
+                                            <div className="text-[10px] font-bold text-white uppercase tracking-wider drop-shadow-md">{item.metric || 'Результат'}</div>
                                         </div>
                                     </div>
                                 </div>
