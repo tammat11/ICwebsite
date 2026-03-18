@@ -6,6 +6,9 @@ const REPO_OWNER = 'tammat11';
 const REPO_NAME = 'ICwebsite';
 const FILE_PATH = 'app/src/data/news.json';
 
+const TG_BOT_TOKEN = '8459731566:AAGbkYk43Fyg7kxcqMuDxbBXgC1LHfSL9bU';
+const TG_CHAT_ID = '-5105161509';
+
 interface NewsArticle {
     id: string;
     title: string;
@@ -55,7 +58,11 @@ const AdminLayout = ({ children, onLogout }: { children: React.ReactNode; onLogo
 
 const AdminPage = () => {
     const [token, setToken] = useState<string | null>(localStorage.getItem('gh_token'));
-    const [inputToken, setInputToken] = useState('');
+    const [isAuthed, setIsAuthed] = useState(!!localStorage.getItem('admin_authenticated'));
+    const [phone, setPhone] = useState('');
+    const [inputCode, setInputToken] = useState('');
+    const [generatedCode, setGeneratedCode] = useState('');
+    const [step, setStep] = useState<'phone' | 'code'>('phone');
     const [news, setNews] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(false);
     const [fileSha, setFileSha] = useState('');
@@ -65,7 +72,7 @@ const AdminPage = () => {
     const [error, setError] = useState('');
 
     const fetchFromGitHub = async () => {
-        if (!token) return;
+        if (!token || !isAuthed) return;
         setLoading(true);
         setError('');
         try {
@@ -94,15 +101,41 @@ const AdminPage = () => {
     }, [token]);
 
     const handleLogin = () => {
-        if (inputToken.trim()) {
-            localStorage.setItem('gh_token', inputToken.trim());
-            setToken(inputToken.trim());
+        if (inputCode === generatedCode && generatedCode !== '') {
+            localStorage.setItem('admin_authenticated', 'true');
+            setIsAuthed(true);
+        } else {
+            alert('Неверный код');
+        }
+    };
+
+    const sendTgCode = async () => {
+        if (!phone) return alert('Введите телефон');
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        setGeneratedCode(code);
+        
+        try {
+            const message = `🔐 *Код входа в админку*\n\nПользователь: \`${phone}\`\nКод: \`${code}\``;
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TG_CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown'
+                })
+            });
+            setStep('code');
+        } catch (err) {
+            alert('Ошибка отправки в Telegram');
         }
     };
 
     const logout = () => {
         localStorage.removeItem('gh_token');
+        localStorage.removeItem('admin_authenticated');
         setToken(null);
+        setIsAuthed(false);
         setNews([]);
     };
 
@@ -157,7 +190,7 @@ const AdminPage = () => {
         saveToGitHub(updatedNews);
     };
 
-    if (!token) {
+    if (!isAuthed) {
         return (
             <div className="min-h-screen bg-brand-light flex items-center justify-center px-6 font-sans">
                 <div className="w-full max-w-md">
@@ -167,26 +200,84 @@ const AdminPage = () => {
                                 <Key size={28} className="text-brand-green" />
                             </div>
                             <h1 className="text-2xl font-bold uppercase tracking-tight text-brand-dark">Вход в CMS</h1>
-                            <p className="text-sm text-brand-dark/40 mt-2 italic">Введите GitHub Token для управления новостями</p>
+                            <p className="text-sm text-brand-dark/40 mt-2 italic">Подтверждение через Telegram</p>
+                        </div>
+                        
+                        {step === 'phone' ? (
+                            <div className="space-y-4">
+                                <input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={e => setPhone(e.target.value)}
+                                    placeholder="Ваш номер телефона"
+                                    className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+                                />
+                                <button
+                                    onClick={sendTgCode}
+                                    className="w-full flex items-center justify-center gap-3 bg-brand-dark text-white py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-brand-green transition-all"
+                                >
+                                    Получить код
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    value={inputCode}
+                                    onChange={e => setInputToken(e.target.value)}
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-3xl font-bold tracking-[0.5em] text-center focus:outline-none focus:ring-2 focus:ring-brand-green/30"
+                                />
+                                <button
+                                    onClick={handleLogin}
+                                    className="w-full flex items-center justify-center gap-3 bg-brand-green text-white py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-brand-dark transition-all"
+                                >
+                                    Войти
+                                </button>
+                                <button onClick={() => setStep('phone')} className="w-full text-[10px] uppercase tracking-widest text-brand-dark/30 hover:text-brand-dark transition-colors">
+                                    ← Другой номер
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!token) {
+        return (
+            <div className="min-h-screen bg-brand-light flex items-center justify-center px-6 font-sans">
+                <div className="w-full max-w-md">
+                    <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-xl border border-black/5">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-brand-green/10 flex items-center justify-center mx-auto mb-4">
+                                <Key size={28} className="text-brand-green" />
+                            </div>
+                            <h1 className="text-2xl font-bold uppercase tracking-tight text-brand-dark">GitHub Token</h1>
+                            <p className="text-sm text-brand-dark/40 mt-2 italic">Введите токен репозитория</p>
                         </div>
                         <div className="space-y-4">
                             <input
                                 type="password"
-                                value={inputToken}
+                                value={inputCode}
                                 onChange={e => setInputToken(e.target.value)}
                                 placeholder="ghp_xxxxxxxxxxxx"
                                 className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             />
                             <button
-                                onClick={handleLogin}
+                                onClick={() => {
+                                    if (inputCode.trim()) {
+                                        localStorage.setItem('gh_token', inputCode.trim());
+                                        setToken(inputCode.trim());
+                                        setInputToken('');
+                                    }
+                                }}
                                 className="w-full flex items-center justify-center gap-3 bg-brand-dark text-white py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-brand-green transition-all"
                             >
-                                <LogIn size={18} />
-                                Войти
+                                Сохранить токен
                             </button>
-                            <p className="text-[10px] text-center text-brand-dark/30 uppercase tracking-widest pt-2">
-                                Данные хранятся в вашем браузере
-                            </p>
                         </div>
                     </div>
                 </div>
