@@ -34,7 +34,6 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
         { label: 'Услуги', to: '/services' },
         { label: 'Карьера', to: '/careers' },
         { label: 'Новости', to: '/news' },
-        { label: 'О компании', to: '/#process' },
         { label: 'Контакты', to: '/contacts' },
     ];
 
@@ -57,37 +56,37 @@ const Navbar = ({ alwaysVisible = false, onCalcOpen }: NavbarProps) => {
                     <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
 
                     {/* Left: Logo & Status */}
-                    <div className="flex items-center gap-3 md:gap-4 relative z-10 w-[60px] md:w-[180px] flex-shrink-0">
+                    <div className="flex items-center gap-3 md:gap-4 relative z-10 w-[50px] md:w-[150px] flex-shrink-0">
                         <Link
                             to="/"
                             className={`flex items-center gap-1 md:gap-2 shrink-0 transition-all duration-500 transform
                             ${logoVisible ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 -translate-x-4 pointer-events-none'}`}
                         >
-                            <img src="/logo_IC_group.png" alt="IC GROUP" className="h-5 md:h-9 w-auto object-contain filter saturate-[1.1]" />
+                            <img src="/logo_IC_group.png" alt="IC GROUP" className="h-5 md:h-8 w-auto object-contain filter saturate-[1.1]" />
                         </Link>
                     </div>
 
                     {/* Middle: Main Nav (visible on all breakpoints) */}
-                    <div className="flex-1 flex items-center justify-center">
-                        <div className="flex items-center gap-0.5 md:gap-2 lg:gap-3 px-1.5 py-1 md:px-2 md:py-1.5 bg-black/[0.04] rounded-full relative z-10 border border-black/5">
+                    <div className="flex-1 flex items-center justify-center min-w-0">
+                        <div className="flex items-center gap-0.5 md:gap-1.5 lg:gap-2 px-1 py-0.5 md:px-1.5 md:py-1 bg-black/[0.04] rounded-full relative z-10 border border-black/5">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.to}
                                 to={link.to}
-                                className={`relative flex items-center justify-center px-2 md:px-5 py-1.5 md:py-2.5 rounded-full text-[8px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-widest transition-all duration-500
+                                className={`relative flex items-center justify-center px-2 md:px-4 py-1.5 md:py-2 rounded-full text-[7.5px] md:text-[10px] font-black uppercase tracking-tight md:tracking-wider transition-all duration-500 whitespace-nowrap
                                 ${location.pathname === link.to
-                                        ? 'text-white bg-black shadow-[0_10px_20px_rgba(0,0,0,0.2)] scale-105'
+                                        ? 'text-white bg-black shadow-[0_8px_15px_rgba(0,0,0,0.2)] scale-105'
                                         : 'text-brand-dark/60 hover:text-brand-dark hover:bg-white/60'
                                     }`}
                             >
-                                <span className="pt-[1.5px] leading-none">{link.label}</span>
+                                <span className="pt-[1px] leading-none">{link.label}</span>
                             </Link>
                         ))}
                         </div>
                     </div>
 
                     {/* Right: Actions */}
-                    <div className="flex items-center gap-1.5 md:gap-4 relative z-10 w-[60px] md:w-[180px] flex-shrink-0 justify-end">
+                    <div className="flex items-center gap-1 md:gap-3 relative z-10 w-[50px] md:w-[150px] flex-shrink-0 justify-end">
                         <a
                             href="tel:+77717656353"
                             className={`hidden xl:flex items-center gap-2 group transition-all duration-500

@@ -73,7 +73,7 @@ const ProcessSection = () => {
                                         <h3 className="text-lg md:text-xl font-black uppercase tracking-tight text-brand-dark mb-2 md:mb-3 transition-colors duration-500 group-hover:text-brand-green leading-snug md:leading-none min-h-[1.5rem] md:min-h-[2rem] flex items-center justify-center">
                                             {step.title}
                                         </h3>
-                                        <p className="text-[10px] md:text-xs font-medium text-gray-400 leading-snug md:leading-relaxed uppercase tracking-[0.18em] md:tracking-wider group-hover:text-gray-500 transition-colors">
+                                        <p className="text-[9px] md:text-[10px] font-medium text-gray-400 leading-snug md:leading-relaxed uppercase tracking-[0.15em] md:tracking-normal group-hover:text-gray-500 transition-colors">
                                             {step.desc}
                                         </p>
                                     </div>
