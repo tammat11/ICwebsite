@@ -9,6 +9,8 @@ const FILE_PATH = 'app/src/data/news.json';
 const TG_BOT_TOKEN = '8459731566:AAGbkYk43Fyg7kxcqMuDxbBXgC1LHfSL9bU';
 const TG_CHAT_ID = '-5105161509';
 
+const ALLOWED_PHONES = ['77070522006', '77026666113'];
+
 interface NewsArticle {
     id: string;
     title: string;
@@ -111,6 +113,11 @@ const AdminPage = () => {
 
     const sendTgCode = async () => {
         if (!phone) return alert('Введите телефон');
+        const cleanPhone = phone.replace(/\D/g, '');
+        if (!ALLOWED_PHONES.includes(cleanPhone)) {
+            return alert('Доступ запрещен для этого номера');
+        }
+        
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         setGeneratedCode(code);
         
