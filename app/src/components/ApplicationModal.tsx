@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { createBitrixLead } from '../utils/bitrix';
+import { formatPhone } from '../utils/phone';
 
 interface ApplicationModalProps {
     isOpen: boolean;
@@ -93,12 +94,9 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
                             type="tel"
                             required
                             value={phone}
-                            onChange={(e) => {
-                                const val = e.target.value.replace(/[^\d+]/g, '');
-                                if (val.length <= 12) setPhone(val);
-                            }}
+                                onChange={(e) => setPhone(formatPhone(e.target.value))}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none font-bold"
-                            placeholder="+77XXXXXXXXX"
+                            placeholder="+7 (XXX) XXX XX XX*"
                         />
                     </div>
 

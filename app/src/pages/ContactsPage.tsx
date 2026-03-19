@@ -3,6 +3,7 @@ import Footer from '../components/Footer';
 import { Mail, Globe, Building2 } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
 import { createBitrixLead } from '../utils/bitrix';
+import { formatPhone } from '../utils/phone';
 
 const ContactsPage = () => {
     const [rootRef, inView] = useInView();
@@ -111,11 +112,8 @@ const ContactsPage = () => {
                                     type="tel" 
                                     required
                                     value={phone}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/[^\d+]/g, '');
-                                        if (val.length <= 12) setPhone(val);
-                                    }}
-                                    placeholder="Телефон (напр. +77...)*" 
+                                    onChange={(e) => setPhone(formatPhone(e.target.value))}
+                                    placeholder="+7 (XXX) XXX XX XX*" 
                                     className="w-full bg-white/10 border border-white/10 rounded-2xl px-6 py-4 placeholder:text-white/30 focus:outline-none focus:border-brand-green transition-colors" 
                                 />
                                 <textarea 
