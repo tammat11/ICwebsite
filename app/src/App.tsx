@@ -14,6 +14,7 @@ import CareersPage from './pages/CareersPage';
 import ContactsPage from './pages/ContactsPage';
 import NewsPage from './pages/NewsPage';
 import AdminPage from './pages/AdminPage';
+import SanitaryQuizPage from './pages/SanitaryQuizPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
@@ -55,6 +56,7 @@ function App() {
         <Route path="/news" element={<NewsPage onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/training/sanitary" element={<SanitaryQuizPage />} />
       </Routes>
       <AICalculator isOpen={isCalcOpen} onClose={() => setCalcOpen(false)} />
       <div className="noise-overlay" />
