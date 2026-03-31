@@ -152,8 +152,8 @@ const quizData = {
 };
 
 const videos = [
-    { id: "SOfX6H8786Y", title: { ru: "Базовая уборка санузлов", kz: "Санитарлық тораптарды негізгі жинау" }, duration: "4:12" },
-    { id: "gWkP-12E65k", title: { ru: "Поддерживающая уборка санузлов", kz: "Санитарлық тораптарды күнделікті жинау" }, duration: "3:45" }
+    { id: "ftCljFFcNSs", title: { ru: "Базовая уборка санузлов", kz: "Санитарлық тораптарды негізгі жинау" }, duration: "3:45" },
+    { id: "snPMaypCl8k", title: { ru: "Поддерживающая уборка санузлов", kz: "Санитарлық тораптарды күнделікті жинау" }, duration: "4:15" }
 ];
 
 const SanitaryQuizPage = () => {
@@ -186,7 +186,6 @@ const SanitaryQuizPage = () => {
     }, 0);
 
     useEffect(() => {
-        // Простая анимация появления
         gsap.fromTo(".reveal-simple", 
             { opacity: 0 }, 
             { opacity: 1, duration: 0.5, stagger: 0.1, ease: "none" }
@@ -287,12 +286,12 @@ const SanitaryQuizPage = () => {
                                     <h2>{t.curatorLabel}</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="flex flex-col gap-2 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                     {curators.map((curator) => (
                                         <button
                                             key={curator}
                                             onClick={() => setSelectedCurator(curator)}
-                                            className={`p-3 rounded-xl border text-[13px] font-bold transition-all text-left ${selectedCurator === curator ? 'border-brand-green bg-brand-green/10 text-brand-dark' : 'border-brand-dark/5 bg-brand-dark/[0.02] text-brand-dark/60 hover:border-brand-dark/10'}`}
+                                            className={`p-4 rounded-xl border text-[14px] font-bold transition-all text-left ${selectedCurator === curator ? 'border-brand-green bg-brand-green/10 text-brand-dark' : 'border-brand-dark/5 bg-brand-dark/[0.02] text-brand-dark/60 hover:border-brand-dark/10'}`}
                                         >
                                             {curator}
                                         </button>
@@ -381,7 +380,7 @@ const SanitaryQuizPage = () => {
                                         {t.resultTitle}: {score} / {t.questions.length}
                                     </h3>
                                     
-                                    <p className="text-white/60 mb-8 max-w-sm mx-auto font-medium">
+                                    <p className="text-white/60 mb-8 max-sm mx-auto font-medium">
                                         {score >= 8 ? t.passMessage : t.failMessage}
                                     </p>
 
