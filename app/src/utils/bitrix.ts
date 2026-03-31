@@ -84,10 +84,11 @@ export const updateSanitaryStats = async (score: number, curator: string) => {
         const AVG_FIELD = 'ufCrm_KASJD12';           // Средняя сумма
         const CURATOR_FIELD = 'ufCrm_1762769620';    // Поле куратора
 
-        // 1. Поиск записи для месяца "03"
+        // 1. Поиск записи для месяца "03" и конкретного куратора
         const listParams = new URLSearchParams();
         listParams.append('entityTypeId', String(ENTITY_TYPE_ID));
         listParams.append('filter[' + MONTH_FIELD + ']', '03');
+        listParams.append('filter[' + CURATOR_FIELD + ']', curator);
         listParams.append('filter[categoryId]', String(CATEGORY_ID));
 
         const listRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
