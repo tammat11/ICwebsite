@@ -74,3 +74,56 @@ export const createBitrixLead = async (data: LeadData) => {
         throw error;
     }
 };
+export const updateSanitaryStats = async (score: number) => {
+    try {
+        const ENTITY_TYPE_ID = 1254;
+        const CATEGORY_ID = 311;
+        const MONTH_FIELD = 'ufCrm127_1756290422310'; // Номер месяца
+        const COUNT_FIELD = 'ufCrm127_1756291224885'; // Количество пройденных
+        const TOTAL_FIELD = 'ufCrm_LKJSAND12';       // Общая сумма
+        const AVG_FIELD = 'ufCrm_KASJD12';           // Средняя сумма
+
+        // 1. Поиск записи для месяца "03"
+        const listParams = new URLSearchParams();
+        listParams.append('entityTypeId', String(ENTITY_TYPE_ID));
+        listParams.append('filter[' + MONTH_FIELD + ']', '03');
+        listParams.append('filter[categoryId]', String(CATEGORY_ID));
+
+        const listRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
+            method: 'POST',
+            body: listParams
+        });
+        const listData = await listRes.json();
+
+        if (listData.result && listData.result.items && listData.result.items.length > 0) {
+            const item = listData.result.items[0];
+            const currentCount = parseInt(item[COUNT_FIELD]) || 0;
+            const currentTotal = parseFloat(item[TOTAL_FIELD]) || 0;
+
+            const newCount = currentCount + 1;
+            const newTotal = currentTotal + score;
+            const newAvg = newTotal / newCount;
+
+            // 2. Обновление записи
+            const updateParams = new URLSearchParams();
+            updateParams.append('entityTypeId', String(ENTITY_TYPE_ID));
+            updateParams.append('id', item.id);
+            updateParams.append('fields[' + COUNT_FIELD + ']', String(newCount));
+            updateParams.append('fields[' + TOTAL_FIELD + ']', String(newTotal));
+            updateParams.append('fields[' + AVG_FIELD + ']', String(newAvg.toFixed(2)));
+
+            const updateRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.update.json`, {
+                method: 'POST',
+                body: updateParams
+            });
+            return await updateRes.json();
+        } else {
+            console.warn('Record for month 03 not found in Bitrix24');
+            // Опционально: создание новой записи, если нужно
+            return null;
+        }
+    } catch (error) {
+        console.error('Error updating sanitary stats in Bitrix:', error);
+        throw error;
+    }
+};

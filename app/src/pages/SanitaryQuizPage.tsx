@@ -3,6 +3,8 @@ import Footer from '../components/Footer';
 import { CheckCircle2, Play, ChevronRight, RotateCcw } from 'lucide-react';
 import gsap from 'gsap';
 
+import { updateSanitaryStats } from '../utils/bitrix';
+
 const quizData = {
     ru: {
         title: "Уборка санитарных зон",
@@ -185,12 +187,22 @@ const SanitaryQuizPage = () => {
 
     const t = quizData[lang];
 
+    const score = userAnswers.reduce((acc, ans, idx) => {
+        return ans === t.questions[idx].correct ? acc + 1 : acc;
+    }, 0);
+
     useEffect(() => {
         gsap.fromTo(".reveal-on-scroll", 
             { y: 40, opacity: 0 }, 
             { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: "power3.out" }
         );
     }, [lang]);
+
+    useEffect(() => {
+        if (showResults) {
+            updateSanitaryStats(score).catch(err => console.error('Failed to sync with Bitrix:', err));
+        }
+    }, [showResults, score]);
 
     const handleAnswer = (optionIndex: number) => {
         const newAnswers = [...userAnswers];
@@ -219,10 +231,6 @@ const SanitaryQuizPage = () => {
         setUserAnswers(new Array(10).fill(-1));
         setShowResults(false);
     };
-
-    const score = userAnswers.reduce((acc, ans, idx) => {
-        return ans === t.questions[idx].correct ? acc + 1 : acc;
-    }, 0);
 
     return (
         <div ref={contentRef} className="bg-brand-light">
