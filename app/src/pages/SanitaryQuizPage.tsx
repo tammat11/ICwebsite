@@ -15,73 +15,24 @@ const quizData = {
         prevBtn: "Назад",
         finishBtn: "Завершить тест",
         restartBtn: "Начать заново",
-        correctText: "Правильно!",
-        incorrectText: "Неверно. Правильный ответ: ",
+        curatorTitle: "Кто ваш куратор?",
+        curatorPlaceholder: "Введите имя куратора",
+        startQuizBtn: "Начать тест",
         resultTitle: "Ваш результат",
         resultMessage: "Вы ответили правильно на {score} из {total} вопросов",
         passMessage: "Отлично! Вы хорошо усвоили материал.",
         failMessage: "Рекомендуем еще раз посмотреть видео и пройти тест.",
         questions: [
-            {
-                id: 1,
-                text: "Что обязательно при уборке санузлов?",
-                options: ["a) Перчатки и очки", "b) Маска для сна", "c) Без защиты"],
-                correct: 0
-            },
-            {
-                id: 2,
-                text: "Чем обрабатывается унитаз?",
-                options: ["a) Дезинфицирующим средством", "b) Водой", "c) Пылесосом"],
-                correct: 0
-            },
-            {
-                id: 3,
-                text: "В какой последовательности убирают санузел?",
-                options: ["a) Сверху вниз", "b) Снизу вверх", "c) Как удобно"],
-                correct: 0
-            },
-            {
-                id: 4,
-                text: "Что использовать для зеркала в санузле?",
-                options: ["a) Средство для стекол", "b) Средство для полов", "c) Вода"],
-                correct: 0
-            },
-            {
-                id: 5,
-                text: "Как часто убирают санузлы?",
-                options: ["a) Ежедневно и чаще при интенсивном использовании", "b) Раз в месяц", "c) Раз в неделю"],
-                correct: 0
-            },
-            {
-                id: 6,
-                text: "Что нельзя допускать в санузлах?",
-                options: ["a) Наличие запахов и следов загрязнений", "b) Сухой пол", "c) Включенный свет"],
-                correct: 0
-            },
-            {
-                id: 7,
-                text: "Какая тряпка используется в санузлах?",
-                options: ["a) Красная", "b) Жёлтая", "c) Синяя"],
-                correct: 0
-            },
-            {
-                id: 8,
-                text: "Что включают в уборку санузлов?",
-                options: ["a) Дезинфекция поверхностей", "b) Замена мебели", "c) Ремонт"],
-                correct: 0
-            },
-            {
-                id: 9,
-                text: "Что делать при засоре?",
-                options: ["a) Сообщить ответственному", "b) Игнорировать", "c) Использовать тряпку"],
-                correct: 0
-            },
-            {
-                id: 10,
-                text: "Где хранится инвентарь для санузлов?",
-                options: ["a) Отдельно от остального", "b) В общей тележке", "c) В офисе"],
-                correct: 0
-            }
+            { id: 1, text: "Что обязательно при уборке санузлов?", options: ["Перчатки и очки", "Маска для сна", "Без защиты"], correct: "Перчатки и очки" },
+            { id: 2, text: "Чем обрабатывается унитаз?", options: ["Дезинфицирующим средством", "Водой", "Пылесосом"], correct: "Дезинфицирующим средством" },
+            { id: 3, text: "В какой последовательности убирают санузел?", options: ["Сверху вниз", "Снизу вверх", "Как удобно"], correct: "Сверху вниз" },
+            { id: 4, text: "Что использовать для зеркала в санузле?", options: ["Средство для стекол", "Средство для полов", "Вода"], correct: "Средство для стекол" },
+            { id: 5, text: "Как часто убирают санузлы?", options: ["Ежедневно и чаще при интенсивном использовании", "Раз в месяц", "Раз в неделю"], correct: "Ежедневно и чаще при интенсивном использовании" },
+            { id: 6, text: "Что нельзя допускать в санузлах?", options: ["Наличие запахов и следов загрязнений", "Сухой пол", "Включенный свет"], correct: "Наличие запахов и следов загрязнений" },
+            { id: 7, text: "Какая тряпка используется в санузлах?", options: ["Красная", "Жёлтая", "Синяя"], correct: "Красная" },
+            { id: 8, text: "Что включают в уборку санузлов?", options: ["Дезинфекция поверхностей", "Замена мебели", "Ремонт"], correct: "Дезинфекция поверхностей" },
+            { id: 9, text: "Что делать при засоре?", options: ["Сообщить ответственному", "Игнорировать", "Использовать тряпку"], correct: "Сообщить ответственному" },
+            { id: 10, text: "Где хранится инвентарь для санузлов?", options: ["Отдельно от остального", "В общей тележке", "В офисе"], correct: "Отдельно от остального" }
         ]
     },
     kz: {
@@ -93,6 +44,9 @@ const quizData = {
         prevBtn: "Артқа",
         finishBtn: "Тестілеуді аяқтау",
         restartBtn: "Қайта бастау",
+        curatorTitle: "Кураторыңыз кім?",
+        curatorPlaceholder: "Куратордың атын енгізіңіз",
+        startQuizBtn: "Тестті бастау",
         correctText: "Дұрыс!",
         incorrectText: "Қате. Дұрыс жауап: ",
         resultTitle: "Сіздің нәтижеңіз",
@@ -100,66 +54,16 @@ const quizData = {
         passMessage: "Өте жақсы! Материалды жақсы меңгердіңіз.",
         failMessage: "Бейнелерді қайтадан көріп, тест тапсыруды ұсынамыз.",
         questions: [
-            {
-                id: 1,
-                text: "Санузелді тазалағанда не міндетті?",
-                options: ["a) Қолғап және көзілдірік кию", "b) Ұйқы маскасы", "c) Қорғаныссыз жұмыс"],
-                correct: 0
-            },
-            {
-                id: 2,
-                text: "Унитаз қандай құралмен өңделеді?",
-                options: ["a) Дезинфекциялық құралмен", "b) Сумен", "c) Пылесоспен"],
-                correct: 0
-            },
-            {
-                id: 3,
-                text: "Санузел қандай ретпен тазартылады?",
-                options: ["a) Жоғарыдан төменге қарай", "b) Төменнен жоғары", "c) Қалағандай"],
-                correct: 0
-            },
-            {
-                id: 4,
-                text: "Айнаға не қолданылады?",
-                options: ["a) Шыны жууға арналған құрал", "b) Еден жуу құралы", "c) Су"],
-                correct: 0
-            },
-            {
-                id: 5,
-                text: "Санузелдер қаншалықты жиі тазаланады?",
-                options: ["a) Күн сайын және қажет болғанда жиірек", "b) Айына 1 рет", "c) Аптасына 1 рет"],
-                correct: 0
-            },
-            {
-                id: 6,
-                text: "Санузелде неге жол беруге болмайды?",
-                options: ["a) Иіс пен ластанудың болуына", "b) Құрғақ еден", "c) Жарықтың жануына"],
-                correct: 0
-            },
-            {
-                id: 7,
-                text: "Санузел үшін қандай шүберек қолданылады?",
-                options: ["a) Қызыл шүберек", "b) Сары", "c) Көк"],
-                correct: 0
-            },
-            {
-                id: 8,
-                text: "Санузелді тазалау нені қамтиды?",
-                options: ["a) Беттерді дезинфекциялау", "b) Жиһаз ауыстыру", "c) Жөндеу"],
-                correct: 0
-            },
-            {
-                id: 9,
-                text: "Тұтқындағы бітеліс болса не істеу керек?",
-                options: ["a) Жауапты адамға хабарлау керек", "b) Елемеу", "c) Шүберекпен тазалау"],
-                correct: 0
-            },
-            {
-                id: 10,
-                text: "Санузелге арналған инвентарь қайда сақталады?",
-                options: ["a) Басқа инвентарьдан бөлек, арнайы жерде", "b) Жалпы арбада", "c) Офисте"],
-                correct: 0
-            }
+            { id: 1, text: "Санузелді тазалағанда не міндетті?", options: ["Қолғап және көзілдірік кию", "Ұйқы маскасы", "Қорғаныссыз жұмыс"], correct: "Қолғап және көзілдірік кию" },
+            { id: 2, text: "Унитаз қандай құралмен өңделеді?", options: ["Дезинфекциялық құралмен", "Сумен", "Пылесоспен"], correct: "Дезинфекциялық құралмен" },
+            { id: 3, text: "Санузел қандай ретпен тазартылады?", options: ["Жоғарыдан төменге қарай", "Төменнен жоғары", "Қалағандай"], correct: "Жоғарыдан төменге қарай" },
+            { id: 4, text: "Айнаға не қолданылады?", options: ["Шыны жууға арналған құрал", "Еден жуу құралы", "Су"], correct: "Шыны жууға арналған құрал" },
+            { id: 5, text: "Санузелдер қаншалықты жиі тазаланады?", options: ["Күн сайын және қажет болғанда жиірек", "Айына 1 рет", "Аптасына 1 рет"], correct: "Күн сайын және қажет болғанда жиірек" },
+            { id: 6, text: "Санузелде неге жол беруге болмайды?", options: ["Иіс пен ластанудың болуына", "Құрғақ еден", "Жарықтың жануына"], correct: "Иіс пен ластанудың болуына" },
+            { id: 7, text: "Санузел үшін қандай шүберек қолданылады?", options: ["Қызыл шүберек", "Сары", "Көк"], correct: "Қызыл шүберек" },
+            { id: 8, text: "Санузелді тазалау нені қамтиды?", options: [" Беттерді дезинфекциялау", "Жиһаз ауыстыру", "Жөндеу"], correct: "Беттерді дезинфекциялау" },
+            { id: 9, text: "Тұтқындағы бітеліс болса не істеу керек?", options: ["Жауапты адамға хабарлау керек", "Елемеу", "Шүберекпен тазалау"], correct: "Жауапты адамға хабарлау керек" },
+            { id: 10, text: "Санузелге арналған инвентарь қайда сақталады?", options: [" Басқа инвентарьдан бөлек, арнайы жерде", "Жалпы арбада", "Офисте"], correct: "Басқа инвентарьдан бөлек, арнайы жерде" }
         ]
     }
 };
@@ -179,16 +83,39 @@ const videos = [
 
 const SanitaryQuizPage = () => {
     const [lang, setLang] = useState<'ru' | 'kz'>('ru');
+    const [curator, setCurator] = useState('');
+    const [isQuizStarted, setIsQuizStarted] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState<number[]>(new Array(10).fill(-1));
     const [showResults, setShowResults] = useState(false);
+    const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
+    
     const contentRef = useRef<HTMLDivElement>(null);
     const quizRef = useRef<HTMLDivElement>(null);
 
     const t = quizData[lang];
 
+    const startQuiz = () => {
+        if (!curator.trim()) return;
+        
+        const shuffled = t.questions.map(q => {
+            const options = [...q.options];
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            return { ...q, shuffledOptions: options };
+        });
+        
+        setShuffledQuestions(shuffled);
+        setIsQuizStarted(true);
+        gsap.fromTo(quizRef.current, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 });
+    };
+
     const score = userAnswers.reduce((acc, ans, idx) => {
-        return ans === t.questions[idx].correct ? acc + 1 : acc;
+        if (ans === -1 || !shuffledQuestions[idx]) return acc;
+        const selectedText = shuffledQuestions[idx].shuffledOptions[ans];
+        return selectedText === shuffledQuestions[idx].correct ? acc + 1 : acc;
     }, 0);
 
     useEffect(() => {
@@ -200,9 +127,9 @@ const SanitaryQuizPage = () => {
 
     useEffect(() => {
         if (showResults) {
-            updateSanitaryStats(score).catch(err => console.error('Failed to sync with Bitrix:', err));
+            updateSanitaryStats(score, curator).catch(err => console.error('Failed to sync with Bitrix:', err));
         }
-    }, [showResults, score]);
+    }, [showResults, score, curator]);
 
     const handleAnswer = (optionIndex: number) => {
         const newAnswers = [...userAnswers];
@@ -226,17 +153,10 @@ const SanitaryQuizPage = () => {
         }
     };
 
-    const restartQuiz = () => {
-        setCurrentQuestion(0);
-        setUserAnswers(new Array(10).fill(-1));
-        setShowResults(false);
-    };
-
     return (
         <div ref={contentRef} className="bg-brand-light">
             <main className="min-h-screen pt-24 pb-20 px-6">
                 <div className="max-w-4xl mx-auto">
-                    {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 relative">
                         <div className="absolute -top-20 -left-20 w-64 h-64 bg-brand-green/10 rounded-full blur-[100px] pointer-events-none" />
                         
@@ -268,7 +188,6 @@ const SanitaryQuizPage = () => {
                         </div>
                     </div>
 
-                    {/* Videos Section */}
                     <div className="mb-20">
                         <div className="flex items-center gap-3 mb-8 reveal-on-scroll">
                             <div className="w-10 h-10 bg-brand-green text-white rounded-xl flex items-center justify-center">
@@ -298,7 +217,6 @@ const SanitaryQuizPage = () => {
                         </div>
                     </div>
 
-                    {/* Quiz Section */}
                     <div className="reveal-on-scroll">
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-10 h-10 bg-brand-dark text-white rounded-xl flex items-center justify-center">
@@ -307,9 +225,30 @@ const SanitaryQuizPage = () => {
                             <h2 className="text-2xl font-bold tracking-tight text-brand-dark">{t.quizTitle}</h2>
                         </div>
 
-                        {!showResults ? (
+                        {!isQuizStarted ? (
+                            <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl border border-brand-dark/5 text-center reveal-on-scroll">
+                                <h3 className="text-2xl font-bold text-brand-dark mb-6">{t.curatorTitle}</h3>
+                                <div className="max-w-md mx-auto space-y-6">
+                                    <input 
+                                        type="text" 
+                                        value={curator}
+                                        onChange={(e) => setCurator(e.target.value)}
+                                        placeholder={t.curatorPlaceholder}
+                                        className="w-full px-6 py-4 rounded-2xl border-2 border-brand-dark/5 bg-brand-dark/[0.02] focus:border-brand-green outline-none transition-all font-medium text-center"
+                                    />
+                                    <button 
+                                        onClick={startQuiz}
+                                        disabled={!curator.trim()}
+                                        className={`w-full py-5 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all ${
+                                            curator.trim() ? 'bg-brand-green text-white hover:shadow-xl hover:-translate-y-1' : 'bg-brand-dark/10 text-brand-dark/30 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        {t.startQuizBtn}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : !showResults ? (
                             <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl border border-brand-dark/5 relative overflow-hidden" ref={quizRef}>
-                                {/* Progress bar */}
                                 <div className="absolute top-0 left-0 h-1.5 bg-brand-green transition-all duration-500" style={{ width: `${((currentQuestion + 1) / t.questions.length) * 100}%` }} />
                                 
                                 <div className="mb-10">
@@ -317,12 +256,12 @@ const SanitaryQuizPage = () => {
                                         Вопрос {currentQuestion + 1} из {t.questions.length}
                                     </span>
                                     <h3 className="text-xl md:text-2xl font-bold text-brand-dark leading-tight">
-                                        {t.questions[currentQuestion].text}
+                                        {shuffledQuestions[currentQuestion]?.text}
                                     </h3>
                                 </div>
 
                                 <div className="space-y-4 mb-10">
-                                    {t.questions[currentQuestion].options.map((option, idx) => (
+                                    {shuffledQuestions[currentQuestion]?.shuffledOptions.map((option: string, idx: number) => (
                                         <button
                                             key={idx}
                                             onClick={() => handleAnswer(idx)}
@@ -383,14 +322,6 @@ const SanitaryQuizPage = () => {
                                     <p className="text-xl text-white/60 mb-12 max-w-lg mx-auto font-medium">
                                         {score >= 8 ? t.passMessage : t.failMessage}
                                     </p>
-
-                                    <button 
-                                        onClick={restartQuiz}
-                                        className="px-12 py-5 bg-white text-brand-dark rounded-full font-bold uppercase tracking-widest text-xs hover:bg-brand-green hover:text-white transition-all shadow-xl hover:-translate-y-1 inline-flex items-center gap-3"
-                                    >
-                                        <RotateCcw size={18} />
-                                        {t.restartBtn}
-                                    </button>
                                 </div>
                             </div>
                         )}

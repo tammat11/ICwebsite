@@ -74,7 +74,7 @@ export const createBitrixLead = async (data: LeadData) => {
         throw error;
     }
 };
-export const updateSanitaryStats = async (score: number) => {
+export const updateSanitaryStats = async (score: number, curator: string) => {
     try {
         const ENTITY_TYPE_ID = 1254;
         const CATEGORY_ID = 311;
@@ -82,6 +82,7 @@ export const updateSanitaryStats = async (score: number) => {
         const COUNT_FIELD = 'ufCrm127_1756291224885'; // Количество пройденных
         const TOTAL_FIELD = 'ufCrm_LKJSAND12';       // Общая сумма
         const AVG_FIELD = 'ufCrm_KASJD12';           // Средняя сумма
+        const CURATOR_FIELD = 'ufCrm_1762769620';    // Поле куратора
 
         // 1. Поиск записи для месяца "03"
         const listParams = new URLSearchParams();
@@ -111,6 +112,7 @@ export const updateSanitaryStats = async (score: number) => {
             updateParams.append('fields[' + COUNT_FIELD + ']', String(newCount));
             updateParams.append('fields[' + TOTAL_FIELD + ']', String(newTotal));
             updateParams.append('fields[' + AVG_FIELD + ']', String(newAvg.toFixed(2)));
+            updateParams.append('fields[' + CURATOR_FIELD + ']', curator);
 
             const updateRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.update.json`, {
                 method: 'POST',
@@ -119,7 +121,6 @@ export const updateSanitaryStats = async (score: number) => {
             return await updateRes.json();
         } else {
             console.warn('Record for month 03 not found in Bitrix24');
-            // Опционально: создание новой записи, если нужно
             return null;
         }
     } catch (error) {
