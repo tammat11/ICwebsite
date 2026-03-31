@@ -1,146 +1,214 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Footer from '../components/Footer';
-import { CheckCircle2, Play, ChevronRight, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Play, ChevronRight, User } from 'lucide-react';
 import gsap from 'gsap';
 
 import { updateSanitaryStats } from '../utils/bitrix';
 
+const curators = [
+    "Ильиных Татьяна", "Айткулова А.", "Айтуганова Ю.", "Алдонгаров С.", 
+    "Аубакирова А.", "Болатбек А.", "Бут Р.", "Гирик А.", 
+    "Жандос Альсейтов", "Жапабаева Б.", "Зобова Е.", "Илиясов Р.", 
+    "Исабек Б.", "Исмагамбетов М", "Кабиева А.", "Калиаскар Б.", 
+    "Кан Т.", "Кенжебулатов А", "Куатова М.", "Ли А.", 
+    "Мусаева Р.", "Назарова М.", "Нысанбеков Е.", "Оспанова Г", 
+    "Полоз О.", "Роза Ерасылова", "Рузиева Зоя", "Токенова Сара", 
+    "Туймебеков Б.", "Черней Т."
+].sort();
+
 const quizData = {
     ru: {
         title: "Уборка санитарных зон",
-        subtitle: "Обучающий курс и тест по стандартам уборки санузлов",
-        videosTitle: "Обучающие видео",
-        quizTitle: "Тест для самопроверки",
+        subtitle: "Обучающий курс по стандартам уборки санузлов и правилам работы с дезинфицирующими средствами.",
+        videosTitle: "Обучающее видео",
+        quizTitle: "Тестирование знаний",
+        curatorLabel: "Выберите вашего куратора",
+        startBtn: "Начать тест",
         nextBtn: "Следующий вопрос",
         prevBtn: "Назад",
         finishBtn: "Завершить тест",
-        restartBtn: "Начать заново",
-        curatorTitle: "Кто ваш куратор?",
-        curatorPlaceholder: "Введите имя куратора",
-        startQuizBtn: "Начать тест",
         resultTitle: "Ваш результат",
-        resultMessage: "Вы ответили правильно на {score} из {total} вопросов",
-        passMessage: "Отлично! Вы хорошо усвоили материал.",
-        failMessage: "Рекомендуем еще раз посмотреть видео и пройти тест.",
+        passMessage: "Поздравляем! Вы успешно прошли тест. Ваши знания соответствуют стандартам компании.",
+        failMessage: "Тест не пройден. Рекомендуем еще раз внимательно посмотреть обучающие видео.",
         questions: [
-            { id: 1, text: "Что обязательно при уборке санузлов?", options: ["Перчатки и очки", "Маска для сна", "Без защиты"], correct: "Перчатки и очки" },
-            { id: 2, text: "Чем обрабатывается унитаз?", options: ["Дезинфицирующим средством", "Водой", "Пылесосом"], correct: "Дезинфицирующим средством" },
-            { id: 3, text: "В какой последовательности убирают санузел?", options: ["Сверху вниз", "Снизу вверх", "Как удобно"], correct: "Сверху вниз" },
-            { id: 4, text: "Что использовать для зеркала в санузле?", options: ["Средство для стекол", "Средство для полов", "Вода"], correct: "Средство для стекол" },
-            { id: 5, text: "Как часто убирают санузлы?", options: ["Ежедневно и чаще при интенсивном использовании", "Раз в месяц", "Раз в неделю"], correct: "Ежедневно и чаще при интенсивном использовании" },
-            { id: 6, text: "Что нельзя допускать в санузлах?", options: ["Наличие запахов и следов загрязнений", "Сухой пол", "Включенный свет"], correct: "Наличие запахов и следов загрязнений" },
-            { id: 7, text: "Какая тряпка используется в санузлах?", options: ["Красная", "Жёлтая", "Синяя"], correct: "Красная" },
-            { id: 8, text: "Что включают в уборку санузлов?", options: ["Дезинфекция поверхностей", "Замена мебели", "Ремонт"], correct: "Дезинфекция поверхностей" },
-            { id: 9, text: "Что делать при засоре?", options: ["Сообщить ответственному", "Игнорировать", "Использовать тряпку"], correct: "Сообщить ответственному" },
-            { id: 10, text: "Где хранится инвентарь для санузлов?", options: ["Отдельно от остального", "В общей тележке", "В офисе"], correct: "Отдельно от остального" }
+            {
+                text: "Что обязательно при уборке санузлов?",
+                options: ["Перчатки и очки", "Маска для сна", "Без защиты"],
+                correct: 0
+            },
+            {
+                text: "Чем обрабатывается унитаз?",
+                options: ["Дезинфицирующим средством", "Водой", "Пылесосом"],
+                correct: 0
+            },
+            {
+                text: "В какой последовательности убирают санузел?",
+                options: ["Сверху вниз", "Снизу вверх", "Как удобно"],
+                correct: 0
+            },
+            {
+                text: "Что использовать для зеркала в санузле?",
+                options: ["Средство для стекол", "Средство для полов", "Вода"],
+                correct: 0
+            },
+            {
+                text: "Как часто убирают санузлы?",
+                options: ["Ежедневно и чаще при интенсивности", "Раз в неделю", "По желанию"],
+                correct: 0
+            },
+            {
+                text: "Какого цвета инвентарь для санузлов?",
+                options: ["Красный", "Синий", "Зеленый"],
+                correct: 0
+            },
+            {
+                text: "Что делать, если закончилось мыло?",
+                options: ["Долить сразу", "Оставить пустым", "Ждать конца смены"],
+                correct: 0
+            },
+            {
+                text: "Как протирать краны?",
+                options: ["Микрофиброй до блеска", "Оставить мокрыми", "Не протирать"],
+                correct: 0
+            },
+            {
+                text: "Где хранить химию для санузлов?",
+                options: ["В спец. тележке или шкафу", "Под раковиной", "В общем коридоре"],
+                correct: 0
+            },
+            {
+                text: "Что делать при обнаружении поломки?",
+                options: ["Сообщить куратору", "Попытаться починить", "Проигнорировать"],
+                correct: 0
+            }
         ]
     },
     kz: {
-        title: "Санитарлық аймақтарды тазалау",
-        subtitle: "Санузелдерді тазалау стандарттары бойынша оқу курсы және тест",
-        videosTitle: "Оқу бейнелері",
-        quizTitle: "Өзін-өзі тексеру тесті",
+        title: "Санитарлық аймақтарды жинау",
+        subtitle: "Жуынатын бөлмелерді жинау стандарттары және дезинфекциялау құралдарымен жұмыс істеу ережелері бойынша оқыту курсы.",
+        videosTitle: "Оқыту видеолары",
+        quizTitle: "Білімді тексеру",
+        curatorLabel: "Кураторыңызды таңдаңыз",
+        startBtn: "Тестті бастау",
         nextBtn: "Келесі сұрақ",
         prevBtn: "Артқа",
-        finishBtn: "Тестілеуді аяқтау",
-        restartBtn: "Қайта бастау",
-        curatorTitle: "Кураторыңыз кім?",
-        curatorPlaceholder: "Куратордың атын енгізіңіз",
-        startQuizBtn: "Тестті бастау",
-        correctText: "Дұрыс!",
-        incorrectText: "Қате. Дұрыс жауап: ",
+        finishBtn: "Тестті аяқтау",
         resultTitle: "Сіздің нәтижеңіз",
-        resultMessage: "Сіз {total} сұрақтың {score}-сына дұрыс жауап бердіңіз",
-        passMessage: "Өте жақсы! Материалды жақсы меңгердіңіз.",
-        failMessage: "Бейнелерді қайтадан көріп, тест тапсыруды ұсынамыз.",
+        passMessage: "Құттықтаймыз! Сіз тестті сәтті тапсырдыңыз. Сіздің біліміңіз компания стандарттарына сәйкес келеді.",
+        failMessage: "Тест тапсырылмады. Оқу бейнелерін қайтадан мұқият қарап шығуды ұсынамыз.",
         questions: [
-            { id: 1, text: "Санузелді тазалағанда не міндетті?", options: ["Қолғап және көзілдірік кию", "Ұйқы маскасы", "Қорғаныссыз жұмыс"], correct: "Қолғап және көзілдірік кию" },
-            { id: 2, text: "Унитаз қандай құралмен өңделеді?", options: ["Дезинфекциялық құралмен", "Сумен", "Пылесоспен"], correct: "Дезинфекциялық құралмен" },
-            { id: 3, text: "Санузел қандай ретпен тазартылады?", options: ["Жоғарыдан төменге қарай", "Төменнен жоғары", "Қалағандай"], correct: "Жоғарыдан төменге қарай" },
-            { id: 4, text: "Айнаға не қолданылады?", options: ["Шыны жууға арналған құрал", "Еден жуу құралы", "Су"], correct: "Шыны жууға арналған құрал" },
-            { id: 5, text: "Санузелдер қаншалықты жиі тазаланады?", options: ["Күн сайын және қажет болғанда жиірек", "Айына 1 рет", "Аптасына 1 рет"], correct: "Күн сайын және қажет болғанда жиірек" },
-            { id: 6, text: "Санузелде неге жол беруге болмайды?", options: ["Иіс пен ластанудың болуына", "Құрғақ еден", "Жарықтың жануына"], correct: "Иіс пен ластанудың болуына" },
-            { id: 7, text: "Санузел үшін қандай шүберек қолданылады?", options: ["Қызыл шүберек", "Сары", "Көк"], correct: "Қызыл шүберек" },
-            { id: 8, text: "Санузелді тазалау нені қамтиды?", options: [" Беттерді дезинфекциялау", "Жиһаз ауыстыру", "Жөндеу"], correct: "Беттерді дезинфекциялау" },
-            { id: 9, text: "Тұтқындағы бітеліс болса не істеу керек?", options: ["Жауапты адамға хабарлау керек", "Елемеу", "Шүберекпен тазалау"], correct: "Жауапты адамға хабарлау керек" },
-            { id: 10, text: "Санузелге арналған инвентарь қайда сақталады?", options: [" Басқа инвентарьдан бөлек, арнайы жерде", "Жалпы арбада", "Офисте"], correct: "Басқа инвентарьдан бөлек, арнайы жерде" }
+            {
+                text: "Санитарлық тораптарды жинау кезінде не міндетті?",
+                options: ["Қолғап пен көзілдірік", "Ұйқыға арналған маска", "Қорғаныссыз"],
+                correct: 0
+            },
+            {
+                text: "Унитаз немен өңделеді?",
+                options: ["Дезинфекциялау құралымен", "Сумен", "Шаңсорғышпен"],
+                correct: 0
+            },
+            {
+                text: "Жуынатын бөлмені қандай ретпен жинайды?",
+                options: ["Жоғарыдан төмен", "Төменнен жоғары", "Ыңғайлы болғандай"],
+                correct: 0
+            },
+            {
+                text: "Жуынатын бөлмедегі айна үшін не пайдалану керек?",
+                options: ["Шыныға арналған құрал", "Еденге арналған құрал", "Су"],
+                correct: 0
+            },
+            {
+                text: "Санитарлық тораптар қаншалықты жиі жиналады?",
+                options: ["Күн сайын және қарқындылық кезінде жиірек", "Аптасына бір рет", "Қалауы бойынша"],
+                correct: 0
+            },
+            {
+                text: "Санитарлық тораптарға арналған құрал-сайманның түсі қандай?",
+                options: ["Қызыл", "Көк", "Жасыл"],
+                correct: 0
+            },
+            {
+                text: "Егер сабын таусылып қалса не істеу керек?",
+                options: ["Бірден құю", "Бос қалдыру", "Ауысымның соңын күту"],
+                correct: 0
+            },
+            {
+                text: "Шүмектерді қалай сүрту керек?",
+                options: ["Микрофибрамен жылтырағанша", "Ылғал күйде қалдыру", "Сүртпеу"],
+                correct: 0
+            },
+            {
+                text: "Санитарлық тораптарға арналған химияны қайда сақтау керек?",
+                options: ["Арнайы арбада немесе шкафта", "Раковинаның астында", "Жалпы дәлізде"],
+                correct: 0
+            },
+            {
+                text: "Ақаулық анықталған кезде не істеу керек?",
+                options: ["Кураторға хабарлау", "Жөндеуге тырысу", "Елемеу"],
+                correct: 0
+            }
         ]
     }
 };
 
 const videos = [
-    {
-        id: "ftCljFFcNSs",
-        title: { ru: "18. Базовая уборка санузлов", kz: "18. Санузелдерді базалық тазалау" },
-        duration: "03:45"
-    },
-    {
-        id: "snPMaypCl8k",
-        title: { ru: "19. Поддерживающая уборка санузлов", kz: "19. Санузелдерді қолдау тазалығы" },
-        duration: "04:15"
-    }
+    { id: "SOfX6H8786Y", title: { ru: "Базовая уборка санузлов", kz: "Санитарлық тораптарды негізгі жинау" }, duration: "4:12" },
+    { id: "gWkP-12E65k", title: { ru: "Поддерживающая уборка санузлов", kz: "Санитарлық тораптарды күнделікті жинау" }, duration: "3:45" }
 ];
 
 const SanitaryQuizPage = () => {
     const [lang, setLang] = useState<'ru' | 'kz'>('ru');
-    const [curator, setCurator] = useState('');
-    const [isQuizStarted, setIsQuizStarted] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState<number[]>(new Array(10).fill(-1));
     const [showResults, setShowResults] = useState(false);
-    const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
+    const [quizStarted, setQuizStarted] = useState(false);
+    const [selectedCurator, setSelectedCurator] = useState("");
     
+    // Перемешанные индексы ответов для каждого вопроса
+    const shuffledOptionsIndexes = useMemo(() => {
+        return quizData.ru.questions.map(q => {
+            const indexes = q.options.map((_, i) => i);
+            for (let i = indexes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+            }
+            return indexes;
+        });
+    }, []);
+
     const contentRef = useRef<HTMLDivElement>(null);
     const quizRef = useRef<HTMLDivElement>(null);
 
     const t = quizData[lang];
 
-    const startQuiz = () => {
-        if (!curator.trim()) return;
-        
-        const shuffled = t.questions.map(q => {
-            const options = [...q.options];
-            for (let i = options.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [options[i], options[j]] = [options[j], options[i]];
-            }
-            return { ...q, shuffledOptions: options };
-        });
-        
-        setShuffledQuestions(shuffled);
-        setIsQuizStarted(true);
-        gsap.fromTo(quizRef.current, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 });
-    };
-
     const score = userAnswers.reduce((acc, ans, idx) => {
-        if (ans === -1 || !shuffledQuestions[idx]) return acc;
-        const selectedText = shuffledQuestions[idx].shuffledOptions[ans];
-        return selectedText === shuffledQuestions[idx].correct ? acc + 1 : acc;
+        return ans === t.questions[idx].correct ? acc + 1 : acc;
     }, 0);
 
     useEffect(() => {
-        gsap.fromTo(".reveal-on-scroll", 
-            { y: 40, opacity: 0 }, 
-            { y: 0, opacity: 1, duration: 0.8, stagger: 0.2, ease: "power3.out" }
+        // Простая анимация появления
+        gsap.fromTo(".reveal-simple", 
+            { opacity: 0 }, 
+            { opacity: 1, duration: 0.5, stagger: 0.1, ease: "none" }
         );
-    }, [lang]);
+    }, [lang, quizStarted, showResults]);
 
     useEffect(() => {
-        if (showResults) {
-            updateSanitaryStats(score, curator).catch(err => console.error('Failed to sync with Bitrix:', err));
+        if (showResults && selectedCurator) {
+            updateSanitaryStats(score, selectedCurator).catch(err => console.error('Failed to sync with Bitrix:', err));
         }
-    }, [showResults, score, curator]);
+    }, [showResults, score, selectedCurator]);
 
-    const handleAnswer = (optionIndex: number) => {
+    const handleAnswer = (shuffledIdx: number) => {
+        const originalIdx = shuffledOptionsIndexes[currentQuestion][shuffledIdx];
         const newAnswers = [...userAnswers];
-        newAnswers[currentQuestion] = optionIndex;
+        newAnswers[currentQuestion] = originalIdx;
         setUserAnswers(newAnswers);
     };
 
     const handleNext = () => {
         if (currentQuestion < t.questions.length - 1) {
             setCurrentQuestion(prev => prev + 1);
-            gsap.fromTo(quizRef.current, { x: 50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4 });
         } else {
             setShowResults(true);
         }
@@ -149,7 +217,6 @@ const SanitaryQuizPage = () => {
     const handlePrev = () => {
         if (currentQuestion > 0) {
             setCurrentQuestion(prev => prev - 1);
-            gsap.fromTo(quizRef.current, { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4 });
         }
     };
 
@@ -157,175 +224,174 @@ const SanitaryQuizPage = () => {
         <div ref={contentRef} className="bg-brand-light">
             <main className="min-h-screen pt-24 pb-20 px-6">
                 <div className="max-w-4xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 relative">
-                        <div className="absolute -top-20 -left-20 w-64 h-64 bg-brand-green/10 rounded-full blur-[100px] pointer-events-none" />
-                        
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 relative reveal-simple">
                         <div className="relative z-10">
-                            <span className="text-brand-green text-[10px] font-bold tracking-[0.3em] uppercase block mb-4 reveal-on-scroll">
-                                Обучение сотрудников
+                            <span className="text-brand-green text-[10px] font-bold tracking-[0.3em] uppercase block mb-2">
+                                Обучение
                             </span>
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-brand-dark leading-none reveal-on-scroll">
+                            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-brand-dark leading-tight">
                                 {t.title}
                             </h1>
-                            <p className="mt-4 text-brand-dark/50 font-medium max-w-xl reveal-on-scroll">
+                            <p className="mt-2 text-brand-dark/50 font-medium max-w-xl">
                                 {t.subtitle}
                             </p>
                         </div>
 
-                        <div className="flex bg-white p-1 rounded-full border border-brand-dark/5 shadow-sm relative z-10 reveal-on-scroll">
-                            <button 
-                                onClick={() => setLang('ru')}
-                                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === 'ru' ? 'bg-brand-dark text-white' : 'text-brand-dark/50 hover:bg-brand-dark/5'}`}
-                            >
-                                РУС
-                            </button>
-                            <button 
-                                onClick={() => setLang('kz')}
-                                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === 'kz' ? 'bg-brand-dark text-white' : 'text-brand-dark/50 hover:bg-brand-dark/5'}`}
-                            >
-                                ҚАЗ
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="mb-20">
-                        <div className="flex items-center gap-3 mb-8 reveal-on-scroll">
-                            <div className="w-10 h-10 bg-brand-green text-white rounded-xl flex items-center justify-center">
-                                <Play size={20} fill="currentColor" />
-                            </div>
-                            <h2 className="text-2xl font-bold tracking-tight text-brand-dark">{t.videosTitle}</h2>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 reveal-on-scroll">
-                            {videos.map((video) => (
-                                <div key={video.id} className="group">
-                                    <div className="aspect-video bg-black rounded-3xl overflow-hidden shadow-xl border border-brand-dark/5 mb-4 group-hover:scale-[1.02] transition-transform duration-500">
-                                        <iframe 
-                                            width="100%" 
-                                            height="100%" 
-                                            src={`https://www.youtube.com/embed/${video.id}`} 
-                                            title={video.title[lang]}
-                                            frameBorder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                            allowFullScreen
-                                        ></iframe>
-                                    </div>
-                                    <h3 className="font-bold text-brand-dark group-hover:text-brand-green transition-colors">{video.title[lang]}</h3>
-                                    <p className="text-xs text-brand-dark/40 mt-1 uppercase font-bold tracking-wider">{video.duration}</p>
-                                </div>
+                        <div className="flex bg-white p-1 rounded-full border border-brand-dark/5 shadow-sm">
+                            {(['ru', 'kz'] as const).map((l) => (
+                                <button 
+                                    key={l}
+                                    onClick={() => setLang(l)}
+                                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === l ? 'bg-brand-dark text-white' : 'text-brand-dark/50 hover:bg-brand-dark/5'}`}
+                                >
+                                    {l === 'ru' ? 'РУС' : 'ҚАЗ'}
+                                </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="reveal-on-scroll">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="w-10 h-10 bg-brand-dark text-white rounded-xl flex items-center justify-center">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <h2 className="text-2xl font-bold tracking-tight text-brand-dark">{t.quizTitle}</h2>
-                        </div>
-
-                        {!isQuizStarted ? (
-                            <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl border border-brand-dark/5 text-center reveal-on-scroll">
-                                <h3 className="text-2xl font-bold text-brand-dark mb-6">{t.curatorTitle}</h3>
-                                <div className="max-w-md mx-auto space-y-6">
-                                    <input 
-                                        type="text" 
-                                        value={curator}
-                                        onChange={(e) => setCurator(e.target.value)}
-                                        placeholder={t.curatorPlaceholder}
-                                        className="w-full px-6 py-4 rounded-2xl border-2 border-brand-dark/5 bg-brand-dark/[0.02] focus:border-brand-green outline-none transition-all font-medium text-center"
-                                    />
-                                    <button 
-                                        onClick={startQuiz}
-                                        disabled={!curator.trim()}
-                                        className={`w-full py-5 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all ${
-                                            curator.trim() ? 'bg-brand-green text-white hover:shadow-xl hover:-translate-y-1' : 'bg-brand-dark/10 text-brand-dark/30 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        {t.startQuizBtn}
-                                    </button>
+                    {!quizStarted ? (
+                        <div className="reveal-simple">
+                            {/* Videos Section */}
+                            <div className="mb-12">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-8 h-8 bg-brand-green text-white rounded-lg flex items-center justify-center">
+                                        <Play size={16} fill="currentColor" />
+                                    </div>
+                                    <h2 className="text-xl font-bold text-brand-dark">{t.videosTitle}</h2>
                                 </div>
-                            </div>
-                        ) : !showResults ? (
-                            <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl border border-brand-dark/5 relative overflow-hidden" ref={quizRef}>
-                                <div className="absolute top-0 left-0 h-1.5 bg-brand-green transition-all duration-500" style={{ width: `${((currentQuestion + 1) / t.questions.length) * 100}%` }} />
                                 
-                                <div className="mb-10">
-                                    <span className="text-brand-green font-bold text-sm tracking-widest uppercase block mb-4">
-                                        Вопрос {currentQuestion + 1} из {t.questions.length}
-                                    </span>
-                                    <h3 className="text-xl md:text-2xl font-bold text-brand-dark leading-tight">
-                                        {shuffledQuestions[currentQuestion]?.text}
-                                    </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {videos.map((video) => (
+                                        <div key={video.id} className="bg-white p-4 rounded-2xl shadow-sm border border-brand-dark/5 transition-transform hover:scale-[1.01]">
+                                            <div className="aspect-video bg-black rounded-xl overflow-hidden mb-3">
+                                                <iframe 
+                                                    width="100%" height="100%" 
+                                                    src={`https://www.youtube.com/embed/${video.id}`} 
+                                                    title={video.title[lang]}
+                                                    frameBorder="0" allowFullScreen
+                                                ></iframe>
+                                            </div>
+                                            <h3 className="font-bold text-sm text-brand-dark">{video.title[lang]}</h3>
+                                            <p className="text-[10px] text-brand-dark/40 mt-0.5 uppercase font-bold">{video.duration}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Curator Selection */}
+                            <div className="bg-white rounded-3xl p-8 shadow-lg border border-brand-dark/5">
+                                <div className="flex items-center gap-3 mb-6 font-bold text-brand-dark">
+                                    <User size={18} />
+                                    <h2>{t.curatorLabel}</h2>
                                 </div>
 
-                                <div className="space-y-4 mb-10">
-                                    {shuffledQuestions[currentQuestion]?.shuffledOptions.map((option: string, idx: number) => (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {curators.map((curator) => (
                                         <button
-                                            key={idx}
-                                            onClick={() => handleAnswer(idx)}
-                                            className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 font-medium ${
-                                                userAnswers[currentQuestion] === idx 
-                                                ? 'border-brand-green bg-brand-green/5 text-brand-dark ring-4 ring-brand-green/10' 
-                                                : 'border-brand-dark/5 bg-brand-dark/[0.02] hover:border-brand-dark/10'
-                                            }`}
+                                            key={curator}
+                                            onClick={() => setSelectedCurator(curator)}
+                                            className={`p-3 rounded-xl border text-[13px] font-bold transition-all text-left ${selectedCurator === curator ? 'border-brand-green bg-brand-green/10 text-brand-dark' : 'border-brand-dark/5 bg-brand-dark/[0.02] text-brand-dark/60 hover:border-brand-dark/10'}`}
                                         >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                    userAnswers[currentQuestion] === idx ? 'border-brand-green bg-brand-green' : 'border-brand-dark/10'
-                                                }`}>
-                                                    {userAnswers[currentQuestion] === idx && <div className="w-2 h-2 rounded-full bg-white" />}
-                                                </div>
-                                                {option}
-                                            </div>
+                                            {curator}
                                         </button>
                                     ))}
                                 </div>
 
-                                <div className="flex items-center justify-between gap-4">
-                                    <button 
-                                        onClick={handlePrev}
-                                        disabled={currentQuestion === 0}
-                                        className={`px-8 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all
-                                            ${currentQuestion === 0 ? 'opacity-0 pointer-events-none' : 'bg-brand-dark/5 text-brand-dark hover:bg-brand-dark/10'}`}
-                                    >
-                                        {t.prevBtn}
-                                    </button>
-                                    
-                                    <button 
-                                        onClick={handleNext}
-                                        disabled={userAnswers[currentQuestion] === -1}
-                                        className={`px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all
-                                            ${userAnswers[currentQuestion] === -1 
-                                                ? 'bg-brand-dark/20 text-brand-dark/30 cursor-not-allowed' 
-                                                : 'bg-brand-green text-white hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'}`}
-                                    >
-                                        {currentQuestion === t.questions.length - 1 ? t.finishBtn : t.nextBtn}
-                                        <ChevronRight size={16} />
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={() => setQuizStarted(true)}
+                                    disabled={!selectedCurator}
+                                    className={`w-full py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs transition-all ${selectedCurator ? 'bg-brand-green text-white hover:bg-brand-green/90' : 'bg-brand-dark/10 text-brand-dark/20 cursor-not-allowed'}`}
+                                >
+                                    {t.startBtn}
+                                </button>
                             </div>
-                        ) : (
-                            <div className="bg-brand-dark rounded-[40px] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-                                <div className="absolute top-0 right-0 w-96 h-96 bg-brand-green/10 rounded-full blur-[120px] pointer-events-none" />
-                                
-                                <div className="relative z-10">
-                                    <div className={`w-24 h-24 rounded-3xl mx-auto flex items-center justify-center mb-8 ${score >= 8 ? 'bg-brand-green text-white' : 'bg-orange-500 text-white'}`}>
-                                        {score >= 8 ? <CheckCircle2 size={48} /> : <RotateCcw size={48} />}
+                        </div>
+                    ) : (
+                        <div className="reveal-simple">
+                            {!showResults ? (
+                                <div className="bg-white rounded-3xl p-8 shadow-xl border border-brand-dark/5" ref={quizRef}>
+                                    <div className="h-1 bg-brand-dark/5 rounded-full mb-8 overflow-hidden">
+                                        <div className="h-full bg-brand-green transition-all duration-300" style={{ width: `${((currentQuestion + 1) / t.questions.length) * 100}%` }} />
                                     </div>
                                     
-                                    <h3 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-                                        {t.resultTitle}: {score}/{t.questions.length}
+                                    <div className="mb-8">
+                                        <span className="text-brand-green font-bold text-[10px] tracking-widest uppercase block mb-2">
+                                            {lang === 'ru' ? 'Вопрос' : 'Сұрақ'} {currentQuestion + 1} / {t.questions.length}
+                                        </span>
+                                        <h3 className="text-xl font-bold text-brand-dark">
+                                            {t.questions[currentQuestion].text}
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3 mb-8">
+                                        {shuffledOptionsIndexes[currentQuestion].map((originalIdx, shuffledIdx) => (
+                                            <button
+                                                key={shuffledIdx}
+                                                onClick={() => handleAnswer(shuffledIdx)}
+                                                className={`w-full text-left p-5 rounded-xl border transition-all font-bold text-[14px] ${
+                                                    userAnswers[currentQuestion] === originalIdx 
+                                                    ? 'border-brand-green bg-brand-green/5 text-brand-dark' 
+                                                    : 'border-brand-dark/5 bg-brand-dark/[0.02] hover:border-brand-dark/10'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                        userAnswers[currentQuestion] === originalIdx ? 'border-brand-green bg-brand-green' : 'border-brand-dark/10'
+                                                    }`}>
+                                                        {userAnswers[currentQuestion] === originalIdx && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                    </div>
+                                                    {t.questions[currentQuestion].options[originalIdx]}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <button 
+                                            onClick={handlePrev}
+                                            disabled={currentQuestion === 0}
+                                            className={`font-bold uppercase tracking-widest text-[10px] transition-all
+                                                ${currentQuestion === 0 ? 'opacity-0 pointer-events-none' : 'text-brand-dark/40 hover:text-brand-dark'}`}
+                                        >
+                                            {t.prevBtn}
+                                        </button>
+                                        
+                                        <button 
+                                            onClick={handleNext}
+                                            disabled={userAnswers[currentQuestion] === -1}
+                                            className={`px-8 py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all
+                                                ${userAnswers[currentQuestion] === -1 
+                                                    ? 'bg-brand-dark/10 text-brand-dark/20 cursor-not-allowed' 
+                                                    : 'bg-brand-green text-white hover:bg-brand-green/90'}`}
+                                        >
+                                            {currentQuestion === t.questions.length - 1 ? t.finishBtn : t.nextBtn}
+                                            <ChevronRight size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="bg-brand-dark rounded-3xl p-12 text-center shadow-xl">
+                                    <div className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-6 ${score >= 8 ? 'bg-brand-green text-white' : 'bg-orange-500 text-white'}`}>
+                                        <CheckCircle2 size={32} />
+                                    </div>
+                                    
+                                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                                        {t.resultTitle}: {score} / {t.questions.length}
                                     </h3>
                                     
-                                    <p className="text-xl text-white/60 mb-12 max-w-lg mx-auto font-medium">
+                                    <p className="text-white/60 mb-8 max-w-sm mx-auto font-medium">
                                         {score >= 8 ? t.passMessage : t.failMessage}
                                     </p>
+
+                                    <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-bold">
+                                        Куратор: {selectedCurator}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer />

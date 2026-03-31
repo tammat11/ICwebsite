@@ -74,7 +74,7 @@ export const createBitrixLead = async (data: LeadData) => {
         throw error;
     }
 };
-export const updateSanitaryStats = async (score: number, curator: string) => {
+export const updateSanitaryStats = async (score: number, curatorName: string) => {
     try {
         const ENTITY_TYPE_ID = 1254;
         const CATEGORY_ID = 311;
@@ -82,13 +82,13 @@ export const updateSanitaryStats = async (score: number, curator: string) => {
         const COUNT_FIELD = 'ufCrm127_1756291224885'; // Количество пройденных
         const TOTAL_FIELD = 'ufCrm_LKJSAND12';       // Общая сумма
         const AVG_FIELD = 'ufCrm_KASJD12';           // Средняя сумма
-        const CURATOR_FIELD = 'ufCrm_1762769620';    // Поле куратора
+        const CURATOR_FIELD = 'ufCrm127_1762769620';  // Поле куратора
 
-        // 1. Поиск записи для месяца "03" и конкретного куратора
+        // 1. Поиск записи для куратора и месяца "03"
         const listParams = new URLSearchParams();
         listParams.append('entityTypeId', String(ENTITY_TYPE_ID));
         listParams.append('filter[' + MONTH_FIELD + ']', '03');
-        listParams.append('filter[' + CURATOR_FIELD + ']', curator);
+        listParams.append('filter[title]', curatorName);
         listParams.append('filter[categoryId]', String(CATEGORY_ID));
 
         const listRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
@@ -113,7 +113,8 @@ export const updateSanitaryStats = async (score: number, curator: string) => {
             updateParams.append('fields[' + COUNT_FIELD + ']', String(newCount));
             updateParams.append('fields[' + TOTAL_FIELD + ']', String(newTotal));
             updateParams.append('fields[' + AVG_FIELD + ']', String(newAvg.toFixed(2)));
-            updateParams.append('fields[' + CURATOR_FIELD + ']', curator);
+            // Также обновляем поле куратора, если оно пустое или требует подтверждения
+            updateParams.append('fields[' + CURATOR_FIELD + ']', curatorName);
 
             const updateRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.update.json`, {
                 method: 'POST',
@@ -121,7 +122,7 @@ export const updateSanitaryStats = async (score: number, curator: string) => {
             });
             return await updateRes.json();
         } else {
-            console.warn('Record for month 03 not found in Bitrix24');
+            console.warn(`Record for curator ${curatorName} and month 03 not found in Bitrix24`);
             return null;
         }
     } catch (error) {
