@@ -286,22 +286,28 @@ const SanitaryQuizPage = () => {
                                     <h2>{t.curatorLabel}</h2>
                                 </div>
 
-                                <div className="flex flex-col gap-2 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {curators.map((curator) => (
-                                        <button
-                                            key={curator}
-                                            onClick={() => setSelectedCurator(curator)}
-                                            className={`p-4 rounded-xl border text-[14px] font-bold transition-all text-left ${selectedCurator === curator ? 'border-brand-green bg-brand-green/10 text-brand-dark' : 'border-brand-dark/5 bg-brand-dark/[0.02] text-brand-dark/60 hover:border-brand-dark/10'}`}
-                                        >
-                                            {curator}
-                                        </button>
-                                    ))}
+                                <div className="relative mb-8">
+                                    <select 
+                                        value={selectedCurator}
+                                        onChange={(e) => setSelectedCurator(e.target.value)}
+                                        className="w-full p-4 rounded-xl border-2 border-brand-dark/5 bg-brand-dark/[0.02] text-brand-dark font-bold text-sm appearance-none cursor-pointer focus:border-brand-green outline-none transition-all"
+                                    >
+                                        <option value="" disabled>{lang === 'ru' ? 'Выберите из списка...' : 'Тізімнен таңдаңыз...'}</option>
+                                        {curators.map((curator) => (
+                                            <option key={curator} value={curator}>
+                                                {curator}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-dark/30">
+                                        <ChevronRight size={18} className="rotate-90" />
+                                    </div>
                                 </div>
 
                                 <button
                                     onClick={() => setQuizStarted(true)}
                                     disabled={!selectedCurator}
-                                    className={`w-full py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs transition-all ${selectedCurator ? 'bg-brand-green text-white hover:bg-brand-green/90' : 'bg-brand-dark/10 text-brand-dark/20 cursor-not-allowed'}`}
+                                    className={`w-full py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs transition-all ${selectedCurator ? 'bg-brand-green text-white hover:bg-brand-green/90 shadow-lg' : 'bg-brand-dark/10 text-brand-dark/20 cursor-not-allowed'}`}
                                 >
                                     {t.startBtn}
                                 </button>
