@@ -1,4 +1,5 @@
-import { Instagram, Linkedin, ArrowUpRight, Facebook, MapPin, Phone } from 'lucide-react';
+import { Instagram, Linkedin, ArrowUpRight, Facebook, MapPin, Phone, GraduationCap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface FooterProps {
     onCalcOpen?: () => void;
@@ -17,7 +18,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
 
             <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
                 {/* Top Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-16 mb-8 md:mb-24">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16 mb-8 md:mb-24">
 
                     {/* Brand Column */}
                     <div className="col-span-1 lg:col-span-2 space-y-4 md:space-y-8">
@@ -66,18 +67,40 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
-                                <Phone className="mt-1 text-brand-green" size={18} />
-                                <div>
-                                    <p className="text-white/40 text-sm mb-1">Тендерный отдел</p>
-                                    <a href="tel:+77078083003" className="text-base md:text-lg font-medium hover:text-brand-green transition-colors">+7 707 808 3003</a>
-                                </div>
-                            </li>
-                            <li className="flex items-start gap-4">
                                 <MapPin className="mt-1 text-brand-green" size={18} />
                                 <div>
                                     <p className="text-white/40 text-sm mb-1">Главный офис</p>
                                     <p className="text-white/80 leading-snug text-sm md:text-base">Алматы, ул. Натарова, 12,<br />050016, Казахстан</p>
                                 </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Employees / Resources */}
+                    <div className="space-y-4 md:space-y-6">
+                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">Сотрудникам</h4>
+                        <ul className="space-y-4">
+                            <li>
+                                <Link 
+                                    to="/training/sanitary" 
+                                    className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-dark transition-all">
+                                        <GraduationCap size={16} />
+                                    </div>
+                                    <span className="text-sm font-medium">Обучающие курсы</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link 
+                                    to="/careers" 
+                                    className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-dark transition-all">
+                                        <ArrowUpRight size={16} />
+                                    </div>
+                                    <span className="text-sm font-medium">Вакансии</span>
+                                </Link>
                             </li>
                         </ul>
                     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
-import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock } from 'lucide-react';
+import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock, GraduationCap } from 'lucide-react';
 import ApplicationModal from '../components/ApplicationModal';
 import { useInView } from '../hooks/useInView';
 
@@ -85,9 +86,14 @@ const CareersPage = () => {
                                     ))}
                                 </ul>
                             </div>
-                            <button onClick={() => openModal('Cleaning')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-brand-dark !text-white hover:!bg-white hover:!text-brand-green border-none py-4 text-xs font-bold uppercase tracking-wider group-hover/card:!bg-white group-hover/card:!text-brand-green">
-                                Заполнить анкету <ArrowUpRight size={16} />
-                            </button>
+                            <div className="flex flex-col gap-3">
+                                <button onClick={() => openModal('Cleaning')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-brand-dark !text-white hover:!bg-white hover:!text-brand-green border-none py-4 text-xs font-bold uppercase tracking-wider group-hover/card:!bg-white group-hover/card:!text-brand-green">
+                                    Заполнить анкету <ArrowUpRight size={16} />
+                                </button>
+                                <Link to="/training/sanitary" className="w-full flex items-center justify-center gap-2 bg-transparent border border-brand-dark/10 group-hover/card:border-white/20 text-brand-dark/60 group-hover/card:text-white hover:bg-brand-dark/5 group-hover/card:hover:bg-white/10 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all">
+                                    <GraduationCap size={14} /> Обучающий курс
+                                </Link>
+                            </div>
                         </div>
                     </div>
 
