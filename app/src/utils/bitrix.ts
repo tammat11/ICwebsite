@@ -84,37 +84,56 @@ export const updateSanitaryStats = async (score: number, curatorName: string) =>
         const AVG_FIELD = 'ufCrm_KASJD12';           // Средняя сумма
         const CURATOR_FIELD = 'ufCrm127_1762769620';  // Поле куратора
 
-        // 1. Поиск записи для куратора и месяца "03"
-        const listParams = new URLSearchParams();
-        listParams.append('entityTypeId', String(ENTITY_TYPE_ID));
-        listParams.append('filter[' + MONTH_FIELD + ']', '03');
-        listParams.append('filter[title]', curatorName);
-        listParams.append('filter[categoryId]', String(CATEGORY_ID));
+        // 1. Поиск записи. Пробуем найти с точным именем или с ведущим пробелом (бывает в базе)
+        // И приоритезируем месяц "03", но если нет - берем пустой
+        const searchVariations = [
+            { title: curatorName, month: '03' },
+            { title: ' ' + curatorName, month: '03' },
+            { title: curatorName, month: '' },
+            { title: ' ' + curatorName, month: '' }
+        ];
 
-        const listRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
-            method: 'POST',
-            body: listParams
-        });
-        const listData = await listRes.json();
+        let targetItem = null;
 
-        if (listData.result && listData.result.items && listData.result.items.length > 0) {
-            const item = listData.result.items[0];
-            const currentCount = parseInt(item[COUNT_FIELD]) || 0;
-            const currentTotal = parseFloat(item[TOTAL_FIELD]) || 0;
+        for (const variant of searchVariations) {
+            const listParams = new URLSearchParams();
+            listParams.append('entityTypeId', String(ENTITY_TYPE_ID));
+            listParams.append('filter[title]', variant.title);
+            listParams.append('filter[' + MONTH_FIELD + ']', variant.month);
+            listParams.append('filter[categoryId]', String(CATEGORY_ID));
+
+            const listRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
+                method: 'POST',
+                body: listParams
+            });
+            const listData = await listRes.json();
+
+            if (listData.result && listData.result.items && listData.result.items.length > 0) {
+                targetItem = listData.result.items[0];
+                break;
+            }
+        }
+
+        if (targetItem) {
+            const currentCount = parseInt(targetItem[COUNT_FIELD]) || 0;
+            const currentTotal = parseFloat(targetItem[TOTAL_FIELD]) || 0;
 
             const newCount = currentCount + 1;
             const newTotal = currentTotal + score;
             const newAvg = newTotal / newCount;
 
-            // 2. Обновление записи
+            // Обновление существующей записи
             const updateParams = new URLSearchParams();
             updateParams.append('entityTypeId', String(ENTITY_TYPE_ID));
-            updateParams.append('id', item.id);
+            updateParams.append('id', targetItem.id);
             updateParams.append('fields[' + COUNT_FIELD + ']', String(newCount));
             updateParams.append('fields[' + TOTAL_FIELD + ']', String(newTotal));
             updateParams.append('fields[' + AVG_FIELD + ']', String(newAvg.toFixed(2)));
-            // Также обновляем поле куратора, если оно пустое или требует подтверждения
             updateParams.append('fields[' + CURATOR_FIELD + ']', curatorName);
+            // Если месяц был пустым - устанавливаем 03
+            if (!targetItem[MONTH_FIELD]) {
+                updateParams.append('fields[' + MONTH_FIELD + ']', '03');
+            }
 
             const updateRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.update.json`, {
                 method: 'POST',
@@ -122,8 +141,23 @@ export const updateSanitaryStats = async (score: number, curatorName: string) =>
             });
             return await updateRes.json();
         } else {
-            console.warn(`Record for curator ${curatorName} and month 03 not found in Bitrix24`);
-            return null;
+            // Если запись вообще не найдена - создаем новую для этого куратора на март
+            console.log(`Creating new record for ${curatorName} for month 03`);
+            const addParams = new URLSearchParams();
+            addParams.append('entityTypeId', String(ENTITY_TYPE_ID));
+            addParams.append('fields[title]', curatorName);
+            addParams.append('fields[categoryId]', String(CATEGORY_ID));
+            addParams.append('fields[' + MONTH_FIELD + ']', '03');
+            addParams.append('fields[' + COUNT_FIELD + ']', '1');
+            addParams.append('fields[' + TOTAL_FIELD + ']', String(score));
+            addParams.append('fields[' + AVG_FIELD + ']', String(score.toFixed(2)));
+            addParams.append('fields[' + CURATOR_FIELD + ']', curatorName);
+
+            const addRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
+                method: 'POST',
+                body: addParams
+            });
+            return await addRes.json();
         }
     } catch (error) {
         console.error('Error updating sanitary stats in Bitrix:', error);
