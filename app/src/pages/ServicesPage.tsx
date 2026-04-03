@@ -1,5 +1,7 @@
 import { Clock, ShieldCheck, Zap, Sparkles, Droplets, Mountain, Flower2, Bug, Settings, Snowflake, Coffee, Waves } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
+import SeoHead from '../components/SeoHead';
 
 const services = [
     {
@@ -92,6 +94,22 @@ const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     const [rootRef, inView] = useInView();
     return (
         <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
+            <SeoHead
+                title="Услуги клининговой компании | IC Group"
+                description="Услуги клининговой компании IC Group: клининг офисов, генеральная и послестроительная уборка, мойка витражей, химчистка и специализированный клининг для бизнеса."
+                path="/services"
+                keywords="услуги клининговой компании, клининг офисов, генеральная уборка, послестроительная уборка, мойка витражей, химчистка"
+                schema={{
+                    '@context': 'https://schema.org',
+                    '@type': 'Service',
+                    serviceType: 'Профессиональный клининг для бизнеса',
+                    provider: {
+                        '@type': 'Organization',
+                        name: 'IC Group',
+                    },
+                    areaServed: 'KZ',
+                }}
+            />
             <main className="pt-40 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
@@ -132,6 +150,46 @@ const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                             </div>
                         ))}
                     </div>
+
+                    <section className="mt-24 rounded-[32px] border border-black/6 bg-white p-8 md:p-12 shadow-[0_20px_60px_rgba(26,29,30,0.05)]">
+                        <h2 className="text-3xl md:text-4xl font-bold uppercase tracking-tight text-brand-dark">
+                            Какие услуги клининговой компании чаще всего заказывают
+                        </h2>
+                        <div className="mt-6 grid gap-6 md:grid-cols-2">
+                            <p className="text-base leading-relaxed text-brand-dark/60">
+                                Для коммерческих объектов чаще всего требуются клининг офисов, ежедневная поддерживающая уборка, генеральная уборка и послестроительная уборка. Эти услуги формируют основу стабильной эксплуатации объекта и напрямую влияют на впечатление клиентов и сотрудников.
+                            </p>
+                            <p className="text-base leading-relaxed text-brand-dark/60">
+                                Дополнительно бизнесу нужны специализированные работы: мойка витражей, химчистка, инженерное обслуживание, сезонная уборка снега и сервисные команды под конкретный формат объекта. Поэтому страница услуг помогает Google понимать, что IC Group — это не одна услуга, а полноценная клининговая компания.
+                            </p>
+                        </div>
+                        <div className="mt-8 grid gap-3 md:grid-cols-3">
+                            <Link to="/klining-ofisov" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Клининг офисов
+                            </Link>
+                            <Link to="/kliningovaya-kompaniya-almaty" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Клининг в Алматы
+                            </Link>
+                            <Link to="/kliningovaya-kompaniya-astana" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Клининг в Астане
+                            </Link>
+                            <Link to="/generalnaya-uborka" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Генеральная уборка
+                            </Link>
+                            <Link to="/poslestroitelnaya-uborka" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                После строительная уборка
+                            </Link>
+                            <Link to="/moyka-vitrazhey" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Мойка витражей
+                            </Link>
+                            <Link to="/klining-ofisov-almaty" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Клининг офисов Алматы
+                            </Link>
+                            <Link to="/klining-ofisov-astana" className="rounded-[20px] bg-[#f6f7f3] px-5 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-brand-dark transition-colors hover:bg-brand-green hover:text-white">
+                                Клининг офисов Астана
+                            </Link>
+                        </div>
+                    </section>
 
                     {/* CTA Footer */}
                     <div className="mt-32 p-10 md:p-16 rounded-[2rem] bg-brand-green relative overflow-hidden text-center shadow-2xl reveal-on-scroll" style={{ animationDelay: '0.2s' }}>

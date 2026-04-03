@@ -103,6 +103,42 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                 </Link>
                             </li>
                         </ul>
+
+                        <div className="pt-4">
+                            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green mb-4">Популярные страницы</h4>
+                            <ul className="space-y-3">
+                                <li>
+                                    <Link to="/klining-ofisov" className="text-sm text-white/60 hover:text-white transition-colors">
+                                        Клининг офисов
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/kliningovaya-kompaniya-almaty" className="text-sm text-white/60 hover:text-white transition-colors">
+                                        Клининговая компания в Алматы
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/kliningovaya-kompaniya-astana" className="text-sm text-white/60 hover:text-white transition-colors">
+                                        Клининговая компания в Астане
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/generalnaya-uborka" className="text-sm text-white/60 hover:text-white transition-colors">
+                                        Генеральная уборка
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/poslestroitelnaya-uborka" className="text-sm text-white/60 hover:text-white transition-colors">
+                                        Послестроительная уборка
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/moyka-vitrazhey" className="text-sm text-white/60 hover:text-white transition-colors">
+                                        Мойка витражей
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 

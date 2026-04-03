@@ -4,6 +4,7 @@ import { CheckCircle2, Play, ChevronRight, User } from 'lucide-react';
 import gsap from 'gsap';
 
 import { updateSanitaryStats } from '../utils/bitrix';
+import SeoHead from '../components/SeoHead';
 
 const curators = [
     "Ильиных Татьяна", "Айткулова А.", "Айтуганова Ю.", "Алдонгаров С.", 
@@ -221,6 +222,12 @@ const SanitaryQuizPage = () => {
 
     return (
         <div ref={contentRef} className="bg-brand-light">
+            <SeoHead
+                title="Обучающий курс по уборке санитарных зон | IC Group"
+                description="Обучающий курс IC Group по стандартам уборки санитарных зон и работе с дезинфицирующими средствами."
+                path="/training/sanitary"
+                robots="noindex,follow"
+            />
             <main className="min-h-screen pt-24 pb-20 px-6">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}

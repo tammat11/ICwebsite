@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LogIn, Plus, Pencil, Trash2, Save, Image as ImageIcon, Send, Loader2, ArrowLeft, Newspaper, ExternalLink, LogOut, Key, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SeoHead from '../components/SeoHead';
 
 const REPO_OWNER = 'tammat11';
 const REPO_NAME = 'ICwebsite';
@@ -248,6 +249,12 @@ const AdminPage = () => {
     if (!isAuthed) {
         return (
             <div className="min-h-screen bg-brand-light flex items-center justify-center px-6 font-sans">
+                <SeoHead
+                    title="Admin | IC Group"
+                    description="Admin panel"
+                    path="/admin"
+                    robots="noindex,nofollow"
+                />
                 <div className="w-full max-w-md">
                     <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-xl border border-black/5">
                         <div className="text-center mb-8">
@@ -516,6 +523,13 @@ const AdminPage = () => {
     }
 
     return (
+        <>
+        <SeoHead
+            title="Admin | IC Group"
+            description="Admin panel"
+            path="/admin"
+            robots="noindex,nofollow"
+        />
         <AdminLayout onLogout={logout}>
             <div className="max-w-5xl mx-auto">
                 <div className="flex items-center justify-between mb-10">
@@ -591,6 +605,7 @@ const AdminPage = () => {
                 )}
             </div>
         </AdminLayout>
+        </>
     );
 };
 

@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock, GraduationCap } from 'lucide-react';
 import ApplicationModal from '../components/ApplicationModal';
 import { useInView } from '../hooks/useInView';
+import SeoHead from '../components/SeoHead';
 
 const CareersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,12 @@ const CareersPage = () => {
 
     return (
         <div ref={root} className={`min-h-screen bg-brand-light selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
+            <SeoHead
+                title="Вакансии в клининговой компании | IC Group"
+                description="Работа в клининговой компании IC Group: вакансии в офисе, клининге и партнерских направлениях. Карьера и обучение сотрудников в Казахстане."
+                path="/careers"
+                keywords="вакансии клининговая компания, работа клининг, работа в клининге, вакансии IC Group"
+            />
             <main className="pt-24 sm:pt-32 pb-20 px-6">
                 {/* Hero Section */}
                 <div className="max-w-7xl mx-auto mb-16 md:mb-32 relative">

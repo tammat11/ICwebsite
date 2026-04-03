@@ -3,6 +3,7 @@ import { Calendar, ArrowUpRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useInView } from '../hooks/useInView';
 import newsData from '../data/news.json';
+import SeoHead from '../components/SeoHead';
 
 interface NewsArticle {
     id: string;
@@ -26,6 +27,12 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
 
     return (
         <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
+            <SeoHead
+                title="Новости и кейсы клининговой компании | IC Group"
+                description="Новости, проекты и кейсы клининговой компании IC Group. Реальные результаты, новые объекты и развитие профессионального клининга в Казахстане."
+                path="/news"
+                keywords="новости клининговой компании, кейсы клининг, проекты IC Group, профессиональный клининг Казахстан"
+            />
             <Navbar alwaysVisible />
 
             <main className="pt-32 pb-20 px-6">

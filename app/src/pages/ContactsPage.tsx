@@ -4,6 +4,7 @@ import { Mail, Globe, Building2 } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
 import { createBitrixLead } from '../utils/bitrix';
 import { formatPhone } from '../utils/phone';
+import SeoHead from '../components/SeoHead';
 
 const ContactsPage = () => {
     const [rootRef, inView] = useInView();
@@ -51,6 +52,18 @@ const ContactsPage = () => {
 
     return (
         <div ref={rootRef} className={`min-h-screen bg-[#F5F5F7] text-brand-dark selection:bg-brand-green/30 ${inView ? 'in-view' : ''}`}>
+            <SeoHead
+                title="Контакты клининговой компании | IC Group"
+                description="Контакты клининговой компании IC Group. Отдел продаж, HR и тендерный отдел. Закажите профессиональный клининг для бизнеса в Казахстане."
+                path="/contacts"
+                keywords="контакты клининговой компании, заказать клининг, клининг для бизнеса, ic group контакты"
+                schema={{
+                    '@context': 'https://schema.org',
+                    '@type': 'ContactPage',
+                    name: 'Контакты IC Group',
+                    url: 'https://ic-group.kz/contacts',
+                }}
+            />
 
             <main className="pt-24 sm:pt-32 pb-20 px-6">
 
