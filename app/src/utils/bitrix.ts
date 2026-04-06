@@ -1,4 +1,6 @@
+import objectsCache from '../data/objects_cache.json';
 const BITRIX_WEBHOOK_URL = 'https://tootopbrass.bitrix24.kz/rest/281/6730mf4ivq497k0n/';
+
 
 /** Воронка 111, стадия "Лиды (от маркетинга)" — при необходимости уточните STAGE_ID в настройках CRM */
 const DEAL_FUNNEL_ID = 111;
@@ -13,6 +15,10 @@ export interface LeadData {
     company?: string;
     comments?: string;
     source?: string;
+    assignedById?: string | number;
+    contactId?: string | number;
+    companyId?: string | number;
+    extraFields?: Record<string, string | number | boolean>;
 }
 
 async function createContact(data: LeadData): Promise<number | null> {
@@ -54,6 +60,13 @@ export const createBitrixLead = async (data: LeadData) => {
         params.append('fields[STAGE_ID]', DEAL_STAGE_ID);
         if (data.comments) params.append('fields[COMMENTS]', data.comments);
         if (contactId) params.append('fields[CONTACT_ID]', String(contactId));
+
+        // Add custom fields
+        if (data.extraFields) {
+            Object.entries(data.extraFields).forEach(([key, value]) => {
+                params.append(`fields[${key}]`, String(value));
+            });
+        }
 
         const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.add.json`, {
             method: 'POST',
@@ -164,3 +177,138 @@ export const updateSanitaryStats = async (score: number, curatorName: string) =>
         throw error;
     }
 };
+
+export const createDailyReportItem = async (data: LeadData) => {
+    try {
+        const params = new URLSearchParams();
+
+        params.append('entityTypeId', '1204');
+        params.append('fields[title]', data.title);
+        params.append('fields[categoryId]', '445');
+        
+        if (data.assignedById) params.append('fields[assignedById]', String(data.assignedById));
+        if (data.contactId) params.append('fields[contactId]', String(data.contactId));
+        if (data.companyId) params.append('fields[companyId]', String(data.companyId));
+        
+        // Add custom fields
+        if (data.extraFields) {
+            Object.entries(data.extraFields).forEach(([key, value]) => {
+                // Ensure key is in the format Bitrix SPA expects (often same as UF_CRM_...)
+                params.append(`fields[${key}]`, String(value));
+            });
+        }
+
+        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString(),
+        });
+
+        const result = await response.json();
+        console.log('Bitrix SPA Response:', result);
+        if (result.error) {
+            console.error('Bitrix SPA Error:', result.error_description || result.error);
+        }
+        return result;
+    } catch (error) {
+        console.error('Error creating Bitrix SPA item:', error);
+        throw error;
+    }
+};
+
+// Function to calculate distance between two points (Haversine formula)
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+};
+
+export const getNearestDeal = async (userLat: number, userLng: number) => {
+    try {
+        // Мы теперь используем локальную базу (objects_cache.json)
+        // Это мгновенно и не нагружает сеть.
+        const deals: any[] = [];
+        
+        objectsCache.forEach((deal: any) => {
+            if (deal.lat && deal.lng) {
+                const dist = calculateDistance(userLat, userLng, deal.lat, deal.lng);
+                deals.push({
+                    id: deal.id,
+                    title: deal.title,
+                    distance: dist,
+                    assignedById: deal.assignedById,
+                    contactId: deal.contactId,
+                    companyId: deal.companyId,
+                    extraFields: deal.extraFields
+                });
+            }
+        });
+
+        // Сортируем по дистанции и отдаем самые близкие (радиус 1км отсечем для чистоты)
+        return deals.sort((a, b) => a.distance - b.distance).slice(0, 50);
+    } catch (error) {
+        console.error('Error finding nearest deal from cache:', error);
+        return null;
+    }
+};
+
+export const getAllDealsWithCoords = async () => {
+    try {
+        let allDeals: any[] = [];
+        let start = 0;
+        let hasNext = true;
+
+        const LAT_FIELD_ID = 'UF_CRM_1732276400585';
+        const LNG_FIELD_ID = 'UF_CRM_1732276407859';
+
+        while (hasNext && allDeals.length < 1500) { // Ограничим 1500 для безопасности
+            const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.list.json`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    'filter[CATEGORY_ID]': '69',
+                    'select[0]': 'ID',
+                    'select[1]': 'TITLE',
+                    'select[2]': LAT_FIELD_ID,
+                    'select[3]': LNG_FIELD_ID,
+                    'start': String(start)
+                }).toString()
+            });
+
+            const result = await response.json();
+            if (result.result && result.result.length > 0) {
+                const processed = result.result
+                    .filter((d: any) => d[LAT_FIELD_ID] && d[LNG_FIELD_ID])
+                    .map((d: any) => ({
+                        id: d.ID,
+                        title: d.TITLE,
+                        lat: parseFloat(d[LAT_FIELD_ID]),
+                        lng: parseFloat(d[LNG_FIELD_ID])
+                    }));
+                
+                allDeals = [...allDeals, ...processed];
+                
+                if (result.next) {
+                    start = result.next;
+                } else {
+                    hasNext = false;
+                }
+            } else {
+                hasNext = false;
+            }
+        }
+
+        return allDeals;
+    } catch (error) {
+        console.error('Error fetching all deals for map:', error);
+        return [];
+    }
+};
+
+export default { createBitrixLead, createDailyReportItem, getNearestDeal, getAllDealsWithCoords };

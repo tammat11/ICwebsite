@@ -15,6 +15,8 @@ import ContactsPage from './pages/ContactsPage';
 import NewsPage from './pages/NewsPage';
 import AdminPage from './pages/AdminPage';
 import SanitaryQuizPage from './pages/SanitaryQuizPage';
+import DailyReportPage from './pages/DailyReportPage';
+import AdminMapPage from './pages/AdminMapPage';
 import SeoLandingPage from './pages/SeoLandingPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
@@ -44,6 +46,10 @@ function ScrollToTop() {
 }
 
 function App() {
+  useEffect(() => {
+    console.log('App initialized on', window.location.href);
+  }, []);
+
   const location = useLocation();
   const [isCalcOpen, setCalcOpen] = useState(false);
 
@@ -59,7 +65,9 @@ function App() {
         <Route path="/news" element={<NewsPage onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/contacts" element={<ContactsPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/map" element={<AdminMapPage />} />
         <Route path="/training/sanitary" element={<SanitaryQuizPage />} />
+        <Route path="/reports/daily" element={<DailyReportPage />} />
         <Route path="/kliningovaya-kompaniya-almaty" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-almaty')!} onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/kliningovaya-kompaniya-astana" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-astana')!} onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/klining-ofisov" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov')!} onCalcOpen={() => setCalcOpen(true)} />} />

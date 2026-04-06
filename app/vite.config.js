@@ -1,8 +1,12 @@
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-export default {
+export default defineConfig({
     plugins: [react(), tailwindcss()],
     base: '/',
-    cacheDir: '/tmp/vite-cache'
-}
+    server: {
+        host: 'localhost',
+        port: 3000
+    }
+})
