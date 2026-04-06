@@ -57,21 +57,7 @@ const DailyReportPage = () => {
         }
     }, []);
 
-    const handleManualLocation = async (latStr: string, lngStr: string) => {
-        const lat = parseFloat(latStr);
-        const lng = parseFloat(lngStr);
-        if (isNaN(lat) || isNaN(lng)) return;
-        
-        const coords = { lat, lng };
-        setLocation(coords);
-        setIsFindingObject(true);
-        const deals = await getNearestDeal(coords.lat, coords.lng);
-        if (deals) {
-            setNearestDeals(deals);
-            setSelectedDeal(deals[0]);
-        }
-        setIsFindingObject(false);
-    };
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -204,27 +190,6 @@ const DailyReportPage = () => {
                                 )}
                             </div>
                         )}
-
-                        {/* Debug Manual Input */}
-                        <div className="mt-4 p-4 bg-brand-accent/30 rounded-2xl border border-dashed border-brand-dark/10 w-full">
-                            <div className="text-[10px] uppercase font-bold text-brand-dark/40 mb-3 text-center">Режим отладки (введите координаты)</div>
-                            <div className="flex gap-2">
-                                <input 
-                                    type="text" 
-                                    placeholder="Широта" 
-                                    className="w-1/2 px-3 py-2 bg-white rounded-xl text-xs font-bold border border-brand-dark/5 focus:outline-none"
-                                    onChange={(e) => handleManualLocation(e.target.value, String(location?.lng || ''))}
-                                    defaultValue={location?.lat || ''}
-                                />
-                                <input 
-                                    type="text" 
-                                    placeholder="Долгота" 
-                                    className="w-1/2 px-3 py-2 bg-white rounded-xl text-xs font-bold border border-brand-dark/5 focus:outline-none"
-                                    onChange={(e) => handleManualLocation(String(location?.lat || ''), e.target.value)}
-                                    defaultValue={location?.lng || ''}
-                                />
-                            </div>
-                        </div>
 
                         {isFindingObject && (
                             <div className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 animate-pulse">Определяем объект...</div>
