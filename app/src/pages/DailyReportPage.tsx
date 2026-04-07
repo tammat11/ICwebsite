@@ -158,9 +158,12 @@ const DailyReportPage = () => {
     return (
         <div className="min-h-screen bg-brand-light pt-32 pb-20 px-6">
             <div className="max-w-3xl mx-auto">
-                <div className="mb-10 text-center">
-                    <div className="section-tag mx-auto mb-3">Аудит</div>
-                    <h1 className="text-4xl font-black block uppercase tracking-tighter leading-tight mb-8">ПРОВЕРКА <br /><span className="text-brand-green">КАЧЕСТВА</span></h1>
+                <div className="mb-10 text-center leading-none">
+                    <div className="section-tag mx-auto mb-4">Аудит</div>
+                    <h1 className="text-6xl font-bold block uppercase tracking-tighter leading-[0.9] mb-12">
+                        ПРОВЕРКА <br />
+                        <span className="text-brand-green">КАЧЕСТВА</span>
+                    </h1>
                     
                     <div className="flex flex-col items-center gap-4 w-full">
                         <button 
