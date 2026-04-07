@@ -292,8 +292,9 @@ export const getNearestDeal = async (userLat: number, userLng: number) => {
             }
         });
 
-        // Сортируем по дистанции и отдаем самые близкие (радиус 1км отсечем для чистоты)
-        return deals.sort((a, b) => a.distance - b.distance).slice(0, 50);
+        // Сортируем по дистанции и отдаем самые близкие (радиус 700м отсечем для чистоты)
+        const filteredDeals = deals.filter(d => d.distance <= 0.7);
+        return filteredDeals.sort((a, b) => a.distance - b.distance).slice(0, 50);
     } catch (error) {
         console.error('Error finding nearest deal from cache:', error);
         return null;

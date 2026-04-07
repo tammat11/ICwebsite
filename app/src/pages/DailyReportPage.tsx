@@ -216,9 +216,9 @@ const DailyReportPage = () => {
     };
 
     const renderRadioQuestion = ({ title, name, options }: { title: string, name: string, options: string[] }) => (
-        <div className="premium-card p-6 md:p-8 rounded-[32px] animate-fade-in-up mb-6 border border-black/5">
+        <div className="premium-card p-5 md:p-8 rounded-[32px] animate-fade-in-up mb-5 border border-black/5">
             <label className="block text-sm font-bold text-brand-dark mb-4">{title}</label>
-            <div className="flex flex-col sm:flex-row w-full gap-2 mb-4">
+            <div className="flex flex-row flex-wrap w-full gap-1.5 mb-4">
                 {options.map(opt => {
                     const isSelected = formData[name] === opt;
                     const isNegative = isNegativeResponse(name, opt);
@@ -235,7 +235,7 @@ const DailyReportPage = () => {
                             key={opt}
                             type="button"
                             onClick={() => updateField(name, opt)}
-                            className={`flex-1 py-4 px-4 rounded-2xl text-center font-bold text-[11px] sm:text-xs uppercase tracking-widest transition-all border ${btnClass}`}
+                            className={`grow min-w-[30%] py-3.5 px-2 rounded-2xl text-center font-bold text-[10px] leading-tight sm:text-xs uppercase tracking-widest transition-all border ${btnClass}`}
                         >
                             {opt}
                         </button>
