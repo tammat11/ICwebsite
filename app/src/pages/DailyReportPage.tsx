@@ -36,29 +36,34 @@ const DailyReportPage = () => {
     const [nearestDeals, setNearestDeals] = useState<{ id: string, title: string, distance: number, assignedById?: string, contactId?: string, companyId?: string }[]>([]);
     const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
     const [showObjectPicker, setShowObjectPicker] = useState(false);
+    const [isGpsLoading, setIsGpsLoading] = useState(true);
 
     useEffect(() => {
-        // EXACT LOGIC FROM BACKUP
         if ("geolocation" in navigator) {
+            setIsGpsLoading(true);
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
                     setLocation(coords);
                     const deals = await getNearestDeal(coords.lat, coords.lng);
                     if (deals && deals.length > 0) {
-                        const nearby = deals.filter(d => d.distance <= 0.3); // Keep 300m limit
+                        const nearby = deals.filter(d => d.distance <= 0.3);
                         setNearestDeals(nearby);
                         if (nearby.length > 0) {
                             setSelectedDeal(nearby[0]);
                         }
                     }
+                    setIsGpsLoading(false);
                 },
                 (err) => {
                     console.error("Geolocation error:", err);
-                    setError("Пожалуйста, разрешите доступ к геопозиции в настройках.");
+                    setError("Пожалуйста, разрешите доступ к геопозиции.");
+                    setIsGpsLoading(false);
                 },
-                { enableHighAccuracy: true, timeout: 5000 }
+                { enableHighAccuracy: true, timeout: 10000 }
             );
+        } else {
+            setIsGpsLoading(false);
         }
     }, []);
 
@@ -167,8 +172,15 @@ const DailyReportPage = () => {
                                 <div className="text-left">
                                     <div className="text-[10px] uppercase font-bold opacity-30 mb-1">Ваша локация</div>
                                     <div className="text-sm font-bold truncate max-w-[170px]">
-                                        {selectedDeal ? selectedDeal.title : "Определение объекта..."}
+                                        {selectedDeal 
+                                            ? selectedDeal.title 
+                                            : (isGpsLoading ? "Определение объекта..." : "Объект не найден рядом")}
                                     </div>
+                                    {!selectedDeal && !isGpsLoading && (
+                                        <div className="text-[8px] text-red-500 font-bold uppercase mt-1">
+                                            Подойдите ближе (300м)
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             {nearestDeals.length > 1 && <ChevronDown size={20} className="opacity-40" />}
