@@ -89,8 +89,7 @@ const DailyReportPage = () => {
     };
 
     const shouldShowComment = (name: string, value: string) => {
-        if (value === '') return false;
-        return true;
+        return isNegativeResponse(name, value);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -165,7 +164,8 @@ const DailyReportPage = () => {
                 'ufCrm105_1753336038': selectedDeal?.id || '0', 
                 'ufCrm105_1753784383': selectedDeal?.id || '',
                 'ufCrm105_1754020000': payloadString, // Полный отчет со ссылкой
-                'ufCrm105_1775555176639': (formData.objectComment || '') + (remarkLink ? `\n\nССЫЛКА НА ЗАМЕЧАНИЕ: ${remarkLink}` : ''),
+                'ufCrm105_1775555176639': formData.objectComment || '', // Общий комментарий
+                'ufCrm105_1775559640734': remarkLink ? remarkLink : '', // Ссылка на замечание
                 // Ответы
                 'ufCrm105_1775554883671': formData.feedbackSpeed || '',
                 'ufCrm105_1775554901558': formData.improvementSuggestions || '',
