@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Send, MapPin, AlertCircle, ChevronDown, Lock, RefreshCcw } from 'lucide-react';
+import { CheckCircle2, Send, MapPin, Search, AlertCircle } from 'lucide-react';
 import { createDailyReportItem, getNearestDeal } from '../utils/bitrix';
+import objectsCache from '../data/objects_cache.json';
 
 const QUESTIONS = [
     { key: 'feedbackSpeed', label: 'Скорость обратной связи куратора', options: ['Быстро', 'Не быстро'] },
@@ -35,67 +36,50 @@ const DailyReportPage = () => {
     const [nearestDeals, setNearestDeals] = useState<{ id: string, title: string, distance: number, assignedById?: string, contactId?: string, companyId?: string }[]>([]);
     const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
     const [showObjectPicker, setShowObjectPicker] = useState(false);
-    const [geoStatus, setGeoStatus] = useState<'determining' | 'found' | 'error' | 'denied'>('determining');
-
-    const DISTANCE_LIMIT = 0.3; // 300 meters
-
-    const startGps = () => {
-        if (!navigator.geolocation) {
-            setGeoStatus('error');
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                setLocation({ lat, lng });
-                const deals = await getNearestDeal(lat, lng);
-                if (deals) {
-                    const nearby = deals.filter(d => d.distance <= DISTANCE_LIMIT);
-                    setNearestDeals(nearby);
-                    if (nearby.length > 0) {
-                        setSelectedDeal(nearby[0]);
-                        setGeoStatus('found');
-                    } else {
-                        setGeoStatus('error');
-                    }
-                }
-            },
-            (err) => {
-                console.error("GPS Native Error:", err);
-                if (err.code === 1) setGeoStatus('denied');
-                else setGeoStatus('error');
-            },
-            { enableHighAccuracy: true, timeout: 15000 }
-        );
-    };
 
     useEffect(() => {
-        // Calling immediately on mount as requested
-        startGps();
+        // EXACT LOGIC FROM BACKUP
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    setLocation(coords);
+                    const deals = await getNearestDeal(coords.lat, coords.lng);
+                    if (deals && deals.length > 0) {
+                        const nearby = deals.filter(d => d.distance <= 0.3); // Keep 300m limit
+                        setNearestDeals(nearby);
+                        if (nearby.length > 0) {
+                            setSelectedDeal(nearby[0]);
+                        }
+                    }
+                },
+                (err) => {
+                    console.error("Geolocation error:", err);
+                    setError("Пожалуйста, разрешите доступ к геопозиции в настройках.");
+                },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        }
     }, []);
 
     const updateField = (name: string, value: string) => setFormData(prev => ({ ...prev, [name]: value }));
     const updateComment = (name: string, value: string) => setComments(prev => ({ ...prev, [name]: value }));
+    
     const shouldShowComment = (name: string, value: string) => {
         if (!value) return false;
-        if (['1', '2'].includes(value)) return true;
-        if (value === 'Нет' || value === 'Не быстро') return true;
-        if (value === 'Плохо' || value === 'Не в нашей форме') return true;
-        return false;
+        return ['1', '2', 'Нет', 'Не быстро', 'Не в нашей форме', 'Плохо'].includes(value);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedDeal) { setError('Объект не найден. Подойдите ближе (300м).'); return; }
+        if (!selectedDeal) { setError('Объект не найден. Подойдите ближе к объекту.'); return; }
         setError(null);
         setIsSubmitting(true);
 
         try {
             const extraFields: Record<string, string | number | boolean> = {
-                'ufCrm105_1753336038': selectedDeal?.title,
-                'ufCrm105_1753784383': selectedDeal?.id,
+                'ufCrm105_1753336038': selectedDeal.title,
+                'ufCrm105_1753784383': selectedDeal.id,
                 'ufCrm105_1753787218160': formData.opuUniform,
                 'ufCrm105_1753787226010': formData.uniformCondition + (comments.uniformCondition ? ` (${comments.uniformCondition})` : ''),
                 'ufCrm105_1753787157294': formData.suppliesQuality,
@@ -103,19 +87,15 @@ const DailyReportPage = () => {
                 'ufCrm105_1753787196844': formData.improvementSuggestions
             };
             
-            const reportSummary = QUESTIONS.map(q => {
-                const val = formData[q.key];
-                const comm = comments[q.key] ? ` (ДЕТАЛИ: ${comments[q.key]})` : '';
-                return `${q.label}: ${val || 'Н/Д'}${comm}`;
-            }).join('\n');
+            const auditBody = QUESTIONS.map(q => `${q.label}: ${formData[q.key] || 'Н/Д'}${comments[q.key] ? ` (${comments[q.key]})` : ''}`).join('\n');
 
             await createDailyReportItem({
-                title: `АУДИТ: ${selectedDeal?.title} (${new Date().toLocaleDateString()})`,
+                title: `АУДИТ: ${selectedDeal.title} (${new Date().toLocaleDateString()})`,
                 extraFields: extraFields,
-                assignedById: selectedDeal?.assignedById,
-                contactId: selectedDeal?.contactId,
-                companyId: selectedDeal?.companyId,
-                comments: `Дистанция: ${(selectedDeal.distance*1000).toFixed(0)}м\nКоординаты: https://www.google.com/maps?q=${location?.lat},${location?.lng}\nКомментарий: ${formData.objectComment}\n\n--- АУДИТ ---\n${reportSummary}`
+                assignedById: selectedDeal.assignedById,
+                contactId: selectedDeal.contactId,
+                companyId: selectedDeal.companyId,
+                comments: `Дистанция: ${(selectedDeal.distance * 1000).toFixed(0)}м\nКоординаты: ${location?.lat},${location?.lng}\nКомментарий: ${formData.objectComment}\n\n--- ДЕТАЛИ ---\n${auditBody}`
             });
             setIsSubmitted(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -128,20 +108,20 @@ const DailyReportPage = () => {
         const isNegative = (val: string) => ['1', '2', 'Нет', 'Не быстро', 'Не в нашей форме', 'Плохо'].includes(val);
 
         return (
-            <div className="premium-card p-8 rounded-[32px] animate-fade-in-up">
-                <label className="block text-sm font-bold text-brand-dark mb-5 ml-1 leading-relaxed">{q.label}</label>
+            <div className="premium-card p-8 rounded-[32px] shadow-premium mb-6">
+                <label className="block text-sm font-bold text-brand-dark mb-5 leading-relaxed">{q.label}</label>
                 <div className="flex w-full gap-2 mb-4">
                     {q.options.map(opt => {
                         const isSelected = formData[q.key] === opt;
-                        let colorClass = 'bg-brand-accent/30 text-brand-dark/40 border-transparent hover:bg-brand-accent/50';
+                        let colorClass = 'bg-brand-accent/30 text-brand-dark/40';
                         if (isSelected) {
-                            if (isPositive(opt)) colorClass = 'bg-green-500 text-white border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]';
-                            else if (isNegative(opt)) colorClass = 'bg-red-500 text-white border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]';
-                            else colorClass = 'bg-brand-green text-white border-brand-green shadow-button';
+                            if (isPositive(opt)) colorClass = 'bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]';
+                            else if (isNegative(opt)) colorClass = 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]';
+                            else colorClass = 'bg-brand-green text-white';
                         }
                         return (
                             <button key={opt} type="button" onClick={() => updateField(q.key, opt)}
-                                className={`flex-1 py-4 px-2 rounded-2xl font-bold text-[10px] uppercase tracking-tighter transition-all duration-300 border ${colorClass} ${isSelected ? 'scale-[1.05]' : 'scale-100'}`}
+                                className={`flex-1 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-tighter transition-all border-none ${colorClass}`}
                             >
                                 {opt}
                             </button>
@@ -149,12 +129,10 @@ const DailyReportPage = () => {
                     })}
                 </div>
                 {shouldShowComment(q.key, formData[q.key]) && (
-                    <div className="animate-scale-in mt-4">
-                        <textarea value={comments[q.key] || ''} onChange={(e) => updateComment(q.key, e.target.value)}
-                            placeholder="Укажите подробности..."
-                            className="w-full px-5 py-4 rounded-2xl bg-brand-light border border-black/5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-green/30 h-28 resize-none shadow-inner"
-                        />
-                    </div>
+                    <textarea value={comments[q.key] || ''} onChange={(e) => updateComment(q.key, e.target.value)}
+                        placeholder="Подробности..."
+                        className="w-full px-5 py-4 rounded-2xl bg-brand-light border-none text-xs font-medium focus:ring-2 focus:ring-brand-green/30 h-28 resize-none shadow-inner"
+                    />
                 )}
             </div>
         );
@@ -162,11 +140,11 @@ const DailyReportPage = () => {
 
     if (isSubmitted) {
         return (
-            <div className="min-h-screen bg-brand-light flex items-center justify-center p-6 pt-32">
+            <div className="min-h-screen bg-brand-light flex items-center justify-center p-6">
                 <div className="max-w-md w-full bg-white rounded-[40px] p-10 shadow-premium text-center">
                     <CheckCircle2 className="text-brand-green mx-auto mb-6" size={48} />
-                    <h1 className="text-2xl font-black text-brand-dark mb-4 uppercase">ОТЧЕТ ПРИНЯТ</h1>
-                    <button onClick={() => window.location.reload()} className="btn-premium w-full mt-4">Ок</button>
+                    <h1 className="text-2xl font-black text-brand-dark mb-4">ОТЧЕТ ПРИНЯТ</h1>
+                    <button onClick={() => window.location.reload()} className="btn-premium w-full mt-4 py-4">Ок</button>
                 </div>
             </div>
         );
@@ -175,52 +153,33 @@ const DailyReportPage = () => {
     return (
         <div className="min-h-screen bg-brand-light pt-32 pb-20 px-6">
             <div className="max-w-3xl mx-auto">
-                <div className="mb-12 text-center leading-none">
-                    <div className="section-tag mx-auto mb-2">Аудит</div>
-                    <h1 className="text-4xl font-black block uppercase tracking-tighter leading-none mb-10">ПРОВЕРКА <br /><span className="text-brand-green">КАЧЕСТВА</span></h1>
+                <div className="mb-10 text-center">
+                    <div className="section-tag mx-auto mb-3">Аудит</div>
+                    <h1 className="text-4xl font-black block uppercase tracking-tighter leading-tight mb-8">ПРОВЕРКА <br /><span className="text-brand-green">КАЧЕСТВА</span></h1>
                     
                     <div className="flex flex-col items-center gap-4 w-full">
                         <button 
-                            onClick={() => geoStatus === 'found' && setShowObjectPicker(!showObjectPicker)}
-                            className={`w-full max-w-sm px-6 py-5 bg-brand-dark text-white rounded-[32px] flex items-center justify-between shadow-2xl transition-all ${nearestDeals.length > 1 ? 'hover:scale-[1.02] active:scale-95' : ''}`}
+                            onClick={() => nearestDeals.length > 1 && setShowObjectPicker(!showObjectPicker)}
+                            className="w-full max-w-sm px-6 py-5 bg-brand-dark text-white rounded-[32px] flex items-center justify-between shadow-2xl"
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`p-2.5 rounded-2xl ${geoStatus === 'found' ? 'bg-brand-green/20' : 'bg-white/10'}`}>
-                                    {geoStatus === 'found' ? <MapPin className="text-brand-green" size={24} /> : <Lock className="text-white/40" size={24} />}
-                                </div>
+                                <MapPin className={selectedDeal ? "text-brand-green" : "text-white/20"} size={24} />
                                 <div className="text-left">
-                                    <div className="text-[10px] uppercase font-bold opacity-30 tracking-widest mb-1 leading-none">Локация</div>
-                                    <div className="text-sm font-bold truncate max-w-[160px]">
-                                        {selectedDeal ? selectedDeal.title : (geoStatus === 'determining' ? 'Запрос GPS...' : 'Доступ закрыт')}
+                                    <div className="text-[10px] uppercase font-bold opacity-30 mb-1">Ваша локация</div>
+                                    <div className="text-sm font-bold truncate max-w-[170px]">
+                                        {selectedDeal ? selectedDeal.title : "Определение объекта..."}
                                     </div>
                                 </div>
                             </div>
-                            {geoStatus === 'found' && nearestDeals.length > 1 && <ChevronDown size={20} className="opacity-40" />}
+                            {nearestDeals.length > 1 && <ChevronDown size={20} className="opacity-40" />}
                         </button>
-
-                        {(geoStatus === 'determining' || geoStatus === 'denied' || geoStatus === 'error') && (
-                            <div className="w-full max-w-sm p-6 bg-white/50 border border-black/5 rounded-[32px] animate-fade-in text-center flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    {geoStatus === 'determining' ? <RefreshCcw className="animate-spin text-brand-green" size={20} /> : <AlertCircle className="text-red-500" size={20} />}
-                                    <div className="text-left">
-                                        <div className="text-[9px] font-black uppercase text-brand-dark/20 leading-none mb-1">Статус GPS</div>
-                                        <div className="text-[11px] font-bold text-brand-dark uppercase">
-                                            {geoStatus === 'determining' ? 'Определяем...' : 'Ошибка доступа'}
-                                        </div>
-                                    </div>
-                                </div>
-                                <button onClick={startGps} className="p-3 bg-brand-green/10 rounded-xl text-brand-green hover:bg-brand-green/20 transition-all">
-                                    <RefreshCcw size={18} />
-                                </button>
-                            </div>
-                        )}
 
                         {showObjectPicker && (
                             <div className="w-full max-w-sm mt-3 bg-white rounded-[40px] p-5 shadow-2xl border border-black/5 z-50">
-                                <div className="text-[9px] uppercase font-bold opacity-30 mb-4 px-2 tracking-widest">Ближайшие (300м)</div>
+                                <div className="text-[9px] uppercase font-bold opacity-30 mb-4 px-2">Ближайшие (300м)</div>
                                 <div className="max-h-60 overflow-y-auto scrollbar-hide">
                                     {nearestDeals.map(d => (
-                                        <button key={d.id} className={`w-full text-left p-5 rounded-[28px] text-xs font-bold transition-all mb-2 flex justify-between items-center ${selectedDeal?.id === d.id ? 'bg-brand-green/10 text-brand-green border-brand-green/20' : 'bg-brand-light border-transparent'} border`} onClick={() => { setSelectedDeal(d); setShowObjectPicker(false); }}>
+                                        <button key={d.id} className={`w-full text-left p-5 rounded-[28px] text-xs font-bold mb-2 flex justify-between items-center ${selectedDeal?.id === d.id ? 'bg-brand-green/10 text-brand-green' : 'bg-brand-light'}`} onClick={() => { setSelectedDeal(d); setShowObjectPicker(false); }}>
                                             <span className="truncate pr-4">{d.title}</span>
                                             <span className="text-[9px] opacity-40">{(d.distance * 1000).toFixed(0)}м</span>
                                         </button>
@@ -233,17 +192,17 @@ const DailyReportPage = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {QUESTIONS.map(q => <RadioQuestionUI key={q.key} q={q} />)}
-                    <div className="premium-card p-8 rounded-[32px]">
-                        <label className="block text-sm font-bold text-brand-dark mb-4 ml-1">Комментарий по объекту</label>
-                        <textarea value={formData.objectComment} onChange={(e) => updateField('objectComment', e.target.value)} placeholder="Важные детали по проверке..." className="w-full px-6 py-5 rounded-3xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-medium h-36 resize-none" />
+                    <div className="premium-card p-8 rounded-[32px] shadow-premium">
+                        <label className="block text-sm font-bold text-brand-dark mb-4">Комментарий по объекту</label>
+                        <textarea value={formData.objectComment} onChange={(e) => updateField('objectComment', e.target.value)} placeholder="Общий отзыв..." className="w-full px-6 py-5 rounded-3xl bg-brand-light border-none focus:ring-2 focus:ring-brand-green/30 h-36 resize-none" />
                     </div>
                     {error && (
-                        <div className="p-6 bg-red-50 border border-red-100 rounded-[32px] flex items-center gap-4 text-red-600 animate-slide-in-right">
+                        <div className="p-6 bg-red-50 border border-red-100 rounded-[32px] flex items-center gap-4 text-red-600">
                             <AlertCircle size={24} />
                             <p className="font-bold text-xs">{error}</p>
                         </div>
                     )}
-                    <button type="submit" disabled={isSubmitting || !selectedDeal} className="w-full btn-premium py-6 flex items-center justify-center gap-3 disabled:opacity-20 translate-y-2">
+                    <button type="submit" disabled={isSubmitting || !selectedDeal} className="w-full btn-premium py-6 flex items-center justify-center gap-3 disabled:opacity-30">
                         {isSubmitting ? 'ОТПРАВЛЯЕМ...' : 'ОТПРАВИТЬ ОТЧЕТ'}
                         <Send size={20} />
                     </button>
