@@ -75,6 +75,19 @@ const DailyReportPage = () => {
         setComments(prev => ({ ...prev, [name]: value }));
     };
 
+    const isNegativeResponse = (name: string, value: string) => {
+        if (!value) return false;
+        const negativeValues = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме'];
+        if (negativeValues.includes(value)) return true;
+        
+        // Особое правило: для предложений по улучшению выбор "Да" считается красным (негативным)
+        if (name === 'improvementSuggestions') {
+            return value === 'Да';
+        }
+        
+        return false;
+    };
+
     const shouldShowComment = (name: string, value: string) => {
         if (value === '') return false;
         return true;
@@ -106,12 +119,9 @@ const DailyReportPage = () => {
 
             Object.entries(formData).forEach(([k, v]) => {
                 if (k === 'objectComment') return;
-                // Условие отрицательного ответа
-                const isNegative = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме'].includes(String(v));
-                // Специальное условие для "Предложения по улучшению": "Да" - это плохо (значит есть жалобы)
-                const isImprovNegative = k === 'improvementSuggestions' && v === 'Да';
-
-                if (isNegative || isImprovNegative) {
+                
+                // Используем ту же функцию проверки на негатив
+                if (isNegativeResponse(k, String(v))) {
                     const commentText = comments[k] ? ` (Коммент: ${comments[k]})` : '';
                     negativeItems.push(`${questionNames[k] || k}: ${v}${commentText}`);
                 }
@@ -211,7 +221,7 @@ const DailyReportPage = () => {
             <div className="flex flex-col sm:flex-row w-full gap-2 mb-4">
                 {options.map(opt => {
                     const isSelected = formData[name] === opt;
-                    const isNegative = shouldShowComment(name, opt);
+                    const isNegative = isNegativeResponse(name, opt);
                     
                     let btnClass = 'bg-brand-accent/30 text-brand-dark/40 border-transparent hover:bg-brand-dark/5';
                     if (isSelected) {
