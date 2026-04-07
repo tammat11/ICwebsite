@@ -283,6 +283,10 @@ export const getNearestDeal = async (userLat: number, userLng: number) => {
                     assignedById: deal.assignedById,
                     contactId: deal.contactId,
                     companyId: deal.companyId,
+                    city: deal.city,
+                    address: deal.address,
+                    ipName: deal.ipName,
+                    ipResp: deal.ipResp,
                     extraFields: deal.extraFields
                 });
             }
