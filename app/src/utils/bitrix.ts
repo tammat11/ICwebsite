@@ -216,6 +216,45 @@ export const createDailyReportItem = async (data: LeadData) => {
     }
 };
 
+export const createRemarkDeal = async (data: any) => {
+    try {
+        const params = new URLSearchParams();
+        params.append('fields[TITLE]', `ЗАМЕЧАНИЕ (${data.objectTitle}): ${data.date}`);
+        params.append('fields[CATEGORY_ID]', '81');
+        params.append('fields[STAGE_ID]', 'C81:PREPARATION'); // Отработка Партнера
+        params.append('fields[COMPANY_ID]', data.companyId || '');
+        params.append('fields[CONTACT_ID]', data.contactId || '');
+        params.append('fields[ASSIGNED_BY_ID]', data.assignedById || '');
+        
+        // Маппинг данных объекта
+        params.append('fields[UF_CRM_1707153439]', data.city || ''); // Город
+        params.append('fields[UF_CRM_1743501476]', data.address || ''); // Адрес объекта инфо
+        params.append('fields[UF_CRM_1742459776]', data.ipName || ''); // Наименование ИП инфо
+        params.append('fields[UF_CRM_1743669674]', data.ipResp || ''); // Ответственное лицо ИП инфо
+        
+        // Источник, Тип и Вид уборки
+        params.append('fields[UF_CRM_1716804677915]', '43437'); // Качество уборки
+        params.append('fields[UF_CRM_1719824872888]', '43735'); // От аккаунта замечание исходящее
+        params.append('fields[UF_CRM_1723523640792]', '44881'); // Базовая уборка
+        
+        // Текст замечаний
+        params.append('fields[COMMENTS]', data.comments);
+        
+        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.add.json`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        });
+        
+        const result = await response.json();
+        console.log('Remark Deal created:', result);
+        return result;
+    } catch (error) {
+        console.error('Error creating Remark Deal:', error);
+        throw error;
+    }
+};
+
 // Function to calculate distance between two points (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371; // Earth's radius in km
@@ -277,6 +316,13 @@ export const getAllDealsWithCoords = async () => {
                     'select[1]': 'TITLE',
                     'select[2]': LAT_FIELD_ID,
                     'select[3]': LNG_FIELD_ID,
+                    'select[4]': 'COMPANY_ID',
+                    'select[5]': 'CONTACT_ID',
+                    'select[6]': 'ASSIGNED_BY_ID',
+                    'select[7]': 'UF_CRM_1707153439', // Город
+                    'select[8]': 'UF_CRM_1743501476', // Адрес объекта инфо
+                    'select[9]': 'UF_CRM_1742459776', // Наименование ИП инфо
+                    'select[10]': 'UF_CRM_1743669674', // Ответственное лицо ИП инфо
                     'start': String(start)
                 }).toString()
             });
@@ -289,7 +335,14 @@ export const getAllDealsWithCoords = async () => {
                         id: d.ID,
                         title: d.TITLE,
                         lat: parseFloat(d[LAT_FIELD_ID]),
-                        lng: parseFloat(d[LNG_FIELD_ID])
+                        lng: parseFloat(d[LNG_FIELD_ID]),
+                        contactId: d.CONTACT_ID,
+                        companyId: d.COMPANY_ID,
+                        assignedById: d.ASSIGNED_BY_ID,
+                        city: d.UF_CRM_1707153439,
+                        address: d.UF_CRM_1743501476,
+                        ipName: d.UF_CRM_1742459776,
+                        ipResp: d.UF_CRM_1743669674
                     }));
                 
                 allDeals = [...allDeals, ...processed];

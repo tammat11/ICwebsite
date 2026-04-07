@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Send, MapPin, Search, AlertCircle } from 'lucide-react';
-import { createDailyReportItem, getNearestDeal } from '../utils/bitrix';
+import { createDailyReportItem, getNearestDeal, createRemarkDeal } from '../utils/bitrix';
 import objectsCache from '../data/objects_cache.json';
 
 const DailyReportPage = () => {
@@ -76,18 +76,8 @@ const DailyReportPage = () => {
     };
 
     const shouldShowComment = (name: string, value: string) => {
-        if (!value) return false;
-        
-        // Специальная логика для предложений: "Нет" - это хорошо (зеленый), "Да" - требует комментария (красный)
-        if (name === 'improvementSuggestions') {
-            return value === 'Да';
-        }
-
-        if (['1', '2'].includes(value)) return true;
-        if (value === 'Нет' || value === 'Не быстро') return true;
-        if (value === 'Плохо' || value === 'Не в нашей форме') return true;
-        
-        return false;
+        if (value === '') return false;
+        return true;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -96,39 +86,104 @@ const DailyReportPage = () => {
         setIsSubmitting(true);
 
         try {
-            const payloadString = (selectedDeal ? `Объект: ${selectedDeal.title}\nID Сделки: ${selectedDeal.id}\n` : '') + 
-                (location ? `Координаты: https://www.google.com/maps?q=${location.lat},${location.lng}\n\n` : '\n') +
-                `=========================\n` +
+            // Определение отрицательных пунктов для замечания
+            const negativeItems: string[] = [];
+            const questionNames: Record<string, string> = {
+                feedbackSpeed: 'Скорость обратной связи',
+                improvementSuggestions: 'Предложения по улучшению',
+                curatorScore: 'Оценка работы куратора',
+                suppliesQuality: 'Качество моющих средств',
+                opuUniform: 'ОПУ в форме',
+                uniformCondition: 'Состояние формы',
+                equipmentCondition: 'Состояние инвентаря',
+                hardFloorQuality: 'Уборка полов',
+                glassMirrorQuality: 'Стекла и зеркала',
+                fittingRoomsQuality: 'Примерочные и свет',
+                cleaningRoomCondition: 'Помещение клининга',
+                restroomCondition: 'Санузлы',
+                softFurnitureCondition: 'Мягкая мебель'
+            };
+
+            Object.entries(formData).forEach(([k, v]) => {
+                if (k === 'objectComment') return;
+                // Условие отрицательного ответа
+                const isNegative = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме'].includes(String(v));
+                // Специальное условие для "Предложения по улучшению": "Да" - это плохо (значит есть жалобы)
+                const isImprovNegative = k === 'improvementSuggestions' && v === 'Да';
+
+                if (isNegative || isImprovNegative) {
+                    const commentText = comments[k] ? ` (Коммент: ${comments[k]})` : '';
+                    negativeItems.push(`${questionNames[k] || k}: ${v}${commentText}`);
+                }
+            });
+
+            let remarkLink = '';
+            let payloadString = (selectedDeal ? `Объект: ${selectedDeal.title}\nID Сделки: ${selectedDeal.id}\n` : '') + 
+                (location ? `Координаты: https://www.google.com/maps?q=${location.lat},${location.lng}\n\n` : '\n');
+
+            // Если есть негатив - создаем Сделку в 81 воронке
+            if (negativeItems.length > 0 && selectedDeal) {
+                const remarkRes = await createRemarkDeal({
+                    objectTitle: selectedDeal.title,
+                    date: new Date().toLocaleDateString(),
+                    companyId: selectedDeal.companyId,
+                    contactId: selectedDeal.contactId,
+                    assignedById: selectedDeal.assignedById,
+                    city: (selectedDeal as any).city,
+                    address: (selectedDeal as any).address,
+                    ipName: (selectedDeal as any).ipName,
+                    ipResp: (selectedDeal as any).ipResp,
+                    comments: `ОТРИЦАТЕЛЬНЫЕ ПУНКТЫ АУДИТА:\n${negativeItems.join('\n')}\n\nОбщий комментарий: ${formData.objectComment}`
+                });
+
+                if (remarkRes.result) {
+                    remarkLink = `https://tootopbrass.bitrix24.kz/crm/deal/details/${remarkRes.result}/`;
+                    payloadString += `⚠️ СОЗДАНО ЗАМЕЧАНИЕ: ${remarkLink}\n\n`;
+                }
+            }
+
+            payloadString += `=========================\n` +
                 Object.entries(formData).map(([k, v]) => {
                     if (k === 'objectComment') return '';
                     const comment = comments[k] ? ` (Коммент: ${comments[k]})` : '';
-                    
-                    // Перевод ключей на русский для красивого отчета
-                    const questionNames: Record<string, string> = {
-                        feedbackSpeed: 'Скорость обратной связи',
-                        improvementSuggestions: 'Предложения по улучшению',
-                        curatorScore: 'Оценка работы куратора',
-                        suppliesQuality: 'Качество моющих средств',
-                        opuUniform: 'ОПУ в форме',
-                        uniformCondition: 'Состояние формы',
-                        equipmentCondition: 'Состояние инвентаря',
-                        hardFloorQuality: 'Уборка полов',
-                        glassMirrorQuality: 'Стекла и зеркала',
-                        fittingRoomsQuality: 'Примерочные и свет',
-                        cleaningRoomCondition: 'Помещение клининга',
-                        restroomCondition: 'Санузлы',
-                        softFurnitureCondition: 'Мягкая мебель'
-                    };
-                    
                     const prettyName = questionNames[k] || k;
                     return `${prettyName}: ${v}${comment}`;
                 }).filter(Boolean).join('\n') +
                 `\n=========================\nКомментарий по объекту: ${formData.objectComment}`;
 
             const extraFields: Record<string, string | number | boolean> = {
-                'ufCrm105_1753336038': selectedDeal?.title || 'Объект не определен',
+                'ufCrm105_1753336038': selectedDeal?.id || '0', 
                 'ufCrm105_1753784383': selectedDeal?.id || '',
-                'ufCrm105_1754020000': payloadString
+                'ufCrm105_1754020000': payloadString, // Полный отчет со ссылкой
+                'ufCrm105_1775555176639': (formData.objectComment || '') + (remarkLink ? `\n\nССЫЛКА НА ЗАМЕЧАНИЕ: ${remarkLink}` : ''),
+                // Ответы
+                'ufCrm105_1775554883671': formData.feedbackSpeed || '',
+                'ufCrm105_1775554901558': formData.improvementSuggestions || '',
+                'ufCrm105_1775554915288': formData.curatorScore || '',
+                'ufCrm105_1775554988638': formData.suppliesQuality || '',
+                'ufCrm105_1775555006334': formData.opuUniform || '',
+                'ufCrm105_1775555020142': formData.uniformCondition || '',
+                'ufCrm105_1775555032624': formData.equipmentCondition || '',
+                'ufCrm105_1775555051766': formData.hardFloorQuality || '',
+                'ufCrm105_1775555067446': formData.glassMirrorQuality || '',
+                'ufCrm105_1775555081846': formData.fittingRoomsQuality || '',
+                'ufCrm105_1775555094446': formData.cleaningRoomCondition || '',
+                'ufCrm105_1775555108910': formData.restroomCondition || '',
+                'ufCrm105_1775555127934': formData.softFurnitureCondition || '',
+                // Комментарии
+                'ufCrm105_1775555255839': comments.feedbackSpeed || '',
+                'ufCrm105_1775555309784': comments.improvementSuggestions || '',
+                'ufCrm105_1775555340580': comments.curatorScore || '',
+                'ufCrm105_1775555402123': comments.suppliesQuality || '',
+                'ufCrm105_1775555445843': comments.opuUniform || '',
+                'ufCrm105_1775555483492': comments.uniformCondition || '',
+                'ufCrm105_1775555723142': comments.equipmentCondition || '',
+                'ufCrm105_1775555765608': comments.hardFloorQuality || '',
+                'ufCrm105_1775555811584': comments.glassMirrorQuality || '',
+                'ufCrm105_1775555862464': comments.fittingRoomsQuality || '',
+                'ufCrm105_1775555936016': comments.cleaningRoomCondition || '',
+                'ufCrm105_1775555989448': comments.restroomCondition || '',
+                'ufCrm105_1775556035238': comments.softFurnitureCondition || '',
             };
 
             await createDailyReportItem({
@@ -143,7 +198,8 @@ const DailyReportPage = () => {
             setIsSubmitted(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
-            setError('Произошла ошибка при отправке отчета.');
+            console.error('Submission error:', err);
+            setError('Ошибка при отправке отчета. Пожалуйста, попробуйте еще раз.');
         } finally {
             setIsSubmitting(false);
         }
