@@ -281,13 +281,13 @@ const DailyReportPage = () => {
                         {selectedDeal && (
                             <div className="w-full">
                                 <div className="px-5 py-3 bg-brand-dark text-white rounded-2xl flex items-center justify-between shadow-premium animate-scale-in">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center">
+                                    <div className="flex-1 min-w-0 pr-2 flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center shrink-0">
                                             <MapPin size={16} />
                                         </div>
-                                        <div>
+                                        <div className="flex-1 min-w-0">
                                             <div className="text-[10px] uppercase font-bold opacity-60 leading-none mb-1">Ваш объект</div>
-                                            <div className="text-sm font-bold truncate max-w-[180px]">{selectedDeal.title}</div>
+                                            <div className="text-[12px] sm:text-sm leading-snug font-bold break-words">{selectedDeal.title}</div>
                                         </div>
                                     </div>
                                     
@@ -355,9 +355,9 @@ const DailyReportPage = () => {
                                                     }}
                                                     className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between mb-1 ${selectedDeal.id === deal.id ? 'bg-brand-green/10 text-brand-green' : 'hover:bg-brand-accent/30 text-brand-dark/60'}`}
                                                 >
-                                                    <div className="flex flex-col">
-                                                        <span className="truncate pr-4 max-w-[180px]">{deal.title}</span>
-                                                        <span className={`text-[8px] uppercase tracking-tighter ${deal.distance < 0.05 ? 'text-brand-green/60' : 'text-brand-dark/20'}`}>
+                                                    <div className="flex flex-col flex-1 min-w-0 pr-2">
+                                                        <span className="text-[12px] leading-snug break-words">{deal.title}</span>
+                                                        <span className={`text-[8px] uppercase mt-1 tracking-tighter ${deal.distance < 0.05 ? 'text-brand-green/60' : 'text-brand-dark/20'}`}>
                                                             {deal.distance < 0.05 ? 'Прямо здесь' : (deal.distance > 5 ? 'Далеко' : 'Рядом')}
                                                         </span>
                                                     </div>
