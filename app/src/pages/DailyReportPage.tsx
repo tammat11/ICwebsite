@@ -176,6 +176,11 @@ const DailyReportPage = () => {
                                             ? selectedDeal.title 
                                             : (isGpsLoading ? "Определение объекта..." : "Объект не найден рядом")}
                                     </div>
+                                    {location && (
+                                        <div className="text-[8px] font-mono opacity-20 uppercase mt-1 tracking-wider">
+                                            {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+                                        </div>
+                                    )}
                                     {!selectedDeal && !isGpsLoading && (
                                         <div className="text-[8px] text-red-500 font-bold uppercase mt-1">
                                             Подойдите ближе (300м)
