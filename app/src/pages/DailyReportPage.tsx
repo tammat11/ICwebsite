@@ -36,35 +36,62 @@ const DailyReportPage = () => {
     const [nearestDeals, setNearestDeals] = useState<{ id: string, title: string, distance: number, assignedById?: string, contactId?: string, companyId?: string }[]>([]);
     const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
     const [showObjectPicker, setShowObjectPicker] = useState(false);
-    const [isGpsLoading, setIsGpsLoading] = useState(true);
+    const [geoStatus, setGeoStatus] = useState<'idle' | 'searching' | 'found' | 'error'>('idle');
+
+    const startGps = () => {
+        if (!navigator.geolocation) {
+            setError("GPS не поддерживается вашим браузером");
+            return;
+        }
+
+        setIsGpsLoading(true);
+        setGeoStatus('searching');
+
+        // Try High Accuracy first
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                setLocation(coords);
+                const deals = await getNearestDeal(coords.lat, coords.lng);
+                if (deals && deals.length > 0) {
+                    const nearby = deals.filter(d => d.distance <= 0.6); // Using 600m
+                    setNearestDeals(nearby);
+                    if (nearby.length > 0) setSelectedDeal(nearby[0]);
+                }
+                setIsGpsLoading(false);
+                setGeoStatus('found');
+            },
+            (err) => {
+                console.warn("High accuracy failed, trying fallback...", err);
+                // Fallback to low accuracy (WiFi/Cell) which is faster indoors
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                        setLocation(coords);
+                        const deals = await getNearestDeal(coords.lat, coords.lng);
+                        if (deals && deals.length > 0) {
+                            const nearby = deals.filter(d => d.distance <= 0.6);
+                            setNearestDeals(nearby);
+                            if (nearby.length > 0) setSelectedDeal(nearby[0]);
+                        }
+                        setIsGpsLoading(false);
+                        setGeoStatus('found');
+                    },
+                    (innerErr) => {
+                        console.error("GPS Error:", innerErr);
+                        setError(`GPS ошибка (${innerErr.code}): ${innerErr.message}`);
+                        setIsGpsLoading(false);
+                        setGeoStatus('error');
+                    },
+                    { enableHighAccuracy: false, timeout: 5000 }
+                );
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    };
 
     useEffect(() => {
-        if ("geolocation" in navigator) {
-            setIsGpsLoading(true);
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                    setLocation(coords);
-                    const deals = await getNearestDeal(coords.lat, coords.lng);
-                    if (deals && deals.length > 0) {
-                        const nearby = deals.filter(d => d.distance <= 0.6);
-                        setNearestDeals(nearby);
-                        if (nearby.length > 0) {
-                            setSelectedDeal(nearby[0]);
-                        }
-                    }
-                    setIsGpsLoading(false);
-                },
-                (err) => {
-                    console.error("Geolocation error:", err);
-                    setError("Пожалуйста, разрешите доступ к геопозиции.");
-                    setIsGpsLoading(false);
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        } else {
-            setIsGpsLoading(false);
-        }
+        startGps();
     }, []);
 
     const updateField = (name: string, value: string) => setFormData(prev => ({ ...prev, [name]: value }));
