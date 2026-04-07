@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Clockster <-> Bitrix Sync Tool</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; background: #f4f6f8; color: #333; }
+        .card { background: white; padding: 30px; border-radius: 20px; shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; border: 1px solid #eee; }
+        h1 { color: #2c3e50; margin-top: 0; }
+        .btn { background: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-right: 10px; }
+        .btn-bitrix { background: #007bff; }
+        .status { margin-top: 20px; padding: 15px; border-radius: 10px; background: #e9ecef; white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        #audit-log { display: none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Синхронизатов Локаций</h1>
+        <p>Этот инструмент поможет забрать данные из Clockster и обновить их в Битрикс24.</p>
+        
+        <div style="margin-bottom: 20px;">
+            <p><strong>Шаг 1:</strong> Получите данные из Clockster</p>
+            <button class="btn" onclick="fetchClockster()">1. Загрузить из Clockster</button>
+        </div>
+
+        <div id="bitrix-step" style="display: none;">
+            <p><strong>Шаг 2:</strong> Обновите данные в Битриксе (69-я воронка)</p>
+            <button class="btn btn-bitrix" onclick="updateBitrix()">2. Начать Обновление</button>
+        </div>
+
+        <div id="status-box" class="status">Ожидание...</div>
+        
+        <div id="audit-log">
+            <h3>Найденные расхождения:</h3>
+            <div id="log-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const CLOCKSTER_TOKEN = 'tiFDpyYU1c9m6IFEXvfBgRlLu3QUugPqOBc9tOHRada84010';
+        const BITRIX_WEBHOOK = 'https://tootopbrass.bitrix24.kz/rest/281/6730mf4ivq497k0n/';
+        let clocksterLocations = [];
+
+        async function fetchClockster() {
+            const status = document.getElementById('status-box');
+            status.innerText = "Подключение к Clockster (через ваш браузер)...";
+            
+            try {
+                // Пытаемся достучаться до API v2 Clockster
+                const response = await fetch('https://api-v2.clockster.io/api/v2/locations', {
+                    headers: { 'Authorization': 'Bearer ' + CLOCKSTER_TOKEN }
+                });
+                
+                if (!response.ok) throw new Error('Ошибка Clockster: ' + response.status);
+                
+                const data = await response.json();
+                clocksterLocations = data.data || data.locations || [];
+                
+                status.innerText = "УСПЕХ! Найдено " + clocksterLocations.length + " локаций в Clockster.";
+                document.getElementById('bitrix-step').style.display = 'block';
+                console.log(clocksterLocations);
+            } catch (err) {
+                status.innerText = "ОШИБКА: Если домен .io заблокирован, попробуйте открыть эту ссылку и скопировать JSON: \n\n" + 
+                                  "https://api-v2.clockster.io/api/v2/locations?token=" + CLOCKSTER_TOKEN;
+            }
+        }
+
+        async function updateBitrix() {
+            const status = document.getElementById('status-box');
+            status.innerText = "Начинаю обновление Битрикса (69-я воронка)...";
+            // Тут мы добавим логику сопоставления Deal_ID из описания Clockster
+        }
+    </script>
+</body>
+</html>
