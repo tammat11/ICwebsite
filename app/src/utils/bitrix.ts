@@ -183,19 +183,17 @@ export const createDailyReportItem = async (data: LeadData) => {
         const params = new URLSearchParams();
 
         params.append('entityTypeId', '1204');
-        params.append('fields[TITLE]', data.title);
-        params.append('fields[CATEGORY_ID]', '445');
+        params.append('fields[title]', data.title);
+        params.append('fields[categoryId]', '445');
         
-        if (data.assignedById) params.append('fields[ASSIGNED_BY_ID]', String(data.assignedById));
-        if (data.contactId) params.append('fields[CONTACT_ID]', String(data.contactId));
-        if (data.companyId) params.append('fields[COMPANY_ID]', String(data.companyId));
+        if (data.assignedById) params.append('fields[assignedById]', String(data.assignedById));
+        if (data.contactId) params.append('fields[contactId]', String(data.contactId));
+        if (data.companyId) params.append('fields[companyId]', String(data.companyId));
         
         // Добавление пользовательских полей
         if (data.extraFields) {
             Object.entries(data.extraFields).forEach(([key, value]) => {
-                // Преобразуем ключ в верхний регистр для надежности
-                const upperKey = key.toUpperCase();
-                params.append(`fields[${upperKey}]`, String(value));
+                params.append(`fields[${key}]`, String(value));
             });
         }
 
