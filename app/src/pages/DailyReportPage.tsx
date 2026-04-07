@@ -96,9 +96,39 @@ const DailyReportPage = () => {
         setIsSubmitting(true);
 
         try {
+            const payloadString = (selectedDeal ? `Объект: ${selectedDeal.title}\nID Сделки: ${selectedDeal.id}\n` : '') + 
+                (location ? `Координаты: https://www.google.com/maps?q=${location.lat},${location.lng}\n\n` : '\n') +
+                `=========================\n` +
+                Object.entries(formData).map(([k, v]) => {
+                    if (k === 'objectComment') return '';
+                    const comment = comments[k] ? ` (Коммент: ${comments[k]})` : '';
+                    
+                    // Перевод ключей на русский для красивого отчета
+                    const questionNames: Record<string, string> = {
+                        feedbackSpeed: 'Скорость обратной связи',
+                        improvementSuggestions: 'Предложения по улучшению',
+                        curatorScore: 'Оценка работы куратора',
+                        suppliesQuality: 'Качество моющих средств',
+                        opuUniform: 'ОПУ в форме',
+                        uniformCondition: 'Состояние формы',
+                        equipmentCondition: 'Состояние инвентаря',
+                        hardFloorQuality: 'Уборка полов',
+                        glassMirrorQuality: 'Стекла и зеркала',
+                        fittingRoomsQuality: 'Примерочные и свет',
+                        cleaningRoomCondition: 'Помещение клининга',
+                        restroomCondition: 'Санузлы',
+                        softFurnitureCondition: 'Мягкая мебель'
+                    };
+                    
+                    const prettyName = questionNames[k] || k;
+                    return `${prettyName}: ${v}${comment}`;
+                }).filter(Boolean).join('\n') +
+                `\n=========================\nКомментарий по объекту: ${formData.objectComment}`;
+
             const extraFields: Record<string, string | number | boolean> = {
                 'ufCrm105_1753336038': selectedDeal?.title || 'Объект не определен',
                 'ufCrm105_1753784383': selectedDeal?.id || '',
+                'ufCrm105_1754020000': payloadString
             };
 
             await createDailyReportItem({
@@ -107,15 +137,7 @@ const DailyReportPage = () => {
                 assignedById: selectedDeal?.assignedById,
                 contactId: selectedDeal?.contactId,
                 companyId: selectedDeal?.companyId,
-                comments: (selectedDeal ? `Объект: ${selectedDeal.title}\nID Сделки: ${selectedDeal.id}\n` : '') + 
-                    (location ? `Координаты: https://www.google.com/maps?q=${location.lat},${location.lng}\n\n` : '\n') +
-                    `=========================\n` +
-                    Object.entries(formData).map(([k, v]) => {
-                        if (k === 'objectComment') return '';
-                        const comment = comments[k] ? ` (Коммент: ${comments[k]})` : '';
-                        return `${k}: ${v}${comment}`;
-                    }).filter(Boolean).join('\n') +
-                    `\n=========================\nКомментарий по объекту: ${formData.objectComment}`
+                comments: payloadString
             });
 
             setIsSubmitted(true);
