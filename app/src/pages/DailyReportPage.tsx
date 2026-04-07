@@ -272,7 +272,7 @@ const DailyReportPage = () => {
                             )}
 
                             {geoStatus === 'error' && (
-                                <div className="mt-4 p-6 bg-red-50 rounded-[32px] border border-red-100 flex flex-col items-center gap-4 text-red-600 animate-bounce shadow-sm">
+                                <div className="mt-4 p-6 bg-red-50 rounded-[32px] border border-red-100 flex flex-col items-center gap-4 text-red-600 shadow-sm animate-fade-in">
                                     <div className="flex items-center gap-3">
                                         <AlertCircle size={24} />
                                         <div className="text-[12px] font-black uppercase tracking-tight">Объекты не найдены в радиусе 300м</div>
