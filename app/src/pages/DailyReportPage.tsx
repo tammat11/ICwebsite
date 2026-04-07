@@ -39,12 +39,9 @@ const DailyReportPage = () => {
 
     const DISTANCE_LIMIT = 0.3; // 300 meters
 
-    const askGps = () => {
-        setGeoStatus('determining');
-        setError(null);
+    const startGps = () => {
         if (!navigator.geolocation) {
             setGeoStatus('error');
-            setError('Ваш браузер не поддерживает GPS');
             return;
         }
 
@@ -62,21 +59,21 @@ const DailyReportPage = () => {
                         setGeoStatus('found');
                     } else {
                         setGeoStatus('error');
-                        setSelectedDeal(null);
                     }
                 }
             },
             (err) => {
-                console.error("GPS Error Code:", err.code);
+                console.error("GPS Native Error:", err);
                 if (err.code === 1) setGeoStatus('denied');
                 else setGeoStatus('error');
             },
-            { enableHighAccuracy: true } // Removed complex options for maximum compatibility
+            { enableHighAccuracy: true, timeout: 15000 }
         );
     };
 
     useEffect(() => {
-        askGps();
+        // Calling immediately on mount as requested
+        startGps();
     }, []);
 
     const updateField = (name: string, value: string) => setFormData(prev => ({ ...prev, [name]: value }));
@@ -91,7 +88,7 @@ const DailyReportPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedDeal) { setError('Объект не найден. Подойдите ближе (до 300м).'); return; }
+        if (!selectedDeal) { setError('Объект не найден. Подойдите ближе (300м).'); return; }
         setError(null);
         setIsSubmitting(true);
 
@@ -194,29 +191,27 @@ const DailyReportPage = () => {
                                 <div className="text-left">
                                     <div className="text-[10px] uppercase font-bold opacity-30 tracking-widest mb-1 leading-none">Локация</div>
                                     <div className="text-sm font-bold truncate max-w-[160px]">
-                                        {selectedDeal ? selectedDeal.title : (geoStatus === 'determining' ? 'Ожидание GPS...' : 'Доступ закрыт')}
+                                        {selectedDeal ? selectedDeal.title : (geoStatus === 'determining' ? 'Запрос GPS...' : 'Доступ закрыт')}
                                     </div>
                                 </div>
                             </div>
                             {geoStatus === 'found' && nearestDeals.length > 1 && <ChevronDown size={20} className="opacity-40" />}
                         </button>
 
-                        {(geoStatus === 'determining' || geoStatus === 'denied' || geoStatus === 'error') && !selectedDeal && (
-                            <div className="w-full max-w-sm p-8 bg-white border border-black/5 rounded-[40px] shadow-2xl animate-fade-in text-center">
-                                <div className="mb-6 flex justify-center">
-                                    <div className="p-5 bg-brand-green/10 rounded-full">
-                                        <RefreshCcw className="text-brand-green animate-spin" size={32} />
+                        {(geoStatus === 'determining' || geoStatus === 'denied' || geoStatus === 'error') && (
+                            <div className="w-full max-w-sm p-6 bg-white/50 border border-black/5 rounded-[32px] animate-fade-in text-center flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    {geoStatus === 'determining' ? <RefreshCcw className="animate-spin text-brand-green" size={20} /> : <AlertCircle className="text-red-500" size={20} />}
+                                    <div className="text-left">
+                                        <div className="text-[9px] font-black uppercase text-brand-dark/20 leading-none mb-1">Статус GPS</div>
+                                        <div className="text-[11px] font-bold text-brand-dark uppercase">
+                                            {geoStatus === 'determining' ? 'Определяем...' : 'Ошибка доступа'}
+                                        </div>
                                     </div>
                                 </div>
-                                <h3 className="text-sm font-black text-brand-dark uppercase mb-2">Нажмите кнопку ниже</h3>
-                                <p className="text-[10px] font-bold text-brand-dark/40 uppercase tracking-widest mb-8 leading-relaxed">Чтобы подтвердить, что <br/> вы находитесь на объекте</p>
-                                <button onClick={askGps} className="btn-premium w-full py-5 text-xs shadow-[0_10px_30px_rgba(110,190,75,0.4)]">Включить GPS</button>
-                                {geoStatus === 'denied' && (
-                                    <div className="mt-8 pt-6 border-t border-black/5">
-                                        <div className="text-red-500 text-[10px] font-black uppercase mb-2">Доступ ограничен</div>
-                                        <p className="text-[9px] font-bold text-brand-dark/30 leading-relaxed px-4">Разрешите доступ к локации в настройках браузера (значок замка вверху)</p>
-                                    </div>
-                                )}
+                                <button onClick={startGps} className="p-3 bg-brand-green/10 rounded-xl text-brand-green hover:bg-brand-green/20 transition-all">
+                                    <RefreshCcw size={18} />
+                                </button>
                             </div>
                         )}
 
