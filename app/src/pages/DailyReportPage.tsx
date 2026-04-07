@@ -238,7 +238,7 @@ const DailyReportPage = () => {
                         value={comments[name] || ''}
                         onChange={(e) => updateComment(name, e.target.value)}
                         placeholder="Укажите подробности..."
-                        className="w-full px-5 py-4 mt-2 rounded-2xl bg-brand-light border border-black/5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-green/30 h-20 resize-none"
+                        className="w-full px-5 py-4 mt-2 rounded-2xl bg-brand-light border border-black/5 text-[16px] font-medium focus:outline-none focus:ring-2 focus:ring-brand-green/30 h-20 resize-none"
                     />
                 </div>
             )}
@@ -302,7 +302,7 @@ const DailyReportPage = () => {
                                                 <input 
                                                     type="text"
                                                     placeholder="Поиск объекта (напр. Мега, Банк...)"
-                                                    className="w-full pl-9 pr-4 py-2.5 bg-brand-accent/30 rounded-xl text-xs font-bold focus:outline-none focus:bg-brand-accent/50 transition-all"
+                                                    className="w-full pl-9 pr-4 py-2.5 bg-brand-accent/30 rounded-xl text-[16px] font-bold focus:outline-none focus:bg-brand-accent/50 transition-all"
                                                     value={searchTerm}
                                                     onChange={(e) => setSearchTerm(e.target.value)}
                                                 />
