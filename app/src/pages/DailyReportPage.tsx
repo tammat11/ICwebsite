@@ -35,65 +35,49 @@ const DailyReportPage = () => {
     const [nearestDeals, setNearestDeals] = useState<{ id: string, title: string, distance: number, assignedById?: string, contactId?: string, companyId?: string }[]>([]);
     const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
     const [showObjectPicker, setShowObjectPicker] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
     const [geoStatus, setGeoStatus] = useState<'determining' | 'found' | 'error' | 'denied'>('determining');
 
-    // Anti-cheat: distance limit in km
     const DISTANCE_LIMIT = 0.3; // 300 meters
 
-    const refreshGps = () => {
+    const askGps = () => {
         setGeoStatus('determining');
         setError(null);
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
-                    setLocation(coords);
-                    const deals = await getNearestDeal(coords.lat, coords.lng);
-                    if (deals) {
-                        const nearby = deals.filter(d => d.distance <= DISTANCE_LIMIT);
-                        setNearestDeals(nearby);
-                        if (nearby.length > 0) {
-                            setSelectedDeal(nearby[0]);
-                            setGeoStatus('found');
-                        } else {
-                            setGeoStatus('error');
-                            setSelectedDeal(null);
-                        }
+        if (!navigator.geolocation) {
+            setGeoStatus('error');
+            setError('Ваш браузер не поддерживает GPS');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                setLocation({ lat, lng });
+                const deals = await getNearestDeal(lat, lng);
+                if (deals) {
+                    const nearby = deals.filter(d => d.distance <= DISTANCE_LIMIT);
+                    setNearestDeals(nearby);
+                    if (nearby.length > 0) {
+                        setSelectedDeal(nearby[0]);
+                        setGeoStatus('found');
+                    } else {
+                        setGeoStatus('error');
+                        setSelectedDeal(null);
                     }
-                },
-                (err) => {
-                    console.error("Geolocation error:", err);
-                    setGeoStatus(err.code === 1 ? 'denied' : 'error');
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        } else { setGeoStatus('error'); }
+                }
+            },
+            (err) => {
+                console.error("GPS Error Code:", err.code);
+                if (err.code === 1) setGeoStatus('denied');
+                else setGeoStatus('error');
+            },
+            { enableHighAccuracy: true } // Removed complex options for maximum compatibility
+        );
     };
 
     useEffect(() => {
-        refreshGps();
+        askGps();
     }, []);
-
-    const handleManualLocation = async (latStr: string, lngStr: string) => {
-        const lat = parseFloat(latStr);
-        const lng = parseFloat(lngStr);
-        if (isNaN(lat) || isNaN(lng)) return;
-        const coords = { lat, lng };
-        setLocation(coords);
-        const deals = await getNearestDeal(coords.lat, coords.lng);
-        if (deals) {
-            const nearby = deals.filter(d => d.distance <= DISTANCE_LIMIT);
-            setNearestDeals(nearby);
-            if (nearby.length > 0) {
-                setSelectedDeal(nearby[0]);
-                setGeoStatus('found');
-            } else {
-                setSelectedDeal(null);
-                setGeoStatus('error');
-            }
-        }
-    };
 
     const updateField = (name: string, value: string) => setFormData(prev => ({ ...prev, [name]: value }));
     const updateComment = (name: string, value: string) => setComments(prev => ({ ...prev, [name]: value }));
@@ -107,16 +91,14 @@ const DailyReportPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedDeal) { setError('Объект не выбран. Пожалуйста, разрешите GPS.'); return; }
-        if (selectedDeal.distance > DISTANCE_LIMIT) { setError('Вы находитесь слишком далеко (>300м)'); return; }
-        
+        if (!selectedDeal) { setError('Объект не найден. Подойдите ближе (до 300м).'); return; }
         setError(null);
         setIsSubmitting(true);
 
         try {
             const extraFields: Record<string, string | number | boolean> = {
-                'ufCrm105_1753336038': selectedDeal?.title || 'Объект не определен',
-                'ufCrm105_1753784383': selectedDeal?.id || '',
+                'ufCrm105_1753336038': selectedDeal?.title,
+                'ufCrm105_1753784383': selectedDeal?.id,
                 'ufCrm105_1753787218160': formData.opuUniform,
                 'ufCrm105_1753787226010': formData.uniformCondition + (comments.uniformCondition ? ` (${comments.uniformCondition})` : ''),
                 'ufCrm105_1753787157294': formData.suppliesQuality,
@@ -131,14 +113,12 @@ const DailyReportPage = () => {
             }).join('\n');
 
             await createDailyReportItem({
-                title: `АУДИТ ОБЪЕКТА: ${selectedDeal?.title || 'Без названия'} (${new Date().toLocaleDateString()})`,
+                title: `АУДИТ: ${selectedDeal?.title} (${new Date().toLocaleDateString()})`,
                 extraFields: extraFields,
                 assignedById: selectedDeal?.assignedById,
                 contactId: selectedDeal?.contactId,
                 companyId: selectedDeal?.companyId,
-                comments: (selectedDeal ? `Объект: ${selectedDeal.title}\nID Сделки: ${selectedDeal.id}\nДистанция: ${(selectedDeal.distance*1000).toFixed(0)}м\n` : '') + 
-                    (location ? `Координаты: https://www.google.com/maps?q=${location.lat},${location.lng}\n` : '') +
-                    `Комментарий: ${formData.objectComment}\n\n--- ДЕТАЛЬНЫЙ АУДИТ ---\n${reportSummary}`
+                comments: `Дистанция: ${(selectedDeal.distance*1000).toFixed(0)}м\nКоординаты: https://www.google.com/maps?q=${location?.lat},${location?.lng}\nКомментарий: ${formData.objectComment}\n\n--- АУДИТ ---\n${reportSummary}`
             });
             setIsSubmitted(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -151,7 +131,7 @@ const DailyReportPage = () => {
         const isNegative = (val: string) => ['1', '2', 'Нет', 'Не быстро', 'Не в нашей форме', 'Плохо'].includes(val);
 
         return (
-            <div className="premium-card p-8 rounded-[32px] animate-fade-in-up shadow-premium">
+            <div className="premium-card p-8 rounded-[32px] animate-fade-in-up">
                 <label className="block text-sm font-bold text-brand-dark mb-5 ml-1 leading-relaxed">{q.label}</label>
                 <div className="flex w-full gap-2 mb-4">
                     {q.options.map(opt => {
@@ -198,125 +178,79 @@ const DailyReportPage = () => {
     return (
         <div className="min-h-screen bg-brand-light pt-32 pb-20 px-6">
             <div className="max-w-3xl mx-auto">
-                <div className="mb-12 text-center">
-                    <div className="section-tag mx-auto">Аудит БД</div>
-                    <h1 className="section-header block uppercase">ПРОВЕРКА <br /><span className="text-brand-green">КАЧЕСТВА</span></h1>
-                    <div className="mt-8 flex flex-col items-center gap-4 w-full">
-                        <div className="relative w-full max-w-sm">
-                            <button 
-                                onClick={() => geoStatus === 'found' && setShowObjectPicker(!showObjectPicker)}
-                                className={`w-full px-6 py-4 bg-brand-dark text-white rounded-3xl flex items-center justify-between shadow-xl transition-all ${nearestDeals.length > 1 ? 'hover:scale-[1.02] active:scale-95' : ''}`}
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className={`p-2 rounded-xl ${geoStatus === 'found' ? 'bg-brand-green/20' : 'bg-white/10'}`}>
-                                        {geoStatus === 'found' ? <MapPin className="text-brand-green" size={20} /> : <Lock className="text-white/40" size={20} />}
-                                    </div>
-                                    <div className="text-left">
-                                        <div className="text-[10px] uppercase font-bold opacity-30 tracking-widest leading-none mb-1">
-                                            {geoStatus === 'found' ? 'Объект подтвержден' : 'Геолокация'}
-                                        </div>
-                                        <div className="text-sm font-bold truncate max-w-[180px]">
-                                            {selectedDeal ? selectedDeal.title : (geoStatus === 'determining' ? 'Ожидание GPS...' : 'Доступ ограничен')}
-                                        </div>
+                <div className="mb-12 text-center leading-none">
+                    <div className="section-tag mx-auto mb-2">Аудит</div>
+                    <h1 className="text-4xl font-black block uppercase tracking-tighter leading-none mb-10">ПРОВЕРКА <br /><span className="text-brand-green">КАЧЕСТВА</span></h1>
+                    
+                    <div className="flex flex-col items-center gap-4 w-full">
+                        <button 
+                            onClick={() => geoStatus === 'found' && setShowObjectPicker(!showObjectPicker)}
+                            className={`w-full max-w-sm px-6 py-5 bg-brand-dark text-white rounded-[32px] flex items-center justify-between shadow-2xl transition-all ${nearestDeals.length > 1 ? 'hover:scale-[1.02] active:scale-95' : ''}`}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className={`p-2.5 rounded-2xl ${geoStatus === 'found' ? 'bg-brand-green/20' : 'bg-white/10'}`}>
+                                    {geoStatus === 'found' ? <MapPin className="text-brand-green" size={24} /> : <Lock className="text-white/40" size={24} />}
+                                </div>
+                                <div className="text-left">
+                                    <div className="text-[10px] uppercase font-bold opacity-30 tracking-widest mb-1 leading-none">Локация</div>
+                                    <div className="text-sm font-bold truncate max-w-[160px]">
+                                        {selectedDeal ? selectedDeal.title : (geoStatus === 'determining' ? 'Ожидание GPS...' : 'Доступ закрыт')}
                                     </div>
                                 </div>
-                                {geoStatus === 'found' && nearestDeals.length > 1 && (
-                                    <ChevronDown size={18} className={`${showObjectPicker ? 'rotate-180' : ''} transition-transform opacity-40`} />
+                            </div>
+                            {geoStatus === 'found' && nearestDeals.length > 1 && <ChevronDown size={20} className="opacity-40" />}
+                        </button>
+
+                        {(geoStatus === 'determining' || geoStatus === 'denied' || geoStatus === 'error') && !selectedDeal && (
+                            <div className="w-full max-w-sm p-8 bg-white border border-black/5 rounded-[40px] shadow-2xl animate-fade-in text-center">
+                                <div className="mb-6 flex justify-center">
+                                    <div className="p-5 bg-brand-green/10 rounded-full">
+                                        <RefreshCcw className="text-brand-green animate-spin" size={32} />
+                                    </div>
+                                </div>
+                                <h3 className="text-sm font-black text-brand-dark uppercase mb-2">Нажмите кнопку ниже</h3>
+                                <p className="text-[10px] font-bold text-brand-dark/40 uppercase tracking-widest mb-8 leading-relaxed">Чтобы подтвердить, что <br/> вы находитесь на объекте</p>
+                                <button onClick={askGps} className="btn-premium w-full py-5 text-xs shadow-[0_10px_30px_rgba(110,190,75,0.4)]">Включить GPS</button>
+                                {geoStatus === 'denied' && (
+                                    <div className="mt-8 pt-6 border-t border-black/5">
+                                        <div className="text-red-500 text-[10px] font-black uppercase mb-2">Доступ ограничен</div>
+                                        <p className="text-[9px] font-bold text-brand-dark/30 leading-relaxed px-4">Разрешите доступ к локации в настройках браузера (значок замка вверху)</p>
+                                    </div>
                                 )}
-                            </button>
+                            </div>
+                        )}
 
-                            {(geoStatus === 'determining' || geoStatus === 'denied') && (
-                                <div className="mt-4 p-6 bg-white rounded-[32px] border border-black/5 flex flex-col items-center gap-4 text-center shadow-xl animate-fade-in">
-                                    <div className="flex items-center gap-3 text-brand-dark/40">
-                                        {geoStatus === 'determining' ? (
-                                            <RefreshCcw className="animate-spin text-brand-green" size={20} />
-                                        ) : <Lock className="text-red-500" size={20} />}
-                                        <div className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                                            {geoStatus === 'determining' ? 'Запрашиваем доступ к GPS...' : 'Доступ к GPS заблокирован'}
-                                        </div>
-                                    </div>
-                                    <button 
-                                        type="button" 
-                                        onClick={refreshGps}
-                                        className="w-full btn-premium py-4 text-[10px]"
-                                    >
-                                        ВКЛЮЧИТЬ GPS И НАЙТИ ОБЪЕКТ
-                                    </button>
-                                    {geoStatus === 'denied' && (
-                                        <p className="text-[9px] font-bold opacity-30 px-4 leading-relaxed">
-                                            Нажмите на иконку «Замка» вверху и разрешите <br/> доступ к местоположению
-                                        </p>
-                                    )}
+                        {showObjectPicker && (
+                            <div className="w-full max-w-sm mt-3 bg-white rounded-[40px] p-5 shadow-2xl border border-black/5 z-50">
+                                <div className="text-[9px] uppercase font-bold opacity-30 mb-4 px-2 tracking-widest">Ближайшие (300м)</div>
+                                <div className="max-h-60 overflow-y-auto scrollbar-hide">
+                                    {nearestDeals.map(d => (
+                                        <button key={d.id} className={`w-full text-left p-5 rounded-[28px] text-xs font-bold transition-all mb-2 flex justify-between items-center ${selectedDeal?.id === d.id ? 'bg-brand-green/10 text-brand-green border-brand-green/20' : 'bg-brand-light border-transparent'} border`} onClick={() => { setSelectedDeal(d); setShowObjectPicker(false); }}>
+                                            <span className="truncate pr-4">{d.title}</span>
+                                            <span className="text-[9px] opacity-40">{(d.distance * 1000).toFixed(0)}м</span>
+                                        </button>
+                                    ))}
                                 </div>
-                            )}
-
-                            {geoStatus === 'error' && !selectedDeal && (
-                                <div className="mt-4 p-6 bg-red-50 rounded-[32px] border border-red-100 flex flex-col items-center gap-4 text-red-600 shadow-sm animate-fade-in">
-                                    <div className="flex items-center gap-3">
-                                        <AlertCircle size={24} />
-                                        <div className="text-[12px] font-black uppercase tracking-tight">Ничего не найдено рядом</div>
-                                    </div>
-                                    <button 
-                                        type="button"
-                                        onClick={refreshGps}
-                                        className="w-full py-4 bg-red-500 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        Проверить еще раз
-                                    </button>
-                                </div>
-                            )}
-
-                            {showObjectPicker && (
-                                <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] p-4 shadow-2xl border border-black/5 z-50 animate-scale-in origin-top">
-                                    <div className="text-[9px] uppercase font-bold opacity-30 mb-3 px-2 flex justify-between">
-                                        <span>Ближайшие (до 300м)</span>
-                                        <span>Найдено: {nearestDeals.length}</span>
-                                    </div>
-                                    <div className="max-h-72 overflow-y-auto scrollbar-hide py-1">
-                                        {nearestDeals.map(d => (
-                                            <button 
-                                                key={d.id} 
-                                                className={`w-full text-left p-4 rounded-2xl text-xs font-bold transition-all mb-2 flex justify-between items-center ${selectedDeal?.id === d.id ? 'bg-brand-green/10 text-brand-green' : 'bg-brand-light/50 hover:bg-brand-green/5'}`} 
-                                                onClick={() => { setSelectedDeal(d); setShowObjectPicker(false); }}
-                                            >
-                                                <span className="truncate pr-4">{d.title}</span>
-                                                <span className={`whitespace-nowrap px-3 py-1 rounded-full text-[9px] uppercase tracking-wider ${d.distance < 0.05 ? 'bg-brand-green text-white' : 'bg-brand-dark/5 text-brand-dark/40'}`}>
-                                                    {d.distance < 0.01 ? 'Прямо здесь' : `${(d.distance * 1000).toFixed(0)}м`}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="p-4 bg-brand-accent/5 rounded-2xl border border-dashed border-brand-dark/5 w-full max-w-[200px] opacity-10 hover:opacity-100 transition-opacity">
-                             <div className="flex gap-2">
-                                <input type="text" placeholder="LAT" className="w-1/2 px-3 py-1.5 bg-white/50 rounded-xl text-[9px] font-bold focus:outline-none" onChange={(e) => handleManualLocation(e.target.value, String(location?.lng || ''))} defaultValue={location?.lat || ''} />
-                                <input type="text" placeholder="LNG" className="w-1/2 px-3 py-1.5 bg-white/50 rounded-xl text-[9px] font-bold focus:outline-none" onChange={(e) => handleManualLocation(String(location?.lat || ''), e.target.value)} defaultValue={location?.lng || ''} />
-                             </div>
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {QUESTIONS.map(q => <RadioQuestionUI key={q.key} q={q} />)}
                     <div className="premium-card p-8 rounded-[32px]">
-                        <label className="block text-sm font-bold text-brand-dark mb-4">Комментарий по объекту</label>
-                        <textarea value={formData.objectComment} onChange={(e) => updateField('objectComment', e.target.value)} placeholder="Добавьте общий комментарий..." className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-medium h-32 resize-none" />
+                        <label className="block text-sm font-bold text-brand-dark mb-4 ml-1">Комментарий по объекту</label>
+                        <textarea value={formData.objectComment} onChange={(e) => updateField('objectComment', e.target.value)} placeholder="Важные детали по проверке..." className="w-full px-6 py-5 rounded-3xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-medium h-36 resize-none" />
                     </div>
                     {error && (
-                        <div className="p-6 bg-red-50 border border-red-200 rounded-3xl flex items-center gap-4 text-red-600 animate-slide-in-right">
+                        <div className="p-6 bg-red-50 border border-red-100 rounded-[32px] flex items-center gap-4 text-red-600 animate-slide-in-right">
                             <AlertCircle size={24} />
-                            <p className="font-bold text-sm tracking-tight">{error}</p>
+                            <p className="font-bold text-xs">{error}</p>
                         </div>
                     )}
-                    <button 
-                        type="submit" 
-                        disabled={isSubmitting || !selectedDeal} 
-                        className="w-full btn-premium py-6 flex items-center justify-center gap-3 disabled:opacity-30"
-                    >
+                    <button type="submit" disabled={isSubmitting || !selectedDeal} className="w-full btn-premium py-6 flex items-center justify-center gap-3 disabled:opacity-20 translate-y-2">
                         {isSubmitting ? 'ОТПРАВЛЯЕМ...' : 'ОТПРАВИТЬ ОТЧЕТ'}
-                        <Send size={18} />
+                        <Send size={20} />
                     </button>
                 </form>
             </div>
