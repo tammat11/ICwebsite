@@ -47,7 +47,7 @@ const DailyReportPage = () => {
                     setLocation(coords);
                     const deals = await getNearestDeal(coords.lat, coords.lng);
                     if (deals && deals.length > 0) {
-                        const nearby = deals.filter(d => d.distance <= 0.3);
+                        const nearby = deals.filter(d => d.distance <= 0.6);
                         setNearestDeals(nearby);
                         if (nearby.length > 0) {
                             setSelectedDeal(nearby[0]);
@@ -183,7 +183,7 @@ const DailyReportPage = () => {
                                     )}
                                     {!selectedDeal && !isGpsLoading && (
                                         <div className="text-[8px] text-red-500 font-bold uppercase mt-1">
-                                            Подойдите ближе (300м)
+                                            Подойдите ближе (600м)
                                         </div>
                                     )}
                                 </div>
@@ -193,7 +193,7 @@ const DailyReportPage = () => {
 
                         {showObjectPicker && (
                             <div className="w-full max-w-sm mt-3 bg-white rounded-[40px] p-5 shadow-2xl border border-black/5 z-50">
-                                <div className="text-[9px] uppercase font-bold opacity-30 mb-4 px-2">Ближайшие (300м)</div>
+                                <div className="text-[9px] uppercase font-bold opacity-30 mb-4 px-2">Ближайшие (600м)</div>
                                 <div className="max-h-60 overflow-y-auto scrollbar-hide">
                                     {nearestDeals.map(d => (
                                         <button key={d.id} className={`w-full text-left p-5 rounded-[28px] text-xs font-bold mb-2 flex justify-between items-center ${selectedDeal?.id === d.id ? 'bg-brand-green/10 text-brand-green' : 'bg-brand-light'}`} onClick={() => { setSelectedDeal(d); setShowObjectPicker(false); }}>
