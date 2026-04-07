@@ -215,7 +215,7 @@ const DailyReportPage = () => {
         }
     };
 
-    const RadioQuestion = ({ title, name, options }: { title: string, name: string, options: string[] }) => (
+    const renderRadioQuestion = ({ title, name, options }: { title: string, name: string, options: string[] }) => (
         <div className="premium-card p-6 md:p-8 rounded-[32px] animate-fade-in-up mb-6 border border-black/5">
             <label className="block text-sm font-bold text-brand-dark mb-4">{title}</label>
             <div className="flex flex-col sm:flex-row w-full gap-2 mb-4">
@@ -406,19 +406,19 @@ const DailyReportPage = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-2 mt-8">
-                    <RadioQuestion title="На сколько быстро вы получаете обратную связь от куратора?" name="feedbackSpeed" options={['Быстро', 'Не быстро']} />
-                    <RadioQuestion title="Есть ли у вас предложения по улучшению нашего сервиса?" name="improvementSuggestions" options={['Да', 'Нет']} />
-                    <RadioQuestion title="Оцените работу вашего куратора" name="curatorScore" options={['3', '2', '1']} />
-                    <RadioQuestion title="Все ли вас устраивает в сроках и качестве предоставляемого моющих средств и РМ?" name="suppliesQuality" options={['Да', 'Нет']} />
-                    <RadioQuestion title="ОПУ на объекте находятся в форме?" name="opuUniform" options={['Да', 'Нет']} />
-                    <RadioQuestion title="Состояние формы?" name="uniformCondition" options={['Хорошее', 'Не в нашей форме', 'Плохо']} />
-                    <RadioQuestion title="Состояние инвентаря, оборудования, техники?" name="equipmentCondition" options={['3', '2', '1']} />
-                    <RadioQuestion title="Качество уборки твердых покрытий?" name="hardFloorQuality" options={['3', '2', '1']} />
-                    <RadioQuestion title="Качество протирки стеклянных и зеркальных поверхностей?" name="glassMirrorQuality" options={['3', '2', '1']} />
-                    <RadioQuestion title="Примерочные, осветительные приборы?" name="fittingRoomsQuality" options={['3', '2', '1']} />
-                    <RadioQuestion title="Состояние помещения клининга?" name="cleaningRoomCondition" options={['3', '2', '1']} />
-                    <RadioQuestion title="Состояние санузлов?" name="restroomCondition" options={['3', '2', '1']} />
-                    <RadioQuestion title="Состояние мягкой мебели и ковровых покрытий?" name="softFurnitureCondition" options={['3', '2', '1']} />
+                    {renderRadioQuestion({ title: "На сколько быстро вы получаете обратную связь от куратора?", name: "feedbackSpeed", options: ['Быстро', 'Не быстро'] })}
+                    {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет'] })}
+                    {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Все ли вас устраивает в сроках и качестве предоставляемого моющих средств и РМ?", name: "suppliesQuality", options: ['Да', 'Нет'] })}
+                    {renderRadioQuestion({ title: "ОПУ на объекте находятся в форме?", name: "opuUniform", options: ['Да', 'Нет'] })}
+                    {renderRadioQuestion({ title: "Состояние формы?", name: "uniformCondition", options: ['Хорошее', 'Не в нашей форме', 'Плохо'] })}
+                    {renderRadioQuestion({ title: "Состояние инвентаря, оборудования, техники?", name: "equipmentCondition", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Качество уборки твердых покрытий?", name: "hardFloorQuality", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Качество протирки стеклянных и зеркальных поверхностей?", name: "glassMirrorQuality", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Примерочные, осветительные приборы?", name: "fittingRoomsQuality", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Состояние помещения клининга?", name: "cleaningRoomCondition", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Состояние санузлов?", name: "restroomCondition", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Состояние мягкой мебели и ковровых покрытий?", name: "softFurnitureCondition", options: ['3', '2', '1'] })}
 
                     <div className="premium-card p-8 rounded-[32px] border border-black/5">
                         <label className="block text-sm font-bold text-brand-dark mb-4">Комментарий по объекту</label>
