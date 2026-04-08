@@ -256,38 +256,44 @@ export const updateSanitaryStats = async (score: number, curatorName: string) =>
 
 export const createDailyReportItem = async (data: LeadData) => {
     try {
-        const params = new URLSearchParams();
-
-        params.append('entityTypeId', '1204');
-        params.append('fields[title]', data.title);
-        params.append('fields[categoryId]', '445');
+        // Подготовка данных для JSON
+        const fields: Record<string, any> = {
+            title: data.title,
+            categoryId: '445',
+            // ФИО клиента (Лицо ИП)
+            ufCrm105_1757494287374: (data as any).clientName || '',
+        };
         
-        if (data.assignedById) params.append('fields[assignedById]', String(data.assignedById));
-        if (data.contactId) params.append('fields[contactId]', String(data.contactId));
-        if (data.companyId) params.append('fields[companyId]', String(data.companyId));
+        if (data.assignedById) fields.assignedById = data.assignedById;
+        if (data.contactId) fields.contactId = data.contactId;
+        if (data.companyId) fields.companyId = data.companyId;
         
         // Добавление пользовательских полей
         if (data.extraFields) {
             Object.entries(data.extraFields).forEach(([key, value]) => {
-                params.append(`fields[${key}]`, String(value));
+                fields[key] = value;
             });
         }
 
-        // Добавление фотографий (преобразование в base64 и маппинг)
+        // Добавление фотографий (формат name/content)
         if (data.files && data.files.length > 0) {
-            for (let i = 0; i < data.files.length; i++) {
-                const base64 = await fileToBase64(data.files[i]);
-                // Мы используем поле UF_CRM_105_1775650024571 для фото. 
-                // В Битриксе множественные поля файлов передаются как массив индексов.
-                params.append(`fields[UF_CRM_105_1775650024571][${i}][fileData][0]`, data.files[i].name);
-                params.append(`fields[UF_CRM_105_1775650024571][${i}][fileData][1]`, base64);
+            fields.ufCrm105_1775650024571 = [];
+            for (const file of data.files) {
+                const base64 = await fileToBase64(file);
+                fields.ufCrm105_1775650024571.push({
+                    name: file.name,
+                    content: base64
+                });
             }
         }
 
         const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString(),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                entityTypeId: '1204',
+                fields: fields
+            }),
         });
 
         const result = await response.json();

@@ -220,7 +220,8 @@ const DailyReportPage = () => {
                 contactId: selectedDeal?.contactId,
                 companyId: selectedDeal?.companyId,
                 comments: payloadString,
-                files: files
+                files: files,
+                ...({ clientName: formData.clientName } as any)
             });
 
             setIsSubmitted(true);
