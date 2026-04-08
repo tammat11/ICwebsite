@@ -50,8 +50,9 @@ const DailyReportPage = () => {
                     const deals = await getNearestDeal(coords.lat, coords.lng);
                     if (deals && deals.length > 0) {
                         setNearestDeals(deals);
-                        // Если в 200 метрах есть несколько объектов - это ТРЦ или БЦ. Выбирать автоматически нельзя.
-                        if (deals.length > 1 && deals[1].distance <= 0.2) {
+                        // Если разница расстояний до топ-2 объектов минимальна (менее 150 метров)
+                        // Значит мы стоим в ТРЦ или около комплекса - просим выбрать вручную.
+                        if (deals.length > 1 && (deals[1].distance - deals[0].distance <= 0.15)) {
                             setSelectedDeal(null);
                             setShowObjectPicker(true);
                         } else {
@@ -327,7 +328,7 @@ const DailyReportPage = () => {
 
                                         <div className="text-[10px] uppercase font-bold text-brand-dark/40 px-3 py-2 border-b border-brand-dark/5 mb-1 flex justify-between">
                                             <span>{searchTerm ? 'Результаты поиска:' : 'Ближайшие объекты:'}</span>
-                                            <span>{searchTerm ? 'Весь список' : `${nearestDeals.filter(d => d.distance <= 0.3).length} точек`}</span>
+                                            <span>{searchTerm ? 'Весь список' : `${nearestDeals.length} точек`}</span>
                                         </div>
                                         <div className="max-h-[320px] overflow-y-auto scrollbar-hide py-1">
                                             {(searchTerm 
@@ -349,7 +350,7 @@ const DailyReportPage = () => {
                                                     })
                                                     .sort((a, b) => a.distance - b.distance)
                                                     .slice(0, 15)
-                                                : nearestDeals.filter(deal => deal.distance <= 0.3 || deal === selectedDeal)
+                                                : nearestDeals // distance <= 0.7 уже отфильтровано в utils/bitrix.ts
                                             ).map(deal => (
                                                 <button
                                                     key={deal.id}
