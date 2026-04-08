@@ -50,7 +50,13 @@ const DailyReportPage = () => {
                     const deals = await getNearestDeal(coords.lat, coords.lng);
                     if (deals && deals.length > 0) {
                         setNearestDeals(deals);
-                        setSelectedDeal(deals[0]); // По умолчанию берем самый близкий
+                        // Если в 200 метрах есть несколько объектов - это ТРЦ или БЦ. Выбирать автоматически нельзя.
+                        if (deals.length > 1 && deals[1].distance <= 0.2) {
+                            setSelectedDeal(null);
+                            setShowObjectPicker(true);
+                        } else {
+                            setSelectedDeal(deals[0]);
+                        }
                     }
                     setIsFindingObject(false);
                 },
@@ -405,7 +411,8 @@ const DailyReportPage = () => {
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-2 mt-8">
+                {selectedDeal ? (
+                    <form onSubmit={handleSubmit} className="space-y-2 mt-8">
                     {renderRadioQuestion({ title: "На сколько быстро вы получаете обратную связь от куратора?", name: "feedbackSpeed", options: ['Быстро', 'Не быстро'] })}
                     {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет'] })}
                     {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1'] })}
@@ -442,6 +449,15 @@ const DailyReportPage = () => {
                         <Send size={18} />
                     </button>
                 </form>
+                ) : (
+                    location && !isFindingObject && (
+                        <div className="mt-8 p-6 md:p-10 text-center bg-brand-dark/5 rounded-[32px] border border-brand-dark/10 animate-fade-in-up">
+                            <MapPin className="mx-auto text-brand-dark/40 mb-4" size={32} />
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-brand-dark mb-2">ПОЖАЛУЙСТА, ВЫБЕРИТЕ ОБЪЕКТ</h3>
+                            <p className="text-xs text-brand-dark/60 font-medium max-w-xs mx-auto">Мы нашли несколько объектов по вашим координатам. Выберите из списка выше тот, который вы сейчас проверяете.</p>
+                        </div>
+                    )
+                )}
             </div>
         </div>
     );
