@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  },
+  "_npx": {
+    "packages": [
+      "qrcode"
+    ]
+  }
+}

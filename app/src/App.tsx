@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation, Link } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -9,23 +9,25 @@ import ClientsMarquee from './components/ClientsMarquee';
 import ProcessSection from './components/ProcessSection';
 import PhilosophySection from './components/PhilosophySection';
 import CasesSection from './components/CasesSection';
-import ServicesPage from './pages/ServicesPage';
-import CareersPage from './pages/CareersPage';
-import ContactsPage from './pages/ContactsPage';
-import NewsPage from './pages/NewsPage';
-import AdminPage from './pages/AdminPage';
-import SanitaryQuizPage from './pages/SanitaryQuizPage';
-import DailyReportPage from './pages/DailyReportPage';
-import AdminMapPage from './pages/AdminMapPage';
-import SeoLandingPage from './pages/SeoLandingPage';
-import InterviewPage from './pages/InterviewPage';
+
+// Lazy load pages for better performance
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const CareersPage = lazy(() => import('./pages/CareersPage'));
+const ContactsPage = lazy(() => import('./pages/ContactsPage'));
+const NewsPage = lazy(() => import('./pages/NewsPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const SanitaryQuizPage = lazy(() => import('./pages/SanitaryQuizPage'));
+const DailyReportPage = lazy(() => import('./pages/DailyReportPage'));
+const AdminMapPage = lazy(() => import('./pages/AdminMapPage'));
+const SeoLandingPage = lazy(() => import('./pages/SeoLandingPage'));
+const InterviewPage = lazy(() => import('./pages/InterviewPage'));
+
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
 import ScrollProgress from './components/ScrollProgress';
 import SeoHead from './components/SeoHead';
 import { getSeoLanding } from './data/seoLandings';
-import { useState } from 'react';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -59,26 +61,32 @@ function App() {
       <ScrollProgress />
       <ScrollToTop />
       {location.pathname !== '/admin' && <Navbar onCalcOpen={() => setCalcOpen(true)} />}
-      <Routes location={location}>
-        <Route path="/" element={<Home onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/services" element={<ServicesPage onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/careers" element={<CareersPage />} />
-        <Route path="/news" element={<NewsPage onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/contacts" element={<ContactsPage />} />
-        <Route path="/interview" element={<InterviewPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/map" element={<AdminMapPage />} />
-        <Route path="/training/sanitary" element={<SanitaryQuizPage />} />
-        <Route path="/reports/daily" element={<DailyReportPage />} />
-        <Route path="/kliningovaya-kompaniya-almaty" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-almaty')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/kliningovaya-kompaniya-astana" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-astana')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/klining-ofisov" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/generalnaya-uborka" element={<SeoLandingPage landing={getSeoLanding('/generalnaya-uborka')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/poslestroitelnaya-uborka" element={<SeoLandingPage landing={getSeoLanding('/poslestroitelnaya-uborka')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/moyka-vitrazhey" element={<SeoLandingPage landing={getSeoLanding('/moyka-vitrazhey')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/klining-ofisov-almaty" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov-almaty')!} onCalcOpen={() => setCalcOpen(true)} />} />
-        <Route path="/klining-ofisov-astana" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov-astana')!} onCalcOpen={() => setCalcOpen(true)} />} />
-      </Routes>
+      <Suspense fallback={
+        <div className="fixed inset-0 bg-white z-[999] flex items-center justify-center transition-opacity duration-500">
+          <div className="w-10 h-10 border-2 border-brand-green/20 border-t-brand-green rounded-full animate-spin" />
+        </div>
+      }>
+        <Routes location={location}>
+          <Route path="/" element={<Home onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/services" element={<ServicesPage onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/news" element={<NewsPage onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/contacts" element={<ContactsPage />} />
+          <Route path="/interview" element={<InterviewPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/map" element={<AdminMapPage />} />
+          <Route path="/training/sanitary" element={<SanitaryQuizPage />} />
+          <Route path="/reports/daily" element={<DailyReportPage />} />
+          <Route path="/kliningovaya-kompaniya-almaty" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-almaty')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/kliningovaya-kompaniya-astana" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-astana')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/klining-ofisov" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/generalnaya-uborka" element={<SeoLandingPage landing={getSeoLanding('/generalnaya-uborka')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/poslestroitelnaya-uborka" element={<SeoLandingPage landing={getSeoLanding('/poslestroitelnaya-uborka')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/moyka-vitrazhey" element={<SeoLandingPage landing={getSeoLanding('/moyka-vitrazhey')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/klining-ofisov-almaty" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov-almaty')!} onCalcOpen={() => setCalcOpen(true)} />} />
+          <Route path="/klining-ofisov-astana" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov-astana')!} onCalcOpen={() => setCalcOpen(true)} />} />
+        </Routes>
+      </Suspense>
       <AICalculator isOpen={isCalcOpen} onClose={() => setCalcOpen(false)} />
       <div className="noise-overlay" />
     </>
