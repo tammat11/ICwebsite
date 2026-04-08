@@ -1,4 +1,4 @@
-import { Instagram, Linkedin, ArrowUpRight, Facebook, MapPin, Phone, GraduationCap } from 'lucide-react';
+import { Instagram, Linkedin, ArrowUpRight, Facebook, MapPin, Phone, GraduationCap, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FooterProps {
@@ -100,6 +100,17 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                         <ArrowUpRight size={16} />
                                     </div>
                                     <span className="text-sm font-medium">Вакансии</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link 
+                                    to="/interview" 
+                                    className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-dark transition-all">
+                                        <FileText size={16} />
+                                    </div>
+                                    <span className="text-sm font-medium">Анкета кандидата</span>
                                 </Link>
                             </li>
                         </ul>

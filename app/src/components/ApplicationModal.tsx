@@ -10,12 +10,15 @@ interface ApplicationModalProps {
     category?: string;
 }
 
+const OFFICE_BITRIX_FORM_URL = 'https://b24-4x0blv.bitrix24.site/crm_form_gd8cz/';
+
 const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationModalProps) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const isOfficeCategory = category === 'Office';
 
     if (!isOpen) return null;
 
@@ -51,7 +54,7 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl p-8 max-w-2xl w-full relative">
+            <div className={`bg-white rounded-3xl p-8 w-full relative ${isOfficeCategory ? 'max-w-4xl' : 'max-w-2xl'}`}>
                 <button
                     onClick={onClose}
                     className="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
@@ -64,60 +67,75 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
                     <p className="text-brand-green font-bold mb-6">{position}</p>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Имя *</label>
-                        <input
-                            type="text"
-                            required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
-                            placeholder="Ваше имя"
-                        />
+                {isOfficeCategory ? (
+                    <div className="space-y-4">
+                        <p className="text-sm text-brand-dark/60 pr-12">
+                            Заполните форму и прикрепите резюме. Заявка сразу улетит в HR-воронку Bitrix с нужными полями.
+                        </p>
+                        <div className="rounded-2xl overflow-hidden border border-brand-dark/10 bg-brand-light/30">
+                            <iframe
+                                src={OFFICE_BITRIX_FORM_URL}
+                                title="Форма отправки резюме в офис"
+                                className="w-full h-[720px] bg-white"
+                            />
+                        </div>
                     </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold mb-2">Имя *</label>
+                            <input
+                                type="text"
+                                required
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
+                                placeholder="Ваше имя"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
-                            placeholder="your@email.com"
-                        />
-                    </div>
+                        <div>
+                            <label className="block text-sm font-bold mb-2">Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none"
+                                placeholder="your@email.com"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Телефон *</label>
-                        <input
-                            type="tel"
-                            required
-                            value={phone}
+                        <div>
+                            <label className="block text-sm font-bold mb-2">Телефон *</label>
+                            <input
+                                type="tel"
+                                required
+                                value={phone}
                                 onChange={(e) => setPhone(formatPhone(e.target.value))}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none font-bold"
-                            placeholder="+7 (XXX) XXX XX XX*"
-                        />
-                    </div>
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none font-bold"
+                                placeholder="+7 (XXX) XXX XX XX*"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Сопроводительное письмо</label>
-                        <textarea
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none h-32"
-                            placeholder="Расскажите о себе..."
-                        />
-                    </div>
+                        <div>
+                            <label className="block text-sm font-bold mb-2">Сопроводительное письмо</label>
+                            <textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-green focus:outline-none h-32"
+                                placeholder="Расскажите о себе..."
+                            />
+                        </div>
 
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`w-full bg-brand-green text-white py-4 rounded-xl font-bold hover:bg-brand-green/90 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    >
-                        {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={`w-full bg-brand-green text-white py-4 rounded-xl font-bold hover:bg-brand-green/90 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        >
+                            {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
+                        </button>
+                    </form>
+                )}
             </div>
         </div>
     );

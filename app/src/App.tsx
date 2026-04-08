@@ -18,6 +18,7 @@ import SanitaryQuizPage from './pages/SanitaryQuizPage';
 import DailyReportPage from './pages/DailyReportPage';
 import AdminMapPage from './pages/AdminMapPage';
 import SeoLandingPage from './pages/SeoLandingPage';
+import InterviewPage from './pages/InterviewPage';
 import Footer from './components/Footer';
 import ContactSection from './components/ContactSection';
 import AICalculator from './components/AICalculator';
@@ -64,6 +65,7 @@ function App() {
         <Route path="/careers" element={<CareersPage />} />
         <Route path="/news" element={<NewsPage onCalcOpen={() => setCalcOpen(true)} />} />
         <Route path="/contacts" element={<ContactsPage />} />
+        <Route path="/interview" element={<InterviewPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/map" element={<AdminMapPage />} />
         <Route path="/training/sanitary" element={<SanitaryQuizPage />} />
