@@ -19,6 +19,7 @@ export interface LeadData {
     contactId?: string | number;
     companyId?: string | number;
     extraFields?: Record<string, string | number | boolean>;
+    files?: File[];
 }
 
 
@@ -270,6 +271,17 @@ export const createDailyReportItem = async (data: LeadData) => {
             Object.entries(data.extraFields).forEach(([key, value]) => {
                 params.append(`fields[${key}]`, String(value));
             });
+        }
+
+        // Добавление фотографий (преобразование в base64 и маппинг)
+        if (data.files && data.files.length > 0) {
+            for (let i = 0; i < data.files.length; i++) {
+                const base64 = await fileToBase64(data.files[i]);
+                // Мы используем поле ufCrm105_1775556200000 для фото. 
+                // В Битриксе множественные поля файлов передаются как массив индексов.
+                params.append(`fields[ufCrm105_1775556200000][${i}][fileData][0]`, data.files[i].name);
+                params.append(`fields[ufCrm105_1775556200000][${i}][fileData][1]`, base64);
+            }
         }
 
         const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {

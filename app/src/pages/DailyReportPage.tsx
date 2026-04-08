@@ -23,8 +23,11 @@ const DailyReportPage = () => {
         cleaningRoomCondition: '',
         restroomCondition: '',
         softFurnitureCondition: '',
-        objectComment: ''
+        objectComment: '',
+        clientName: ''
     });
+
+    const [files, setFiles] = useState<File[]>([]);
 
     const [comments, setComments] = useState<Record<string, string>>({});
 
@@ -84,6 +87,8 @@ const DailyReportPage = () => {
 
     const isNegativeResponse = (name: string, value: string) => {
         if (!value) return false;
+        if (value === 'Нет клиента' || value === 'Не имеется') return false;
+
         const negativeValues = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме'];
         if (negativeValues.includes(value)) return true;
         
@@ -96,6 +101,7 @@ const DailyReportPage = () => {
     };
 
     const shouldShowComment = (name: string, value: string) => {
+        if (name === 'feedbackSpeed' && value && value !== 'Нет клиента') return true;
         return isNegativeResponse(name, value);
     };
 
@@ -159,8 +165,9 @@ const DailyReportPage = () => {
             }
 
             payloadString += `=========================\n` +
+                `Данные клиента: ${formData.clientName || 'Не указано'}\n` +
                 Object.entries(formData).map(([k, v]) => {
-                    if (k === 'objectComment') return '';
+                    if (k === 'objectComment' || k === 'clientName') return '';
                     const comment = comments[k] ? ` (Коммент: ${comments[k]})` : '';
                     const prettyName = questionNames[k] || k;
                     return `${prettyName}: ${v}${comment}`;
@@ -209,7 +216,8 @@ const DailyReportPage = () => {
                 assignedById: selectedDeal?.assignedById,
                 contactId: selectedDeal?.contactId,
                 companyId: selectedDeal?.companyId,
-                comments: payloadString
+                comments: payloadString,
+                files: files
             });
 
             setIsSubmitted(true);
@@ -414,21 +422,62 @@ const DailyReportPage = () => {
                     </div>
                 </div>
 
-                {selectedDeal ? (
-                    <form onSubmit={handleSubmit} className="space-y-2 mt-8">
-                    {renderRadioQuestion({ title: "На сколько быстро вы получаете обратную связь от куратора?", name: "feedbackSpeed", options: ['Быстро', 'Не быстро'] })}
-                    {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет'] })}
-                    {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1'] })}
-                    {renderRadioQuestion({ title: "Все ли вас устраивает в сроках и качестве предоставляемого моющих средств и РМ?", name: "suppliesQuality", options: ['Да', 'Нет'] })}
+                <div className="premium-card p-8 rounded-[32px] border border-black/5 mb-5">
+                    <label className="block text-sm font-bold text-brand-dark mb-4">Данные клиента / Кто прошел опросник</label>
+                    <input
+                        type="text"
+                        value={formData.clientName}
+                        onChange={(e) => updateField('clientName', e.target.value)}
+                        placeholder="ФИО и должность клиента"
+                        className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-bold"
+                    />
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-2 mt-2">
+                    {renderRadioQuestion({ title: "На сколько быстро вы получаете обратную связь от куратора?", name: "feedbackSpeed", options: ['Быстро', 'Не быстро', 'Нет клиента'] })}
+                    {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет', 'Нет клиента'] })}
+                    {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1', 'Нет клиента'] })}
+                    {renderRadioQuestion({ title: "Все ли вас устраивает в сроках и качестве предоставляемого моющих средств и РМ?", name: "suppliesQuality", options: ['Да', 'Нет', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "ОПУ на объекте находятся в форме?", name: "opuUniform", options: ['Да', 'Нет'] })}
                     {renderRadioQuestion({ title: "Состояние формы?", name: "uniformCondition", options: ['Хорошее', 'Не в нашей форме', 'Плохо'] })}
                     {renderRadioQuestion({ title: "Состояние инвентаря, оборудования, техники?", name: "equipmentCondition", options: ['3', '2', '1'] })}
                     {renderRadioQuestion({ title: "Качество уборки твердых покрытий?", name: "hardFloorQuality", options: ['3', '2', '1'] })}
                     {renderRadioQuestion({ title: "Качество протирки стеклянных и зеркальных поверхностей?", name: "glassMirrorQuality", options: ['3', '2', '1'] })}
-                    {renderRadioQuestion({ title: "Примерочные, осветительные приборы?", name: "fittingRoomsQuality", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Примерочные, осветительные приборы?", name: "fittingRoomsQuality", options: ['3', '2', '1', 'Не имеется'] })}
                     {renderRadioQuestion({ title: "Состояние помещения клининга?", name: "cleaningRoomCondition", options: ['3', '2', '1'] })}
-                    {renderRadioQuestion({ title: "Состояние санузлов?", name: "restroomCondition", options: ['3', '2', '1'] })}
-                    {renderRadioQuestion({ title: "Состояние мягкой мебели и ковровых покрытий?", name: "softFurnitureCondition", options: ['3', '2', '1'] })}
+                    {renderRadioQuestion({ title: "Состояние санузлов?", name: "restroomCondition", options: ['3', '2', '1', 'Не имеется'] })}
+                    {renderRadioQuestion({ title: "Состояние мягкой мебели и ковровых покрытий?", name: "softFurnitureCondition", options: ['3', '2', '1', 'Не имеется'] })}
+
+                    <div className="premium-card p-8 rounded-[32px] border border-black/5 mb-5">
+                        <label className="block text-sm font-bold text-brand-dark mb-4">Фото с объекта</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => {
+                                if (e.target.files) {
+                                    setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                                }
+                            }}
+                            className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:outline-none transition-all font-medium mb-4"
+                        />
+                        {files.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {files.map((file, i) => (
+                                    <div key={i} className="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden group">
+                                        <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" alt="" />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setFiles(prev => prev.filter((_, idx) => idx !== i))}
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="premium-card p-8 rounded-[32px] border border-black/5">
                         <label className="block text-sm font-bold text-brand-dark mb-4">Комментарий по объекту</label>
