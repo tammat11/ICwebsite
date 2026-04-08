@@ -260,8 +260,8 @@ export const createDailyReportItem = async (data: LeadData) => {
         const fields: Record<string, any> = {
             title: data.title,
             categoryId: '445',
-            // ФИО клиента (Лицо ИП)
-            ufCrm105_1757494287374: (data as any).clientName || '',
+            // ФИО клиента (Поле ФИО клиента)
+            ufCrm105_1775651155077: (data as any).clientName || '',
         };
         
         if (data.assignedById) fields.assignedById = data.assignedById;
