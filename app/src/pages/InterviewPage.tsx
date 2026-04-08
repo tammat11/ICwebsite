@@ -103,15 +103,9 @@ const InterviewPage = () => {
             
             <main className="max-w-3xl mx-auto px-6 pt-32 pb-32">
                 <div className="flex flex-col items-center text-center mb-16">
-                    <div className="mb-10 opacity-40 hover:opacity-100 transition-opacity">
-                        <img src="/logo_IC_group.png" alt="IC Group" className="h-8 md:h-10 w-auto object-contain grayscale" />
+                    <div className="mb-10 transition-opacity">
+                        <img src="/logo_IC_group.png" alt="IC Group" className="h-10 md:h-12 w-auto object-contain" />
                     </div>
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="inline-flex items-center gap-2 text-brand-dark/30 hover:text-brand-green transition-all font-black uppercase tracking-[0.3em] text-[10px] mb-12 group"
-                    >
-                        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Назад
-                    </button>
 
                     <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-black uppercase tracking-[0.2em] mb-6">
                         Карьера в офисе
