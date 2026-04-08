@@ -363,7 +363,7 @@ const DailyReportPage = () => {
                                                         setShowObjectPicker(false);
                                                         setSearchTerm('');
                                                     }}
-                                                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between mb-1 ${selectedDeal.id === deal.id ? 'bg-brand-green/10 text-brand-green' : 'hover:bg-brand-accent/30 text-brand-dark/60'}`}
+                                                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between mb-1 ${selectedDeal?.id === deal.id ? 'bg-brand-green/10 text-brand-green' : 'hover:bg-brand-accent/30 text-brand-dark/60'}`}
                                                 >
                                                     <div className="flex flex-col flex-1 min-w-0 pr-2">
                                                         <span className="text-[12px] leading-snug break-words">{deal.title}</span>
