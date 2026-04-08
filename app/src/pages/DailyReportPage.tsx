@@ -208,6 +208,9 @@ const DailyReportPage = () => {
                 'ufCrm105_1775555936016': comments.cleaningRoomCondition || '',
                 'ufCrm105_1775555989448': comments.restroomCondition || '',
                 'ufCrm105_1775556035238': comments.softFurnitureCondition || '',
+                // Координаты
+                'ufCrm105_1775650060': location?.lat || '',
+                'ufCrm105_1775650055': location?.lng || '',
             };
 
             await createDailyReportItem({
@@ -462,6 +465,7 @@ const DailyReportPage = () => {
                                 }
                             }}
                             className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:outline-none transition-all font-medium mb-4"
+                            aria-label="Прикрепить фотографии"
                         />
                         {files.length > 0 && (
                             <div className="flex flex-wrap gap-2">
