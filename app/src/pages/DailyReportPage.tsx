@@ -308,10 +308,13 @@ const DailyReportPage = () => {
                                         </button>
                                     )}
                                 </div>
+                            </div>
+                        )}
                                 
-                                {/* Список выбора */}
-                                {showObjectPicker && (
-                                    <div className="mt-2 bg-white border border-brand-dark/5 rounded-2xl p-2 shadow-premium animate-fade-in-up z-20 overflow-hidden">
+                        {/* Список выбора */}
+                        {showObjectPicker && (
+                            <div className="w-full">
+                                <div className="mt-2 bg-white border border-brand-dark/5 rounded-2xl p-2 shadow-premium animate-fade-in-up z-20 overflow-hidden">
                                         {/* Поиск */}
                                         <div className="p-2 border-b border-brand-dark/5 mb-1">
                                             <div className="relative">
@@ -382,9 +385,8 @@ const DailyReportPage = () => {
                                             )}
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                </div>
+                            )}
 
 
 
