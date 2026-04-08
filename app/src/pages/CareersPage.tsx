@@ -65,9 +65,9 @@ const CareersPage = () => {
                                     ))}
                                 </ul>
                             </div>
-                            <button onClick={() => openModal('Office')} className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-dark hover:!bg-brand-green hover:!text-white border-none py-4 text-xs font-bold uppercase tracking-wider">
+                            <Link to="/interview" className="btn-secondary w-full flex items-center justify-center gap-2 !bg-white !text-brand-dark hover:!bg-brand-green hover:!text-white border-none py-4 text-xs font-bold uppercase tracking-wider">
                                 Отправить резюме <ArrowUpRight size={16} />
-                            </button>
+                            </Link>
                         </div>
                     </div>
 

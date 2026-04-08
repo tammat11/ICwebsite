@@ -21,12 +21,6 @@ export interface LeadData {
     extraFields?: Record<string, string | number | boolean>;
 }
 
-interface HrCandidateData {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    resumeFile: File;
-}
 
 async function createContact(data: LeadData): Promise<number | null> {
     const params = new URLSearchParams();
@@ -114,26 +108,43 @@ const fileToBase64 = (file: File): Promise<string> =>
         reader.readAsDataURL(file);
     });
 
-export const createHrCandidate = async (data: HrCandidateData) => {
+export const createHrCandidate = async (data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    resumeFile?: File;
+    resumeFiles?: { name: string; content: string }[];
+}) => {
     try {
-        const base64File = await fileToBase64(data.resumeFile);
         const params = new URLSearchParams();
-
         params.append('entityTypeId', '1232');
         params.append('fields[title]', `Анкета кандидата: ${data.firstName} ${data.lastName}`);
         params.append('fields[categoryId]', '369');
         params.append('fields[stageId]', 'DT1232_369:NEW');
+        
+        // Маппинг полей
         params.append('fields[ufCrm119_1763461461473]', data.firstName);
         params.append('fields[ufCrm119_1763461467290]', data.lastName);
         params.append('fields[ufCrm119_1763461482839]', data.phone);
-        params.append('fields[ufCrm119_1763461489623][fileData][0]', data.resumeFile.name);
-        params.append('fields[ufCrm119_1763461489623][fileData][1]', base64File);
+
+        // Обработка одного файла (для совместимости)
+        if (data.resumeFile) {
+            const base64 = await fileToBase64(data.resumeFile);
+            params.append('fields[ufCrm119_1763461489623][fileData][0]', data.resumeFile.name);
+            params.append('fields[ufCrm119_1763461489623][fileData][1]', base64);
+        }
+
+        // Обработка нескольких файлов (если переданы уже в base64)
+        if (data.resumeFiles && data.resumeFiles.length > 0) {
+            data.resumeFiles.forEach((file, index) => {
+                params.append(`fields[ufCrm119_1763461489623][${index}][fileData][0]`, file.name);
+                params.append(`fields[ufCrm119_1763461489623][${index}][fileData][1]`, file.content);
+            });
+        }
 
         const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: params.toString(),
         });
 
