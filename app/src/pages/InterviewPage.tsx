@@ -119,10 +119,6 @@ const InterviewPage = () => {
                 </div>
 
                 <div className="relative">
-                    {/* Decorative blurs */}
-                    <div className="absolute -top-20 -right-20 w-96 h-96 bg-brand-green/10 rounded-full blur-[120px] pointer-events-none" />
-                    <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-brand-green/10 rounded-full blur-[120px] pointer-events-none" />
-                    
                     <div className="bg-white rounded-[56px] p-8 md:p-14 shadow-[0_40px_100px_rgba(0,0,0,0.04)] border border-black/[0.03] relative z-10 transition-all">
                         <form onSubmit={handleSubmit} className="space-y-10">
                             <div className="space-y-3">
