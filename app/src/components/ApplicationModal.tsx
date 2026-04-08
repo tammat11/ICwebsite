@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { X } from 'lucide-react';
+import { useState } from 'react';
 import { createBitrixLead } from '../utils/bitrix';
 import { formatPhone } from '../utils/phone';
+import CandidateForm from './CandidateForm';
 
 interface ApplicationModalProps {
     isOpen: boolean;
@@ -9,8 +10,6 @@ interface ApplicationModalProps {
     position?: string;
     category?: string;
 }
-
-const OFFICE_BITRIX_FORM_URL = 'https://b24-4x0blv.bitrix24.site/crm_form_gd8cz/';
 
 const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationModalProps) => {
     const [name, setName] = useState('');
@@ -72,13 +71,7 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
                         <p className="text-sm text-brand-dark/60 pr-12">
                             Заполните форму и прикрепите резюме. Заявка сразу улетит в HR-воронку Bitrix с нужными полями.
                         </p>
-                        <div className="rounded-2xl overflow-hidden border border-brand-dark/10 bg-brand-light/30">
-                            <iframe
-                                src={OFFICE_BITRIX_FORM_URL}
-                                title="Форма отправки резюме в офис"
-                                className="w-full h-[720px] bg-white"
-                            />
-                        </div>
+                        <CandidateForm compact />
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">

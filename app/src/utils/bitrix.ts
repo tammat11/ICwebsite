@@ -21,6 +21,13 @@ export interface LeadData {
     extraFields?: Record<string, string | number | boolean>;
 }
 
+interface HrCandidateData {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    resumeFile: File;
+}
+
 async function createContact(data: LeadData): Promise<number | null> {
     const params = new URLSearchParams();
     params.append('fields[NAME]', data.name || 'Клиент');
@@ -84,6 +91,63 @@ export const createBitrixLead = async (data: LeadData) => {
         return result;
     } catch (error) {
         console.error('Error creating Bitrix deal:', error);
+        throw error;
+    }
+};
+
+const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            const result = reader.result;
+            if (typeof result !== 'string') {
+                reject(new Error('Failed to read file as base64'));
+                return;
+            }
+
+            const [, base64 = ''] = result.split(',');
+            resolve(base64);
+        };
+
+        reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+    });
+
+export const createHrCandidate = async (data: HrCandidateData) => {
+    try {
+        const base64File = await fileToBase64(data.resumeFile);
+        const params = new URLSearchParams();
+
+        params.append('entityTypeId', '1232');
+        params.append('fields[title]', `Анкета кандидата: ${data.firstName} ${data.lastName}`);
+        params.append('fields[categoryId]', '369');
+        params.append('fields[stageId]', 'DT1232_369:NEW');
+        params.append('fields[ufCrm119_1763461461473]', data.firstName);
+        params.append('fields[ufCrm119_1763461467290]', data.lastName);
+        params.append('fields[ufCrm119_1763461482839]', data.phone);
+        params.append('fields[ufCrm119_1763461489623][fileData][0]', data.resumeFile.name);
+        params.append('fields[ufCrm119_1763461489623][fileData][1]', base64File);
+
+        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString(),
+        });
+
+        const result = await response.json();
+        console.log('Bitrix HR candidate response:', result);
+
+        if (result.error) {
+            console.error('Bitrix HR candidate error:', result.error_description || result.error);
+            throw new Error(result.error_description || result.error);
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error creating Bitrix HR candidate item:', error);
         throw error;
     }
 };
@@ -368,4 +432,4 @@ export const getAllDealsWithCoords = async () => {
     }
 };
 
-export default { createBitrixLead, createDailyReportItem, getNearestDeal, getAllDealsWithCoords };
+export default { createBitrixLead, createHrCandidate, createDailyReportItem, getNearestDeal, getAllDealsWithCoords };

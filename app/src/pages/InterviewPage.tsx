@@ -1,9 +1,8 @@
 import { ArrowUpRight, Briefcase, FileText, PhoneCall } from 'lucide-react';
+import CandidateForm from '../components/CandidateForm';
 import Footer from '../components/Footer';
 import SeoHead from '../components/SeoHead';
 import { useInView } from '../hooks/useInView';
-
-const INTERVIEW_FORM_URL = 'https://b24-4x0blv.bitrix24.site/crm_form_gd8cz/';
 
 const InterviewPage = () => {
     const [rootRef, inView] = useInView();
@@ -110,12 +109,33 @@ const InterviewPage = () => {
 
                 <section className="max-w-7xl mx-auto mt-14 md:mt-20">
                     <div className="rounded-[40px] bg-brand-dark p-3 md:p-4 shadow-[0_26px_80px_rgba(0,0,0,0.18)] reveal-on-scroll">
-                        <div className="rounded-[32px] overflow-hidden border border-white/10 bg-white">
-                            <iframe
-                                src={INTERVIEW_FORM_URL}
-                                title="Опросник кандидата IC Group"
-                                className="w-full h-[860px] md:h-[980px] bg-white"
-                            />
+                        <div className="grid gap-8 rounded-[32px] border border-white/10 bg-white p-5 md:grid-cols-[0.9fr_1.1fr] md:p-8">
+                            <div className="rounded-[28px] bg-[#f7f8f4] p-6 md:p-8">
+                                <div className="text-[10px] uppercase tracking-[0.24em] text-brand-green font-black">Перед отправкой</div>
+                                <h2 className="mt-4 text-2xl md:text-4xl font-bold tracking-tight text-brand-dark">
+                                    Подготовьте резюме и нормальный номер для связи
+                                </h2>
+                                <p className="mt-4 text-sm md:text-base leading-relaxed text-brand-dark/60">
+                                    Мы специально убрали встроенную битриксовую коробку и сделали свою форму, чтобы страница выглядела как часть сайта, а не как прилепленный инородный кусок.
+                                </p>
+
+                                <div className="mt-8 space-y-3">
+                                    {[
+                                        'Имя и фамилия уходят в отдельные поля HR-процесса.',
+                                        'Телефон сохраняется в карточке кандидата для быстрого контакта.',
+                                        'Файл резюме прикрепляется прямо в поле Bitrix.',
+                                    ].map((item) => (
+                                        <div key={item} className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-brand-dark/70 shadow-sm">
+                                            <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                                            <span>{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <CandidateForm />
+                            </div>
                         </div>
                     </div>
                 </section>
