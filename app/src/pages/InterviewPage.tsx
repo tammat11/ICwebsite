@@ -103,8 +103,8 @@ const InterviewPage = () => {
             
             <main className="max-w-3xl mx-auto px-6 pt-32 pb-32">
                 <div className="flex flex-col items-center text-center mb-16">
-                    <div className="mb-10 transition-opacity">
-                        <img src="/logo_IC_group.png" alt="IC Group" className="h-10 md:h-12 w-auto object-contain" />
+                    <div className="mb-12 transition-opacity">
+                        <img src="/logo_IC_group.png" alt="IC Group" className="h-16 md:h-20 w-auto object-contain" />
                     </div>
 
                     <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-black uppercase tracking-[0.2em] mb-6">
