@@ -103,6 +103,9 @@ const InterviewPage = () => {
             
             <main className="max-w-3xl mx-auto px-6 pt-32 pb-32">
                 <div className="flex flex-col items-center text-center mb-16">
+                    <div className="mb-10 opacity-40 hover:opacity-100 transition-opacity">
+                        <img src="/logo_IC_group.png" alt="IC Group" className="h-8 md:h-10 w-auto object-contain grayscale" />
+                    </div>
                     <button 
                         onClick={() => navigate(-1)}
                         className="inline-flex items-center gap-2 text-brand-dark/30 hover:text-brand-green transition-all font-black uppercase tracking-[0.3em] text-[10px] mb-12 group"
@@ -113,7 +116,7 @@ const InterviewPage = () => {
                     <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-black uppercase tracking-[0.2em] mb-6">
                         Карьера в офисе
                     </span>
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-brand-dark uppercase leading-[0.9] mb-8 max-w-2xl text-balance">
+                    <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-brand-dark uppercase leading-[0.9] mb-8 max-w-2xl text-balance">
                         Станьте <span className="text-brand-green">частью</span> команды
                     </h1>
                     <p className="text-lg md:text-xl text-brand-dark/40 font-medium leading-relaxed max-w-xl">
