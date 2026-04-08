@@ -202,7 +202,7 @@
     "contactId": null,
     "companyId": "1263",
     "assignedById": "207",
-    "city": "",
+    "city": null,
     "address": "2807355",
     "ipName": "2348467",
     "ipResp": "2362023"
@@ -364,19 +364,6 @@
     "ipResp": "3902897"
   },
   {
-    "id": "690155",
-    "title": "AV trading ТОО",
-    "lat": 43.302525,
-    "lng": 77.007934,
-    "contactId": "0",
-    "companyId": "1643",
-    "assignedById": "1093",
-    "city": "1091",
-    "address": "4016765",
-    "ipName": "2348471",
-    "ipResp": ""
-  },
-  {
     "id": "690189",
     "title": "HOMMES ТОО",
     "lat": 43.228256,
@@ -387,7 +374,7 @@
     "city": "1091",
     "address": "4016767",
     "ipName": "2348463",
-    "ipResp": ""
+    "ipResp": null
   },
   {
     "id": "693193",
@@ -423,10 +410,10 @@
     "contactId": "0",
     "companyId": "133",
     "assignedById": "55",
-    "city": "",
-    "address": "",
+    "city": null,
+    "address": null,
     "ipName": "2643735",
-    "ipResp": ""
+    "ipResp": null
   },
   {
     "id": "115589",
@@ -570,6 +557,45 @@
     "address": "2583837",
     "ipName": "2348423",
     "ipResp": "2362007"
+  },
+  {
+    "id": "145073",
+    "title": "ForteBank АО Семей, ул.Кайым Мухамеханов 15А (Архив Панфилова)",
+    "lat": 50.406245,
+    "lng": 80.249433,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1119",
+    "address": "2583839",
+    "ipName": "2348455",
+    "ipResp": "2362011"
+  },
+  {
+    "id": "145075",
+    "title": "ForteBank АО ул.Бегалина 15",
+    "lat": 50.434551,
+    "lng": 80.24849,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1119",
+    "address": "2583841",
+    "ipName": "2348455",
+    "ipResp": "2362011"
+  },
+  {
+    "id": "145077",
+    "title": "ForteBank АО пр.Ауезова 40Б",
+    "lat": 50.38725,
+    "lng": 80.235599,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1119",
+    "address": "2583843",
+    "ipName": "2348455",
+    "ipResp": "2362011"
   },
   {
     "id": "145097",
@@ -752,6 +778,58 @@
     "address": "2582163",
     "ipName": "2348423",
     "ipResp": "2362007"
+  },
+  {
+    "id": "145137",
+    "title": "ForteBank АО ул.Казыбек би 161",
+    "lat": 42.897352,
+    "lng": 71.36452,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1103",
+    "address": "2582393",
+    "ipName": "2348449",
+    "ipResp": "2362019"
+  },
+  {
+    "id": "145139",
+    "title": "ForteBank АО пр. Жамбыла 186(архив)",
+    "lat": 42.896355,
+    "lng": 71.359795,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1103",
+    "address": "2582395",
+    "ipName": "2348449",
+    "ipResp": "2362019"
+  },
+  {
+    "id": "145141",
+    "title": "ForteBank АО м-н Самал, д.29",
+    "lat": 42.88109,
+    "lng": 71.340472,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1103",
+    "address": "2582397",
+    "ipName": "2348449",
+    "ipResp": "2362019"
+  },
+  {
+    "id": "145143",
+    "title": "ForteBank АО м-н Самал, д.29 НПВЗ, 7 мкр",
+    "lat": 42.881121,
+    "lng": 71.340587,
+    "contactId": null,
+    "companyId": "59",
+    "assignedById": "57",
+    "city": "1103",
+    "address": "2584775",
+    "ipName": "2348449",
+    "ipResp": "2362019"
   },
   {
     "id": "145145",
@@ -2548,6 +2626,19 @@
     "ipResp": "3849905"
   },
   {
+    "id": "145925",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО ТЦ Batyr Mall, ул. Камзина 67/1",
+    "lat": 52.274597,
+    "lng": 76.989998,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1117",
+    "address": "2583301",
+    "ipName": "2348441",
+    "ipResp": "2362005"
+  },
+  {
     "id": "145927",
     "title": "ForteBank АО ул.Сутюшева 21",
     "lat": 54.868803,
@@ -3196,6 +3287,19 @@
     "address": "2582081",
     "ipName": "2348423",
     "ipResp": "2362007"
+  },
+  {
+    "id": "146085",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0009, ТРЦ “Mart”, ул. Толе би 27,",
+    "lat": 42.900488,
+    "lng": 71.389245,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1103",
+    "address": "2583303",
+    "ipName": "2348449",
+    "ipResp": "2362019"
   },
   {
     "id": "146091",
@@ -3913,6 +4017,19 @@
     "ipResp": "2362029"
   },
   {
+    "id": "146305",
+    "title": "Agro Land Co ТОО Mall APORT Ташкентский тракт",
+    "lat": 43.233971,
+    "lng": 76.799426,
+    "contactId": null,
+    "companyId": "217",
+    "assignedById": "71",
+    "city": "1091",
+    "address": "2582229",
+    "ipName": "2348425",
+    "ipResp": "2361997"
+  },
+  {
     "id": "146307",
     "title": "Defacto Retail Store Kz TOO (Дефакто Ретейл Стор К Апорт Молл",
     "lat": 43.266752,
@@ -3935,6 +4052,19 @@
     "assignedById": "55",
     "city": "1091",
     "address": "2582107",
+    "ipName": "2348425",
+    "ipResp": "2361997"
+  },
+  {
+    "id": "146325",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0006, ТРK “Молл Апорт”, пр. Райымбека",
+    "lat": 43.256916,
+    "lng": 76.866072,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1091",
+    "address": "2583297",
     "ipName": "2348425",
     "ipResp": "2361997"
   },
@@ -3965,6 +4095,19 @@
     "ipResp": "2362003"
   },
   {
+    "id": "146359",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0001, ТРЦ “MEGA Alma-Ata”, улица Розыбакиева 247A",
+    "lat": 43.202442,
+    "lng": 76.89221,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1091",
+    "address": "2583293",
+    "ipName": "2348427",
+    "ipResp": "2362021"
+  },
+  {
     "id": "146367",
     "title": "Defacto Retail Store Kz TOO (Дефакто Ретейл Стор К ул.Макатаева 127/1, ТРЦ «Мега Парк»",
     "lat": 43.264209,
@@ -3989,6 +4132,19 @@
     "address": "2583033",
     "ipName": "3358597",
     "ipResp": "2362033"
+  },
+  {
+    "id": "146407",
+    "title": "\"Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0003, ТРК “MEGA",
+    "lat": 43.200641,
+    "lng": 76.89074,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1091",
+    "address": "2807457",
+    "ipName": "3144915",
+    "ipResp": "3144937"
   },
   {
     "id": "146421",
@@ -4249,6 +4405,32 @@
     "address": "2583077",
     "ipName": "2348499",
     "ipResp": "2362003"
+  },
+  {
+    "id": "146573",
+    "title": "Мэри Кэй (Казахстан) ТОО пр. Достык, зд. № 210, БЦ \"Koktem Grand\", Блок 2, 8 эт",
+    "lat": 43.227547,
+    "lng": 76.919684,
+    "contactId": null,
+    "companyId": "69",
+    "assignedById": "1093",
+    "city": "1091",
+    "address": "2583257",
+    "ipName": "2348485",
+    "ipResp": "2361995"
+  },
+  {
+    "id": "146577",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0007, ТРK “Forum”, ?пр. Сейфуллина 617",
+    "lat": 43.233911,
+    "lng": 76.935537,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1091",
+    "address": "2583299",
+    "ipName": "2348485",
+    "ipResp": "2361995"
   },
   {
     "id": "146579",
@@ -4641,6 +4823,19 @@
     "ipResp": "2361999"
   },
   {
+    "id": "146795",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО Mega Silk Way просп. Кабанбай Батыра 62",
+    "lat": 51.088968,
+    "lng": 71.406912,
+    "contactId": null,
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1089",
+    "address": "2583291",
+    "ipName": "2348459",
+    "ipResp": "2361999"
+  },
+  {
     "id": "146813",
     "title": "Centras Brands ТОО Манаса 32 А,БЦ SAT 3 этаж",
     "lat": 43.236407,
@@ -4845,6 +5040,19 @@
     "assignedById": "1093",
     "city": "1091",
     "address": "2585437",
+    "ipName": "2348481",
+    "ipResp": "2362027"
+  },
+  {
+    "id": "146879",
+    "title": "Сентрас Секьюритиз АО ул.Манаса 32 А БЦ SAT",
+    "lat": 43.23623,
+    "lng": 76.90967,
+    "contactId": null,
+    "companyId": "95",
+    "assignedById": "1093",
+    "city": "1091",
+    "address": "2583267",
     "ipName": "2348481",
     "ipResp": "2362027"
   },
@@ -5291,6 +5499,19 @@
     "ipResp": "2362027"
   },
   {
+    "id": "147167",
+    "title": "Евразийский банк АО г.Алматы, Кунаева,56 ГБ (кофе леди)",
+    "lat": 43.263822,
+    "lng": 76.949489,
+    "contactId": null,
+    "companyId": "287",
+    "assignedById": "57",
+    "city": "1091",
+    "address": "2582445",
+    "ipName": "2348433",
+    "ipResp": "2362029"
+  },
+  {
     "id": "147169",
     "title": "Евразийский банк АО Отделение №624, Кунаева 56(cантехник)",
     "lat": 43.2602,
@@ -5313,6 +5534,19 @@
     "assignedById": "57",
     "city": "1091",
     "address": "2584735",
+    "ipName": "2348433",
+    "ipResp": "2362029"
+  },
+  {
+    "id": "147457",
+    "title": "Евразийский банк АО г.Алматы, Кунаева,56 ГБ плотник",
+    "lat": 43.263823,
+    "lng": 76.94949,
+    "contactId": null,
+    "companyId": "287",
+    "assignedById": "57",
+    "city": "1091",
+    "address": "2584859",
     "ipName": "2348433",
     "ipResp": "2362029"
   },
@@ -5460,6 +5694,97 @@
     "ipResp": "2361995"
   },
   {
+    "id": "225561",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы, Ташкентский тракт 17К, ТРЦ Mall Aport,Reserved",
+    "lat": 43.3392,
+    "lng": 76.9398,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "2585391",
+    "ipName": "2348425",
+    "ipResp": "2361997"
+  },
+  {
+    "id": "225567",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы, Ташкентский тракт 17К, ТРЦ Mall Aport,Sinsay",
+    "lat": 43.3392,
+    "lng": 76.9398,
+    "contactId": "1927",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "2585393",
+    "ipName": "2348425",
+    "ipResp": "2361997"
+  },
+  {
+    "id": "225621",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы,мкр-н Мамыр 1, д. 8А,ТРЦ \"Sputnik Mall\"Sinsay",
+    "lat": 43.222,
+    "lng": 76.877,
+    "contactId": "1943",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "2585397",
+    "ipName": "3358597",
+    "ipResp": "2362033"
+  },
+  {
+    "id": "225623",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Астана,ул. Саганык 60/5,ТРЦ \"Abu Dhabi Plaza\"Reserved",
+    "lat": 51.1285,
+    "lng": 71.4304,
+    "contactId": "1941",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1089",
+    "address": "2585399",
+    "ipName": "2348459",
+    "ipResp": "2361999"
+  },
+  {
+    "id": "225625",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Астана, ул. Жансугурова 8, ТРЦ «Aruzhan»,Sinsay",
+    "lat": 51.1695,
+    "lng": 71.403,
+    "contactId": "1935",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1089",
+    "address": "2585401",
+    "ipName": "2348431",
+    "ipResp": "2362031"
+  },
+  {
+    "id": "225627",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Усть-Каменогорск, ул. Казахстан 62, ТРЦ «ADK River»,Sinsay",
+    "lat": 42.319621,
+    "lng": 69.596249,
+    "contactId": "1933",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1113",
+    "address": "2585403",
+    "ipName": "2348455",
+    "ipResp": "2362011"
+  },
+  {
+    "id": "225629",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Костанай,пр. Назарбаева 193 а,ТРЦ «Kostanay Plaza»Sinsay",
+    "lat": 53.236135,
+    "lng": 63.613916,
+    "contactId": "1931",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1111",
+    "address": "2585405",
+    "ipName": "2348423",
+    "ipResp": "2362007"
+  },
+  {
     "id": "225909",
     "title": "Эраунд Групп ТОО ТРЦ Dostyk Plaza",
     "lat": 43.233488,
@@ -5510,6 +5835,19 @@
     "address": "2807427",
     "ipName": "2348485",
     "ipResp": "2361995"
+  },
+  {
+    "id": "225931",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы, ул.Сатпаева 90В, ТРЦ ADK,Sinsay",
+    "lat": 43.222,
+    "lng": 76.877,
+    "contactId": "1929",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "2585395",
+    "ipName": "2348499",
+    "ipResp": "2362003"
   },
   {
     "id": "230373",
@@ -5772,6 +6110,19 @@
     "ipResp": "2362029"
   },
   {
+    "id": "285261",
+    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан KZ0008, ТРЦ “Keruen City”, ул. Макатаева 4, Актобе, Казахстан",
+    "lat": 50.288868,
+    "lng": 57.193507,
+    "contactId": "239",
+    "companyId": "169",
+    "assignedById": "55",
+    "city": "1095",
+    "address": "2807389",
+    "ipName": "2348451",
+    "ipResp": "2361991"
+  },
+  {
     "id": "285265",
     "title": "Эраунд Групп ТОО ТРЦ Спутник",
     "lat": 43.237156,
@@ -5876,6 +6227,58 @@
     "ipResp": "2362007"
   },
   {
+    "id": "350895",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Караганда, ул. 134-й учетный квартал, 921 Ташкентский тракт 17к,ТРЦ «Global City»,Sinsay",
+    "lat": 49.806586,
+    "lng": 73.15241,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1109",
+    "address": "2807353",
+    "ipName": "2348443",
+    "ipResp": "3849905"
+  },
+  {
+    "id": "350897",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Караганда, ул. Бухар жырау 86, ТРЦ «Grand Store»,Sinsay",
+    "lat": 49.789735,
+    "lng": 73.104565,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1109",
+    "address": "2807351",
+    "ipName": "2348443",
+    "ipResp": "3849905"
+  },
+  {
+    "id": "350899",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Павлодар, ул. Камзина67/1, ТРЦ «Батыр Молл»,Sinsay",
+    "lat": 52.274925,
+    "lng": 76.99054,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1117",
+    "address": "2807349",
+    "ipName": "2348441",
+    "ipResp": "2362005"
+  },
+  {
+    "id": "350901",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Тараз, ул. Толе би 27, ТРЦ «Mart»,Sinsay",
+    "lat": 42.900056,
+    "lng": 71.389056,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1103",
+    "address": "2807347",
+    "ipName": "2348449",
+    "ipResp": "2362019"
+  },
+  {
     "id": "350907",
     "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г.Алматы,ул.Кажымукана ,д.22/5,БЦ Хан-Тенгри,4 этаж",
     "lat": 43.223763,
@@ -5900,6 +6303,19 @@
     "address": "2650133",
     "ipName": "3144915",
     "ipResp": "3144937"
+  },
+  {
+    "id": "373745",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Астана , ш.Алаш, ТРЦ «Central Market»,Sinsay",
+    "lat": 51.196152,
+    "lng": 71.465697,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1089",
+    "address": "2586113",
+    "ipName": "2348431",
+    "ipResp": "2362031"
   },
   {
     "id": "373843",
@@ -5963,6 +6379,19 @@
     "assignedById": "55",
     "city": "1097",
     "address": "2953877",
+    "ipName": "2348423",
+    "ipResp": "2362007"
+  },
+  {
+    "id": "457867",
+    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Актау. ТРЦ \"Saya park\"Sinsay",
+    "lat": 43.640278,
+    "lng": 51.1575,
+    "contactId": "1833",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1093",
+    "address": "2958805",
     "ipName": "2348423",
     "ipResp": "2362007"
   },
@@ -6136,6 +6565,71 @@
     "ipResp": "2361997"
   },
   {
+    "id": "561493",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Sinsay Экибастуз Макси Молл",
+    "lat": 51.702255,
+    "lng": 75.308708,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1129",
+    "address": "3729003",
+    "ipName": "2348443",
+    "ipResp": "3849905"
+  },
+  {
+    "id": "561495",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Sinsay Актобе Далида Центр",
+    "lat": 50.300377,
+    "lng": 57.154555,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1095",
+    "address": "3729005",
+    "ipName": "2348451",
+    "ipResp": "2361991"
+  },
+  {
+    "id": "561497",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Sinsay Алматы Мерей",
+    "lat": 43.237659,
+    "lng": 76.945241,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "3729007",
+    "ipName": "3358597",
+    "ipResp": "2362033"
+  },
+  {
+    "id": "561499",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО «Sinsay» в ТРЦ «Актобе Молл»",
+    "lat": 50.291901,
+    "lng": 57.145366,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1095",
+    "address": "3729009",
+    "ipName": "2348451",
+    "ipResp": "2361991"
+  },
+  {
+    "id": "561501",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Магазин «Sinsay» в ТРЦ «Асем»",
+    "lat": 51.116651,
+    "lng": 71.402599,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1089",
+    "address": "3729011",
+    "ipName": "2348431",
+    "ipResp": "2362031"
+  },
+  {
     "id": "572559",
     "title": "Kaspi Bank АО, ул. Гастелло 18 (склад УСФС)",
     "lat": 49.819094,
@@ -6147,6 +6641,32 @@
     "address": "2807523",
     "ipName": "2348443",
     "ipResp": "3849905"
+  },
+  {
+    "id": "572561",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Магазин «Sinsay», ТРЦ «Maxi Mall», Сатпаева 51",
+    "lat": 49.919538,
+    "lng": 82.628127,
+    "contactId": "1927",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1113",
+    "address": "3780677",
+    "ipName": "2348455",
+    "ipResp": "2362011"
+  },
+  {
+    "id": "572565",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Магазин «Reserved»  , ТРЦ «Maxi Mall», Сатпаева 51",
+    "lat": 49.919375,
+    "lng": 82.627888,
+    "contactId": "1943",
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1113",
+    "address": "3780679",
+    "ipName": "2348455",
+    "ipResp": "2362011"
   },
   {
     "id": "572881",
@@ -6173,6 +6693,19 @@
     "address": "3786493",
     "ipName": "2348483",
     "ipResp": "2362023"
+  },
+  {
+    "id": "583241",
+    "title": "Магазин «Sinsay» в ТРЦ «Кокшетау Молл» , мкр. Центральный 24 Г",
+    "lat": 53.303339,
+    "lng": 69.387678,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1125",
+    "address": "3877879",
+    "ipName": "2348505",
+    "ipResp": "2362013"
   },
   {
     "id": "589393",
@@ -6786,6 +7319,58 @@
     "ipResp": "2362009"
   },
   {
+    "id": "646683",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" в ТРЦ \"Кокшетау РИО\", ул.Жунусова 7",
+    "lat": 53.293727,
+    "lng": 69.381848,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1125",
+    "address": "3959991",
+    "ipName": "2348505",
+    "ipResp": "2362013"
+  },
+  {
+    "id": "646685",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" , Кульджинский тракт 106",
+    "lat": 43.314602,
+    "lng": 77.02409,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "3959993",
+    "ipName": "2348471",
+    "ipResp": "2362025"
+  },
+  {
+    "id": "646687",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" , мкр.Нуршуак 1256",
+    "lat": 42.379674,
+    "lng": 69.52984,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1101",
+    "address": "3959995",
+    "ipName": "3278569",
+    "ipResp": "3421309"
+  },
+  {
+    "id": "646689",
+    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" , Абая 101",
+    "lat": 51.220155,
+    "lng": 51.389336,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1107",
+    "address": "3959997",
+    "ipName": "2348423",
+    "ipResp": "2362007"
+  },
+  {
     "id": "652719",
     "title": "Магазин \"MECHTA\" прилегающая тер-ия на Розыбакиева",
     "lat": 43.19844,
@@ -7397,6 +7982,149 @@
     "ipResp": "2362033"
   },
   {
+    "id": "702461",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Актобе, магазин \"Sinsey\" , «Dalida City», ул. Молдагуловой 72А",
+    "lat": 50.274299,
+    "lng": 57.113717,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1095",
+    "address": "4017191",
+    "ipName": "2348451",
+    "ipResp": "2361991"
+  },
+  {
+    "id": "702463",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Семей, , магазин \"Sinsey\" , ТРЦ Аргымак",
+    "lat": 50.404976,
+    "lng": 80.249235,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1119",
+    "address": "4017193",
+    "ipName": "2348455",
+    "ipResp": "2362011"
+  },
+  {
+    "id": "702465",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Mart Village",
+    "lat": 43.237878,
+    "lng": 76.945729,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "4017195",
+    "ipName": "3358597",
+    "ipResp": "2362033"
+  },
+  {
+    "id": "702467",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Уральск, магазин \"Sinsey\" , ТРЦ Asia Mall",
+    "lat": 51.20403,
+    "lng": 51.370528,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1107",
+    "address": "4017197",
+    "ipName": "2348423",
+    "ipResp": "2362007"
+  },
+  {
+    "id": "702469",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Жанаозен, магазин \"Sinsey\" , Оркен зд 1",
+    "lat": 43.336446,
+    "lng": 52.855953,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1123",
+    "address": "4017199",
+    "ipName": "2348423",
+    "ipResp": "2362007"
+  },
+  {
+    "id": "702471",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Туркестан, магазин \"Sinsey\" , ТРЦ Караван Сарай, Саттарханова",
+    "lat": 43.286336,
+    "lng": 68.303978,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1105",
+    "address": "4017201",
+    "ipName": "2348453",
+    "ipResp": "2362015"
+  },
+  {
+    "id": "702473",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Павлодар, магазин \"Sinsey\" , ТРЦ Orange",
+    "lat": 52.285588,
+    "lng": 76.941081,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1117",
+    "address": "4017203",
+    "ipName": "2348441",
+    "ipResp": "2362005"
+  },
+  {
+    "id": "702475",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Silk Way City",
+    "lat": 43.254736,
+    "lng": 76.936922,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "4017205",
+    "ipName": "2348487",
+    "ipResp": "2361989"
+  },
+  {
+    "id": "702477",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Атакент Молл",
+    "lat": 43.23765,
+    "lng": 76.94628,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "4017207",
+    "ipName": "2348433",
+    "ipResp": "2362029"
+  },
+  {
+    "id": "702479",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Asia Park, Райымбека 514а",
+    "lat": 43.244538,
+    "lng": 76.836093,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1091",
+    "address": "4017209",
+    "ipName": "3358597",
+    "ipResp": "2362033"
+  },
+  {
+    "id": "702481",
+    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Астана, магазин \"Sinsey\" , ТРЦ Жаннур",
+    "lat": 51.169413,
+    "lng": 71.440544,
+    "contactId": null,
+    "companyId": "117",
+    "assignedById": "491",
+    "city": "1089",
+    "address": "4017211",
+    "ipName": "2348431",
+    "ipResp": "2362031"
+  },
+  {
     "id": "702505",
     "title": "TOO \"BI Service\", г.Алматы, Тимирязева 28Б",
     "lat": 43.225658,
@@ -7735,45 +8463,6 @@
     "ipResp": "3849905"
   },
   {
-    "id": "145073",
-    "title": "ForteBank АО Семей, ул.Кайым Мухамеханов 15А (Архив Панфилова)",
-    "lat": 50.406245,
-    "lng": 80.249433,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1119",
-    "address": "2583839",
-    "ipName": "2348455",
-    "ipResp": "2362011"
-  },
-  {
-    "id": "145075",
-    "title": "ForteBank АО ул.Бегалина 15",
-    "lat": 50.434551,
-    "lng": 80.24849,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1119",
-    "address": "2583841",
-    "ipName": "2348455",
-    "ipResp": "2362011"
-  },
-  {
-    "id": "145077",
-    "title": "ForteBank АО пр.Ауезова 40Б",
-    "lat": 50.38725,
-    "lng": 80.235599,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1119",
-    "address": "2583843",
-    "ipName": "2348455",
-    "ipResp": "2362011"
-  },
-  {
     "id": "145081",
     "title": "БРИТИШ АМЕРИКАН ТОБАККО КАЗАХСТАН ТРЕЙДИНГ ТОО ул.Кульманова 111/A",
     "lat": 47.108713,
@@ -7915,58 +8604,6 @@
     "address": "2582347",
     "ipName": "2348423",
     "ipResp": "2362007"
-  },
-  {
-    "id": "145137",
-    "title": "ForteBank АО ул.Казыбек би 161",
-    "lat": 42.897352,
-    "lng": 71.36452,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1103",
-    "address": "2582393",
-    "ipName": "2348449",
-    "ipResp": "2362019"
-  },
-  {
-    "id": "145139",
-    "title": "ForteBank АО пр. Жамбыла 186(архив)",
-    "lat": 42.896355,
-    "lng": 71.359795,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1103",
-    "address": "2582395",
-    "ipName": "2348449",
-    "ipResp": "2362019"
-  },
-  {
-    "id": "145141",
-    "title": "ForteBank АО м-н Самал, д.29",
-    "lat": 42.88109,
-    "lng": 71.340472,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1103",
-    "address": "2582397",
-    "ipName": "2348449",
-    "ipResp": "2362019"
-  },
-  {
-    "id": "145143",
-    "title": "ForteBank АО м-н Самал, д.29 НПВЗ, 7 мкр",
-    "lat": 42.881121,
-    "lng": 71.340587,
-    "contactId": null,
-    "companyId": "59",
-    "assignedById": "57",
-    "city": "1103",
-    "address": "2584775",
-    "ipName": "2348449",
-    "ipResp": "2362019"
   },
   {
     "id": "145167",
@@ -9607,19 +10244,6 @@
     "ipResp": "3849905"
   },
   {
-    "id": "145925",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО ТЦ Batyr Mall, ул. Камзина 67/1",
-    "lat": 52.274597,
-    "lng": 76.989998,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1117",
-    "address": "2583301",
-    "ipName": "2348441",
-    "ipResp": "2362005"
-  },
-  {
     "id": "146053",
     "title": "TEMA RETAIL KZ (ТЕМА РЕТЭЙЛ КЗ) ТОО ТРК Атырау",
     "lat": 47.105736,
@@ -9813,19 +10437,6 @@
     "address": "2583095",
     "ipName": "2348423",
     "ipResp": "2362007"
-  },
-  {
-    "id": "146085",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0009, ТРЦ “Mart”, ул. Толе би 27,",
-    "lat": 42.900488,
-    "lng": 71.389245,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1103",
-    "address": "2583303",
-    "ipName": "2348449",
-    "ipResp": "2362019"
   },
   {
     "id": "146143",
@@ -10088,19 +10699,6 @@
     "ipResp": "2362029"
   },
   {
-    "id": "146305",
-    "title": "Agro Land Co ТОО Mall APORT Ташкентский тракт",
-    "lat": 43.233971,
-    "lng": 76.799426,
-    "contactId": null,
-    "companyId": "217",
-    "assignedById": "71",
-    "city": "1091",
-    "address": "2582229",
-    "ipName": "2348425",
-    "ipResp": "2361997"
-  },
-  {
     "id": "146311",
     "title": "Magnum Cash&Carry ТОО АФ57 Шугыла",
     "lat": 43.272081,
@@ -10162,19 +10760,6 @@
     "assignedById": "57",
     "city": "1091",
     "address": "2584203",
-    "ipName": "2348425",
-    "ipResp": "2361997"
-  },
-  {
-    "id": "146325",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0006, ТРK “Молл Апорт”, пр. Райымбека",
-    "lat": 43.256916,
-    "lng": 76.866072,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1091",
-    "address": "2583297",
     "ipName": "2348425",
     "ipResp": "2361997"
   },
@@ -10322,19 +10907,6 @@
     "ipResp": "2362021"
   },
   {
-    "id": "146359",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0001, ТРЦ “MEGA Alma-Ata”, улица Розыбакиева 247A",
-    "lat": 43.202442,
-    "lng": 76.89221,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1091",
-    "address": "2583293",
-    "ipName": "2348427",
-    "ipResp": "2362021"
-  },
-  {
     "id": "146371",
     "title": "GUCLU ASTANA (ГЮЧЛЮ АСТАНА) ТОО Толе би",
     "lat": 43.249759,
@@ -10474,19 +11046,6 @@
     "assignedById": "57",
     "city": "1091",
     "address": "2584245",
-    "ipName": "3144915",
-    "ipResp": "3144937"
-  },
-  {
-    "id": "146407",
-    "title": "\"Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0003, ТРК “MEGA",
-    "lat": 43.200641,
-    "lng": 76.89074,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1091",
-    "address": "2807457",
     "ipName": "3144915",
     "ipResp": "3144937"
   },
@@ -11046,32 +11605,6 @@
     "assignedById": "57",
     "city": "1091",
     "address": "2583995",
-    "ipName": "2348485",
-    "ipResp": "2361995"
-  },
-  {
-    "id": "146573",
-    "title": "Мэри Кэй (Казахстан) ТОО пр. Достык, зд. № 210, БЦ \"Koktem Grand\", Блок 2, 8 эт",
-    "lat": 43.227547,
-    "lng": 76.919684,
-    "contactId": null,
-    "companyId": "69",
-    "assignedById": "1093",
-    "city": "1091",
-    "address": "2583257",
-    "ipName": "2348485",
-    "ipResp": "2361995"
-  },
-  {
-    "id": "146577",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО KZ0007, ТРK “Forum”, ?пр. Сейфуллина 617",
-    "lat": 43.233911,
-    "lng": 76.935537,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1091",
-    "address": "2583299",
     "ipName": "2348485",
     "ipResp": "2361995"
   },
@@ -11882,19 +12415,6 @@
     "ipResp": "2361999"
   },
   {
-    "id": "146795",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан ТОО Mega Silk Way просп. Кабанбай Батыра 62",
-    "lat": 51.088968,
-    "lng": 71.406912,
-    "contactId": null,
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1089",
-    "address": "2583291",
-    "ipName": "2348459",
-    "ipResp": "2361999"
-  },
-  {
     "id": "146797",
     "title": "Qarasu construct ТОО ул. Баурыжан Момышулы 2/1 (1этаж)",
     "lat": 51.130259,
@@ -12099,19 +12619,6 @@
     "assignedById": "1093",
     "city": "1091",
     "address": "2584443",
-    "ipName": "2348481",
-    "ipResp": "2362027"
-  },
-  {
-    "id": "146879",
-    "title": "Сентрас Секьюритиз АО ул.Манаса 32 А БЦ SAT",
-    "lat": 43.23623,
-    "lng": 76.90967,
-    "contactId": null,
-    "companyId": "95",
-    "assignedById": "1093",
-    "city": "1091",
-    "address": "2583267",
     "ipName": "2348481",
     "ipResp": "2362027"
   },
@@ -13230,19 +13737,6 @@
     "assignedById": "57",
     "city": "1091",
     "address": "2582509",
-    "ipName": "2348433",
-    "ipResp": "2362029"
-  },
-  {
-    "id": "147167",
-    "title": "Евразийский банк АО г.Алматы, Кунаева,56 ГБ (кофе леди)",
-    "lat": 43.263822,
-    "lng": 76.949489,
-    "contactId": null,
-    "companyId": "287",
-    "assignedById": "57",
-    "city": "1091",
-    "address": "2582445",
     "ipName": "2348433",
     "ipResp": "2362029"
   },
@@ -14545,19 +15039,6 @@
     "address": "2582959",
     "ipName": "2348505",
     "ipResp": "2362013"
-  },
-  {
-    "id": "147457",
-    "title": "Евразийский банк АО г.Алматы, Кунаева,56 ГБ плотник",
-    "lat": 43.263823,
-    "lng": 76.94949,
-    "contactId": null,
-    "companyId": "287",
-    "assignedById": "57",
-    "city": "1091",
-    "address": "2584859",
-    "ipName": "2348433",
-    "ipResp": "2362029"
   },
   {
     "id": "147461",
@@ -16211,97 +16692,6 @@
     "ipResp": "2362021"
   },
   {
-    "id": "225561",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы, Ташкентский тракт 17К, ТРЦ Mall Aport,Reserved",
-    "lat": 43.3392,
-    "lng": 76.9398,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "2585391",
-    "ipName": "2348425",
-    "ipResp": "2361997"
-  },
-  {
-    "id": "225567",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы, Ташкентский тракт 17К, ТРЦ Mall Aport,Sinsay",
-    "lat": 43.3392,
-    "lng": 76.9398,
-    "contactId": "1927",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "2585393",
-    "ipName": "2348425",
-    "ipResp": "2361997"
-  },
-  {
-    "id": "225621",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы,мкр-н Мамыр 1, д. 8А,ТРЦ \"Sputnik Mall\"Sinsay",
-    "lat": 43.222,
-    "lng": 76.877,
-    "contactId": "1943",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "2585397",
-    "ipName": "3358597",
-    "ipResp": "2362033"
-  },
-  {
-    "id": "225623",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Астана,ул. Саганык 60/5,ТРЦ \"Abu Dhabi Plaza\"Reserved",
-    "lat": 51.1285,
-    "lng": 71.4304,
-    "contactId": "1941",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1089",
-    "address": "2585399",
-    "ipName": "2348459",
-    "ipResp": "2361999"
-  },
-  {
-    "id": "225625",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Астана, ул. Жансугурова 8, ТРЦ «Aruzhan»,Sinsay",
-    "lat": 51.1695,
-    "lng": 71.403,
-    "contactId": "1935",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1089",
-    "address": "2585401",
-    "ipName": "2348431",
-    "ipResp": "2362031"
-  },
-  {
-    "id": "225627",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Усть-Каменогорск, ул. Казахстан 62, ТРЦ «ADK River»,Sinsay",
-    "lat": 42.319621,
-    "lng": 69.596249,
-    "contactId": "1933",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1113",
-    "address": "2585403",
-    "ipName": "2348455",
-    "ipResp": "2362011"
-  },
-  {
-    "id": "225629",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Костанай,пр. Назарбаева 193 а,ТРЦ «Kostanay Plaza»Sinsay",
-    "lat": 53.236135,
-    "lng": 63.613916,
-    "contactId": "1931",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1111",
-    "address": "2585405",
-    "ipName": "2348423",
-    "ipResp": "2362007"
-  },
-  {
     "id": "225887",
     "title": "TOI MART ТОО рынок Бак-Орда",
     "lat": 43.2385,
@@ -16313,19 +16703,6 @@
     "address": "2585407",
     "ipName": "3358597",
     "ipResp": "2362033"
-  },
-  {
-    "id": "225931",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Алматы, ул.Сатпаева 90В, ТРЦ ADK,Sinsay",
-    "lat": 43.222,
-    "lng": 76.877,
-    "contactId": "1929",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "2585395",
-    "ipName": "2348499",
-    "ipResp": "2362003"
   },
   {
     "id": "234573",
@@ -17173,19 +17550,6 @@
     "ipResp": "2362029"
   },
   {
-    "id": "285261",
-    "title": "Эйч энд Эм Хеннес энд Мауриц Казахстан KZ0008, ТРЦ “Keruen City”, ул. Макатаева 4, Актобе, Казахстан",
-    "lat": 50.288868,
-    "lng": 57.193507,
-    "contactId": "239",
-    "companyId": "169",
-    "assignedById": "55",
-    "city": "1095",
-    "address": "2807389",
-    "ipName": "2348451",
-    "ipResp": "2361991"
-  },
-  {
     "id": "291435",
     "title": "The Caspian International Restaurants  KFC Malika,Толе би 227",
     "lat": 43.23689,
@@ -17381,71 +17745,6 @@
     "ipResp": "2362009"
   },
   {
-    "id": "350895",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Караганда, ул. 134-й учетный квартал, 921 Ташкентский тракт 17к,ТРЦ «Global City»,Sinsay",
-    "lat": 49.806586,
-    "lng": 73.15241,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1109",
-    "address": "2807353",
-    "ipName": "2348443",
-    "ipResp": "3849905"
-  },
-  {
-    "id": "350897",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Караганда, ул. Бухар жырау 86, ТРЦ «Grand Store»,Sinsay",
-    "lat": 49.789735,
-    "lng": 73.104565,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1109",
-    "address": "2807351",
-    "ipName": "2348443",
-    "ipResp": "3849905"
-  },
-  {
-    "id": "350899",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Павлодар, ул. Камзина67/1, ТРЦ «Батыр Молл»,Sinsay",
-    "lat": 52.274925,
-    "lng": 76.99054,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1117",
-    "address": "2807349",
-    "ipName": "2348441",
-    "ipResp": "2362005"
-  },
-  {
-    "id": "350901",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Тараз, ул. Толе би 27, ТРЦ «Mart»,Sinsay",
-    "lat": 42.900056,
-    "lng": 71.389056,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1103",
-    "address": "2807347",
-    "ipName": "2348449",
-    "ipResp": "2362019"
-  },
-  {
-    "id": "373745",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Астана , ш.Алаш, ТРЦ «Central Market»,Sinsay",
-    "lat": 51.196152,
-    "lng": 71.465697,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1089",
-    "address": "2586113",
-    "ipName": "2348431",
-    "ipResp": "2362031"
-  },
-  {
     "id": "431391",
     "title": "ТОО \"INVICTUS GO 54\" г Алматы Маметовой 54",
     "lat": 43.26639,
@@ -17509,19 +17808,6 @@
     "address": "2934465",
     "ipName": "2348481",
     "ipResp": "2362027"
-  },
-  {
-    "id": "457867",
-    "title": "«LPP Kazakhstan (ЛПП Казахстан)» ТОО г. Актау. ТРЦ \"Saya park\"Sinsay",
-    "lat": 43.640278,
-    "lng": 51.1575,
-    "contactId": "1833",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1093",
-    "address": "2958805",
-    "ipName": "2348423",
-    "ipResp": "2362007"
   },
   {
     "id": "460023",
@@ -18096,71 +18382,6 @@
     "ipResp": "2362005"
   },
   {
-    "id": "561493",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Sinsay Экибастуз Макси Молл",
-    "lat": 51.702255,
-    "lng": 75.308708,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1129",
-    "address": "3729003",
-    "ipName": "2348443",
-    "ipResp": "3849905"
-  },
-  {
-    "id": "561495",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Sinsay Актобе Далида Центр",
-    "lat": 50.300377,
-    "lng": 57.154555,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1095",
-    "address": "3729005",
-    "ipName": "2348451",
-    "ipResp": "2361991"
-  },
-  {
-    "id": "561497",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Sinsay Алматы Мерей",
-    "lat": 43.237659,
-    "lng": 76.945241,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "3729007",
-    "ipName": "3358597",
-    "ipResp": "2362033"
-  },
-  {
-    "id": "561499",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО «Sinsay» в ТРЦ «Актобе Молл»",
-    "lat": 50.291901,
-    "lng": 57.145366,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1095",
-    "address": "3729009",
-    "ipName": "2348451",
-    "ipResp": "2361991"
-  },
-  {
-    "id": "561501",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Магазин «Sinsay» в ТРЦ «Асем»",
-    "lat": 51.116651,
-    "lng": 71.402599,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1089",
-    "address": "3729011",
-    "ipName": "2348431",
-    "ipResp": "2362031"
-  },
-  {
     "id": "572439",
     "title": "ТОО \"БЕРЕКЕ АГРО ИНВЕСТ\" БЦ \"VERUM\"",
     "lat": 43.242994,
@@ -18172,32 +18393,6 @@
     "address": "3421321",
     "ipName": "2348463",
     "ipResp": "2362009"
-  },
-  {
-    "id": "572561",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Магазин «Sinsay», ТРЦ «Maxi Mall», Сатпаева 51",
-    "lat": 49.919538,
-    "lng": 82.628127,
-    "contactId": "1927",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1113",
-    "address": "3780677",
-    "ipName": "2348455",
-    "ipResp": "2362011"
-  },
-  {
-    "id": "572565",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО Магазин «Reserved»  , ТРЦ «Maxi Mall», Сатпаева 51",
-    "lat": 49.919375,
-    "lng": 82.627888,
-    "contactId": "1943",
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1113",
-    "address": "3780679",
-    "ipName": "2348455",
-    "ipResp": "2362011"
   },
   {
     "id": "572569",
@@ -18278,19 +18473,6 @@
     "ipResp": "3960581"
   },
   {
-    "id": "583241",
-    "title": "Магазин «Sinsay» в ТРЦ «Кокшетау Молл» , мкр. Центральный 24 Г",
-    "lat": 53.303339,
-    "lng": 69.387678,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1125",
-    "address": "3877879",
-    "ipName": "2348505",
-    "ipResp": "2362013"
-  },
-  {
     "id": "591563",
     "title": "The Caspian International Restaurants KFC, Толе би 151",
     "lat": 43.252878,
@@ -18367,58 +18549,6 @@
     "address": "3959987",
     "ipName": "2348495",
     "ipResp": "2362017"
-  },
-  {
-    "id": "646683",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" в ТРЦ \"Кокшетау РИО\", ул.Жунусова 7",
-    "lat": 53.293727,
-    "lng": 69.381848,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1125",
-    "address": "3959991",
-    "ipName": "2348505",
-    "ipResp": "2362013"
-  },
-  {
-    "id": "646685",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" , Кульджинский тракт 106",
-    "lat": 43.314602,
-    "lng": 77.02409,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "3959993",
-    "ipName": "2348471",
-    "ipResp": "2362025"
-  },
-  {
-    "id": "646687",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" , мкр.Нуршуак 1256",
-    "lat": 42.379674,
-    "lng": 69.52984,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1101",
-    "address": "3959995",
-    "ipName": "3278569",
-    "ipResp": "3421309"
-  },
-  {
-    "id": "646689",
-    "title": "LPP Kazakhstan (ЛПП Казахстан)» ТОО, магазин \"Sinsey\" , Абая 101",
-    "lat": 51.220155,
-    "lng": 51.389336,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1107",
-    "address": "3959997",
-    "ipName": "2348423",
-    "ipResp": "2362007"
   },
   {
     "id": "666665",
@@ -18510,149 +18640,6 @@
     "address": "4016715",
     "ipName": "3278569",
     "ipResp": "3421309"
-  },
-  {
-    "id": "702461",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Актобе, магазин \"Sinsey\" , «Dalida City», ул. Молдагуловой 72А",
-    "lat": 50.274299,
-    "lng": 57.113717,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1095",
-    "address": "4017191",
-    "ipName": "2348451",
-    "ipResp": "2361991"
-  },
-  {
-    "id": "702463",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Семей, , магазин \"Sinsey\" , ТРЦ Аргымак",
-    "lat": 50.404976,
-    "lng": 80.249235,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1119",
-    "address": "4017193",
-    "ipName": "2348455",
-    "ipResp": "2362011"
-  },
-  {
-    "id": "702465",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Mart Village",
-    "lat": 43.237878,
-    "lng": 76.945729,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "4017195",
-    "ipName": "3358597",
-    "ipResp": "2362033"
-  },
-  {
-    "id": "702467",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Уральск, магазин \"Sinsey\" , ТРЦ Asia Mall",
-    "lat": 51.20403,
-    "lng": 51.370528,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1107",
-    "address": "4017197",
-    "ipName": "2348423",
-    "ipResp": "2362007"
-  },
-  {
-    "id": "702469",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Жанаозен, магазин \"Sinsey\" , Оркен зд 1",
-    "lat": 43.336446,
-    "lng": 52.855953,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1123",
-    "address": "4017199",
-    "ipName": "2348423",
-    "ipResp": "2362007"
-  },
-  {
-    "id": "702471",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Туркестан, магазин \"Sinsey\" , ТРЦ Караван Сарай, Саттарханова",
-    "lat": 43.286336,
-    "lng": 68.303978,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1105",
-    "address": "4017201",
-    "ipName": "2348453",
-    "ipResp": "2362015"
-  },
-  {
-    "id": "702473",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Павлодар, магазин \"Sinsey\" , ТРЦ Orange",
-    "lat": 52.285588,
-    "lng": 76.941081,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1117",
-    "address": "4017203",
-    "ipName": "2348441",
-    "ipResp": "2362005"
-  },
-  {
-    "id": "702475",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Silk Way City",
-    "lat": 43.254736,
-    "lng": 76.936922,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "4017205",
-    "ipName": "2348487",
-    "ipResp": "2361989"
-  },
-  {
-    "id": "702477",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Атакент Молл",
-    "lat": 43.23765,
-    "lng": 76.94628,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "4017207",
-    "ipName": "2348433",
-    "ipResp": "2362029"
-  },
-  {
-    "id": "702479",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Алматы, магазин \"Sinsey\" , ТРЦ Asia Park, Райымбека 514а",
-    "lat": 43.244538,
-    "lng": 76.836093,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1091",
-    "address": "4017209",
-    "ipName": "3358597",
-    "ipResp": "2362033"
-  },
-  {
-    "id": "702481",
-    "title": "«LPP Kazakhstan ЛПП Казахстан» ТОО, г.Астана, магазин \"Sinsey\" , ТРЦ Жаннур",
-    "lat": 51.169413,
-    "lng": 71.440544,
-    "contactId": null,
-    "companyId": "117",
-    "assignedById": "491",
-    "city": "1089",
-    "address": "4017211",
-    "ipName": "2348431",
-    "ipResp": "2362031"
   },
   {
     "id": "702631",
