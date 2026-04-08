@@ -422,18 +422,20 @@ const DailyReportPage = () => {
                     </div>
                 </div>
 
-                <div className="premium-card p-8 rounded-[32px] border border-black/5 mb-5">
-                    <label className="block text-sm font-bold text-brand-dark mb-4">Данные клиента / Кто прошел опросник</label>
-                    <input
-                        type="text"
-                        value={formData.clientName}
-                        onChange={(e) => updateField('clientName', e.target.value)}
-                        placeholder="ФИО и должность клиента"
-                        className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-bold"
-                    />
-                </div>
+                {selectedDeal ? (
+                    <>
+                        <div className="premium-card p-8 rounded-[32px] border border-black/5 mb-5">
+                            <label className="block text-sm font-bold text-brand-dark mb-4">Данные клиента / Кто прошел опросник</label>
+                            <input
+                                type="text"
+                                value={formData.clientName}
+                                onChange={(e) => updateField('clientName', e.target.value)}
+                                placeholder="ФИО и должность клиента"
+                                className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-bold"
+                            />
+                        </div>
 
-                <form onSubmit={handleSubmit} className="space-y-2 mt-2">
+                        <form onSubmit={handleSubmit} className="space-y-2 mt-2">
                     {renderRadioQuestion({ title: "На сколько быстро вы получаете обратную связь от куратора?", name: "feedbackSpeed", options: ['Быстро', 'Не быстро', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1', 'Нет клиента'] })}
@@ -501,6 +503,7 @@ const DailyReportPage = () => {
                         <Send size={18} />
                     </button>
                 </form>
+                </>
                 ) : (
                     location && !isFindingObject && (
                         <div className="mt-8 p-6 md:p-10 text-center bg-brand-dark/5 rounded-[32px] border border-brand-dark/10 animate-fade-in-up">
