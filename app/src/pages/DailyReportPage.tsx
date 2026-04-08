@@ -164,8 +164,8 @@ const DailyReportPage = () => {
                 }
             }
 
-            payloadString += `=========================\n` +
-                `Данные клиента: ${formData.clientName || 'Не указано'}\n` +
+            payloadString += `КТО ПРОШЕЛ ОПРОС: ${formData.clientName || 'Не указано'}\n` +
+                `=========================\n` +
                 Object.entries(formData).map(([k, v]) => {
                     if (k === 'objectComment' || k === 'clientName') return '';
                     const comment = comments[k] ? ` (Коммент: ${comments[k]})` : '';

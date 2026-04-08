@@ -277,10 +277,10 @@ export const createDailyReportItem = async (data: LeadData) => {
         if (data.files && data.files.length > 0) {
             for (let i = 0; i < data.files.length; i++) {
                 const base64 = await fileToBase64(data.files[i]);
-                // Мы используем поле ufCrm105_1775650024571 для фото. 
+                // Мы используем поле UF_CRM_105_1775650024571 для фото. 
                 // В Битриксе множественные поля файлов передаются как массив индексов.
-                params.append(`fields[ufCrm105_1775650024571][${i}][fileData][0]`, data.files[i].name);
-                params.append(`fields[ufCrm105_1775650024571][${i}][fileData][1]`, base64);
+                params.append(`fields[UF_CRM_105_1775650024571][${i}][fileData][0]`, data.files[i].name);
+                params.append(`fields[UF_CRM_105_1775650024571][${i}][fileData][1]`, base64);
             }
         }
 
