@@ -89,7 +89,7 @@ const DailyReportPage = () => {
         if (!value) return false;
         if (value === 'Нет клиента' || value === 'Не имеется') return false;
 
-        const negativeValues = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме'];
+        const negativeValues = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме', 'Без формы', 'В форме, но не по стандарту'];
         if (negativeValues.includes(value)) return true;
         
         // Особое правило: для предложений по улучшению выбор "Да" считается красным (негативным)
@@ -445,7 +445,7 @@ const DailyReportPage = () => {
                     {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "Все ли вас устраивает в сроках и качестве предоставляемого моющих средств и РМ?", name: "suppliesQuality", options: ['Да', 'Нет', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "ОПУ на объекте находятся в форме?", name: "opuUniform", options: ['Да', 'Нет'] })}
-                    {renderRadioQuestion({ title: "Состояние формы?", name: "uniformCondition", options: ['Хорошее', 'Не в нашей форме', 'Плохо'] })}
+                    {renderRadioQuestion({ title: "Состояние формы?", name: "uniformCondition", options: ['Хорошее', 'Без формы', 'В форме, но не по стандарту'] })}
                     {renderRadioQuestion({ title: "Состояние инвентаря, оборудования, техники?", name: "equipmentCondition", options: ['3', '2', '1'] })}
                     {renderRadioQuestion({ title: "Качество уборки твердых покрытий?", name: "hardFloorQuality", options: ['3', '2', '1'] })}
                     {renderRadioQuestion({ title: "Качество протирки стеклянных и зеркальных поверхностей?", name: "glassMirrorQuality", options: ['3', '2', '1'] })}
