@@ -185,6 +185,9 @@ const DailyReportPage = () => {
                 }
             });
 
+            // Сжатие фотографий перед отправкой
+            const compressedFiles = await Promise.all(files.map(file => compressImage(file)));
+
             let remarkLink = '';
             let payloadString = (selectedDeal ? `Объект: ${selectedDeal.title}\nID Сделки: ${selectedDeal.id}\n` : '') + 
                 (location ? `Координаты: https://www.google.com/maps?q=${location.lat},${location.lng}\n\n` : '\n');
@@ -201,7 +204,8 @@ const DailyReportPage = () => {
                     address: (selectedDeal as any).address,
                     ipName: (selectedDeal as any).ipName,
                     ipResp: (selectedDeal as any).ipResp,
-                    comments: `ОТРИЦАТЕЛЬНЫЕ ПУНКТЫ АУДИТА:\n${negativeItems.join('\n')}\n\nОбщий комментарий: ${formData.objectComment}`
+                    comments: `ОТРИЦАТЕЛЬНЫЕ ПУНКТЫ АУДИТА:\n${negativeItems.join('\n')}\n\nОбщий комментарий: ${formData.objectComment}`,
+                    files: compressedFiles // Передаем сжатые фото и в замечание
                 });
 
                 if (remarkRes.result) {

@@ -310,32 +310,41 @@ export const createDailyReportItem = async (data: LeadData) => {
 
 export const createRemarkDeal = async (data: any) => {
     try {
-        const params = new URLSearchParams();
-        params.append('fields[TITLE]', `ЗАМЕЧАНИЕ (${data.objectTitle}): ${data.date}`);
-        params.append('fields[CATEGORY_ID]', '81');
-        params.append('fields[STAGE_ID]', 'C81:PREPARATION'); // Отработка Партнера
-        params.append('fields[COMPANY_ID]', data.companyId || '');
-        params.append('fields[CONTACT_ID]', data.contactId || '');
-        params.append('fields[ASSIGNED_BY_ID]', data.assignedById || '');
-        
-        // Маппинг данных объекта
-        params.append('fields[UF_CRM_1707153439]', data.city || ''); // Город
-        params.append('fields[UF_CRM_1743501476]', data.address || ''); // Адрес объекта инфо
-        params.append('fields[UF_CRM_1742459776]', data.ipName || ''); // Наименование ИП инфо
-        params.append('fields[UF_CRM_1743669674]', data.ipResp || ''); // Ответственное лицо ИП инфо
-        
-        // Источник, Тип и Вид уборки
-        params.append('fields[UF_CRM_1716804677915]', '43437'); // Качество уборки
-        params.append('fields[UF_CRM_1719824872888]', '43735'); // От аккаунта замечание исходящее
-        params.append('fields[UF_CRM_1723523640792]', '44881'); // Базовая уборка
-        
-        // Текст замечаний
-        params.append('fields[COMMENTS]', data.comments);
-        
+        const fields: Record<string, any> = {
+            TITLE: `ЗАМЕЧАНИЕ (${data.objectTitle}): ${data.date}`,
+            CATEGORY_ID: '81',
+            STAGE_ID: 'C81:PREPARATION', // Отработка Партнера
+            COMPANY_ID: data.companyId || '',
+            CONTACT_ID: data.contactId || '',
+            ASSIGNED_BY_ID: data.assignedById || '',
+            COMMENTS: data.comments,
+            // Маппинг данных объекта
+            UF_CRM_1707153439: data.city || '', // Город
+            UF_CRM_1743501476: data.address || '', // Адрес объекта инфо
+            UF_CRM_1742459776: data.ipName || '', // Наименование ИП инфо
+            UF_CRM_1743669674: data.ipResp || '', // Ответственное лицо ИП инфо
+            // Источник, Тип и Вид уборки
+            UF_CRM_1716804677915: '43437', // Качество уборки
+            UF_CRM_1719824872888: '43735', // От аккаунта замечание исходящее
+            UF_CRM_1723523640792: '44881', // Базовая уборка
+        };
+
+        // Добавление фотографий (Фото отзыва/замечания)
+        if (data.files && data.files.length > 0) {
+            fields.UF_CRM_1716804439763 = [];
+            for (const file of data.files) {
+                const base64 = await fileToBase64(file);
+                fields.UF_CRM_1716804439763.push({
+                    name: file.name,
+                    content: base64
+                });
+            }
+        }
+
         const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.add.json`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString()
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fields: fields })
         });
         
         const result = await response.json();
