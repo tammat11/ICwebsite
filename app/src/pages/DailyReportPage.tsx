@@ -138,22 +138,47 @@ const DailyReportPage = () => {
         const negativeValues = ['1', '2', 'Нет', 'Плохо', 'Не быстро', 'Не в нашей форме', 'Без формы', 'В форме, но не по стандарту'];
         if (negativeValues.includes(value)) return true;
         
-        // Особое правило: для предложений по улучшению выбор "Да" считается красным (негативным)
-        if (name === 'improvementSuggestions') {
-            return value === 'Да';
-        }
+        // Для предложений по улучшению "Нет" - это теперь положительный ответ (негатив = false)
+        // Предложения больше не считаются "отрицательными пунктами" для создания замечания
+        return false;
         
         return false;
     };
 
     const shouldShowComment = (name: string, value: string) => {
         if (name === 'feedbackSpeed' && value && value !== 'Нет клиента') return true;
+        if (name === 'improvementSuggestions' && value === 'Да') return true;
         return isNegativeResponse(name, value);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        
+        // Список всех обязательных ключей вопросов
+        const requiredQuestions = [
+            'feedbackSpeed', 'improvementSuggestions', 'curatorScore', 'suppliesQuality',
+            'opuUniform', 'uniformCondition', 'equipmentCondition', 'hardFloorQuality',
+            'glassMirrorQuality', 'fittingRoomsQuality', 'cleaningRoomCondition',
+            'restroomCondition', 'softFurnitureCondition'
+        ];
+
+        const missing = requiredQuestions.find(q => !formData[q]);
+        if (missing) {
+            alert('Пожалуйста, ответьте на все вопросы перед отправкой.');
+            // Прокрутка к первому неотвеченному вопросу
+            const questionElement = document.getElementById(`question-${missing}`);
+            if (questionElement) {
+                questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
+        if (!formData.clientName) {
+            alert('Пожалуйста, укажите ФИО клиента или выберите "Не имеется".');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -263,9 +288,6 @@ const DailyReportPage = () => {
                 'ufCrm105_1775650055': location?.lng || '',
             };
 
-            // Сжатие фотографий перед отправкой
-            const compressedFiles = await Promise.all(files.map(file => compressImage(file)));
-
             await createDailyReportItem({
                 title: `АУДИТ ОБЪЕКТА: ${selectedDeal?.title || 'Без названия'} (${new Date().toLocaleDateString()})`,
                 extraFields: extraFields,
@@ -287,8 +309,12 @@ const DailyReportPage = () => {
         }
     };
 
-    const renderRadioQuestion = ({ title, name, options }: { title: string, name: string, options: string[] }) => (
-        <div className="premium-card p-5 md:p-8 rounded-[32px] animate-fade-in-up mb-5 border border-black/5">
+    const renderRadioQuestion = ({ title, name, options }: { title: string, name: string, options: string[] }) => {
+        const isNegative = isNegativeResponse(name, formData[name]);
+        const showComment = shouldShowComment(name, formData[name]);
+
+        return (
+            <div id={`question-${name}`} className={`premium-card p-8 rounded-[32px] border transition-all duration-500 mb-5 ${isNegative ? 'border-red-500/20 bg-red-50/10' : 'border-black/5 hover:border-black/10'}`}>
             <label className="block text-sm font-bold text-brand-dark mb-4">{title}</label>
             <div className="flex flex-row flex-wrap w-full gap-1.5 mb-4">
                 {options.map(opt => {
@@ -326,6 +352,7 @@ const DailyReportPage = () => {
             )}
         </div>
     );
+};
 
     if (isSubmitted) {
         return (
@@ -482,19 +509,32 @@ const DailyReportPage = () => {
                 {selectedDeal ? (
                     <>
                         <div className="premium-card p-8 rounded-[32px] border border-black/5 mb-5">
-                            <label className="block text-sm font-bold text-brand-dark mb-4">Данные клиента / Кто прошел опросник</label>
-                            <input
-                                type="text"
-                                value={formData.clientName}
-                                onChange={(e) => updateField('clientName', e.target.value)}
-                                placeholder="ФИО и должность клиента"
-                                className="w-full px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-bold"
-                            />
+                            <label className="block text-sm font-bold text-brand-dark mb-4">Данные клиента / Кто прошел опросник *</label>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <input
+                                    type="text"
+                                    value={formData.clientName}
+                                    onChange={(e) => updateField('clientName', e.target.value)}
+                                    placeholder="ФИО и должность клиента"
+                                    className="flex-1 px-6 py-4 rounded-2xl bg-brand-light border border-black/5 focus:ring-2 focus:ring-brand-green/30 focus:bg-white focus:outline-none transition-all font-bold"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => updateField('clientName', 'Не имеется')}
+                                    className={`px-8 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] transition-all border ${
+                                        formData.clientName === 'Не имеется'
+                                        ? 'bg-brand-dark text-white border-brand-dark'
+                                        : 'bg-brand-light text-brand-dark/40 border-black/5 hover:bg-brand-accent/30'
+                                    }`}
+                                >
+                                    Не имеется
+                                </button>
+                            </div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-2 mt-2">
                     {renderRadioQuestion({ title: "На сколько быстро вы получаете обратную связь от куратора?", name: "feedbackSpeed", options: ['Быстро', 'Не быстро', 'Нет клиента'] })}
-                    {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет', 'Нет клиента'] })}
+                    {renderRadioQuestion({ title: "Есть ли у вас предложения по улучшению нашего сервиса?", name: "improvementSuggestions", options: ['Да', 'Нет'] })}
                     {renderRadioQuestion({ title: "Оцените работу вашего куратора", name: "curatorScore", options: ['3', '2', '1', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "Все ли вас устраивает в сроках и качестве предоставляемого моющих средств и РМ?", name: "suppliesQuality", options: ['Да', 'Нет', 'Нет клиента'] })}
                     {renderRadioQuestion({ title: "ОПУ на объекте находятся в форме?", name: "opuUniform", options: ['Да', 'Нет'] })}
