@@ -12,6 +12,7 @@ const AdminMapPage = () => {
     
     const [isLoading, setIsLoading] = useState(true);
     const [mode, setMode] = useState<'audits' | 'calls' | 'map'>('audits');
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     
     const calculateStatsInternal = (currentDeals: any[] = [], currentReports: any[] = [], targetMode: 'audits' | 'calls', allDealsTotal: any[] = [], uMap: any = {}) => {
         try {
@@ -68,27 +69,38 @@ const AdminMapPage = () => {
 
     // Filtered data calculated in real-time from memory
     const currentData = React.useMemo(() => {
-        const sourceData = (mode === 'audits') 
-            ? { deals: allDeals, reports: rawAuditReports } 
-            : { deals: allDeals, reports: rawCallReports };
-        
-        // Local Filter by Date
-        const filteredReports = (sourceData.reports || []).filter((r: any) => {
+        let filteredDeals = allDeals || [];
+        if (selectedUserId) {
+            filteredDeals = filteredDeals.filter(d => String(d.assignedById) === selectedUserId);
+        }
+
+        const sourceReports = (mode === 'audits') ? rawAuditReports : rawCallReports;
+        let filteredReports = (sourceReports || []).filter((r: any) => {
             const rDate = r.createdTime?.split('T')[0];
             if (!rDate) return false;
             if (startDate && rDate < startDate) return false;
             if (endDate && rDate > endDate) return false;
+            if (selectedUserId && String(r.assignedById) !== selectedUserId) return false;
             return true;
         });
 
-        const analytics = calculateStatsInternal(sourceData.deals, filteredReports, mode, allDeals, usersMap);
+        const analytics = calculateStatsInternal(allDeals, filteredReports, mode, allDeals, usersMap);
+        const displayAnalytics = selectedUserId 
+            ? analytics.filter(s => s.id === selectedUserId)
+            : analytics;
 
         return {
-            deals: sourceData.deals,
+            deals: filteredDeals,
             reports: filteredReports,
-            analytics
+            analytics: displayAnalytics
         };
-    }, [mode, startDate, endDate, rawAuditReports, rawCallReports, allDeals, usersMap]);
+    }, [mode, startDate, endDate, rawAuditReports, rawCallReports, allDeals, usersMap, selectedUserId]);
+
+    // Managers list for the filter (those with > 10 objects)
+    const activeManagers = React.useMemo(() => {
+        const stats = calculateStatsInternal(allDeals, [], 'audits', allDeals, usersMap);
+        return stats.map(s => ({ id: s.id, name: s.name }));
+    }, [allDeals, usersMap]);
 
     // Track previously fetched range to avoid redundant API calls
     const [fetchedRange, setFetchedRange] = useState({ start: '', end: '' });
@@ -234,8 +246,30 @@ const AdminMapPage = () => {
                     </div>
                 </div>
 
-                {/* Premium Date Range Picker */}
-                <div className="flex justify-center mb-12">
+                {/* Premium Filters: Date & Account */}
+                <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12">
+                    
+                    {/* Account Selector */}
+                    <div className="group relative">
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-brand-green/20 rounded-[32px] blur opacity-10 group-hover:opacity-30 transition duration-1000"></div>
+                        <div className="relative flex items-center gap-3 bg-white/80 backdrop-blur-xl p-2 rounded-[32px] border border-black/[0.03] shadow-premium ring-1 ring-black/[0.02]">
+                            <div className="flex items-center gap-3 px-6 py-3 bg-brand-light/40 rounded-[26px] border border-black/[0.02] hover:bg-white transition-all">
+                                <Users size={16} className="text-blue-500" />
+                                <select 
+                                    value={selectedUserId || ''} 
+                                    onChange={(e) => setSelectedUserId(e.target.value || null)}
+                                    className="bg-transparent text-[13px] font-black text-brand-dark outline-none cursor-pointer min-w-[150px]"
+                                >
+                                    <option value="">Все аккаунты</option>
+                                    {activeManagers.map(m => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Date Picker */}
                     <div className="group relative">
                         {/* Glow effect for background */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-green/20 to-blue-500/20 rounded-[34px] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
@@ -279,14 +313,15 @@ const AdminMapPage = () => {
                             </div>
 
                             {/* Clear Button */}
-                            {(startDate || endDate) && (
+                            {(startDate || endDate || selectedUserId) && (
                                 <button 
                                     onClick={() => {
                                         setStartDate('');
                                         setEndDate('');
+                                        setSelectedUserId(null);
                                     }}
                                     className="w-12 h-12 flex items-center justify-center rounded-[24px] bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-500 active:scale-95"
-                                    title="Сбросить даты"
+                                    title="Сбросить фильтры"
                                 >
                                     <X size={18} />
                                 </button>
