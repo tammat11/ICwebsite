@@ -516,7 +516,7 @@ const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any)
                     <div style="font-family: 'Montserrat', sans-serif; padding: 10px;">
                         <div style="font-weight: 900; font-size: 14px; margin-bottom: 5px; color: #1a2215;">${deal.title}</div>
                         <div style="font-size: 10px; color: ${color}; font-weight: bold; text-transform: uppercase;">
-                            ${hasReport ? 'Аудит проведен' : 'Аудит не найден'}
+                            ${hasReport ? 'Выполнено' : 'Не выполнено'}
                         </div>
                         <div style="font-size: 11px; margin-top: 5px; opacity: 0.6;">${deal.city || ''}</div>
                     </div>
@@ -527,14 +527,14 @@ const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any)
         });
 
         // Fit bounds if has markers
-        if (deals.length > 0) {
+        if (deals.length > 0 && markersGroup.current.getLayers().length > 0) {
             // mapInstance.current.fitBounds(markersGroup.current.getBounds());
         }
 
         return () => {
             // Optional: cleanup
         };
-    }, [deals, reports, startDate, endDate]);
+    }, [deals, reports, startDate, endDate, statusFilter]);
 
     return <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 10 }} />;
 };
