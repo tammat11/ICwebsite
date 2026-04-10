@@ -1,130 +1,337 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { getAllDealsWithCoords } from '../utils/bitrix';
-import { Layout } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getAllDealsWithCoords, getDailyReports, getBitrixUsers } from '../utils/bitrix';
+import { Layout, Users, FileText, CheckCircle2, TrendingUp, RefreshCw, Calendar, X } from 'lucide-react';
 
 const AdminMapPage = () => {
-    const [deals, setDeals] = useState<any[]>([]);
+    const [auditData, setAuditData] = useState<{ deals: any[], reports: any[], analytics: any[] }>({ deals: [], reports: [], analytics: [] });
+    const [callData, setCallData] = useState<{ deals: any[], reports: any[], analytics: any[] }>({ deals: [], reports: [], analytics: [] });
     const [isLoading, setIsLoading] = useState(true);
-    const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
-    const mapRef = useRef<any>(null);
+    const [mode, setMode] = useState<'audits' | 'calls'>('audits');
+    
+    // Filters State
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const today = now.toISOString().split('T')[0];
+    const [startDate, setStartDate] = useState(firstDayOfMonth);
+    const [endDate, setEndDate] = useState(today);
 
-    useEffect(() => {
-        // Load Leaflet dynamically
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
+    // Current displayed data based on mode
+    const currentData = mode === 'audits' ? auditData : callData;
 
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = () => {
-            initMap();
-        };
-        document.head.appendChild(script);
+    const fetchData = () => {
+        setIsLoading(true);
+        
+        Promise.all([
+            getAllDealsWithCoords(), 
+            getDailyReports(1204, 445, startDate, endDate),
+            getDailyReports(1364, 431, startDate, endDate),
+            getBitrixUsers()
+        ]).then(([allDeals, reportsAudits, reportsCalls, usersMap]) => {
+            // Calculate Audit analytics
+            const auditStats = calculateStatsInternal(allDeals, reportsAudits, usersMap, 'audits', allDeals);
+            setAuditData({ deals: allDeals, reports: reportsAudits, analytics: auditStats });
 
-        // Fetch deals
-        getAllDealsWithCoords().then(fetched => {
-            setDeals(fetched);
+            // Calculate Call analytics
+            const callStats = calculateStatsInternal(allDeals, reportsCalls, usersMap, 'calls', allDeals);
+            setCallData({ deals: allDeals, reports: reportsCalls, analytics: callStats });
+
+            setIsLoading(false);
+        }).catch((err) => {
+            console.error('Fetch Error:', err);
             setIsLoading(false);
         });
+    };
 
-        // Get user location
-        navigator.geolocation.getCurrentPosition(
-            (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-            (err) => console.error(err)
-        );
+    const calculateStatsInternal = (currentDeals: any[], currentReports: any[], usersMap: any, targetMode: 'audits' | 'calls', allDeals: any[]) => {
+        const reportsByUser = currentReports.reduce((acc: any, r: any) => {
+            const uid = String(r.assignedById);
+            if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
+            return acc;
+        }, {});
 
-        return () => {
-            document.head.removeChild(link);
-            document.head.removeChild(script);
-        };
-    }, []);
+        const dealsByUser = currentDeals.reduce((acc: any, d: any) => {
+            const uid = String(d.assignedById);
+            if (uid) acc[uid] = (acc[uid] || 0) + 1;
+            return acc;
+        }, {});
 
-    const initMap = () => {
-        // Wait for Leaflet to be ready and target div to exist
-        const L = (window as any).L;
-        if (!L || !document.getElementById('map')) return;
+        const allUserIds = Array.from(new Set([...Object.keys(dealsByUser), ...Object.keys(reportsByUser)]));
+        const stats = allUserIds.map(uid => {
+            const periodDealsCount = dealsByUser[uid] || 0;
+            const reportsCount = reportsByUser[uid] || 0;
+            
+            // План и фильтрация по общему кол-ву объектов (чтобы таблица не пустела)
+            const totalDealsForUser = allDeals.filter(d => String(d.assignedById) === uid).length;
 
-        if (mapRef.current) return;
+            let plan = 0;
+            if (targetMode === 'audits') {
+                plan = totalDealsForUser < 100 ? 60 : 40;
+            } else {
+                plan = totalDealsForUser < 100 ? 20 : 100;
+            }
 
-        // Default Almaty center
-        const map = L.map('map').setView([43.238949, 76.889709], 12);
-        mapRef.current = map;
+            return {
+                id: uid,
+                name: usersMap[uid] || 'Неизвестно',
+                dealsCount: targetMode === 'audits' ? totalDealsForUser : periodDealsCount,
+                totalDeals: totalDealsForUser,
+                reportsCount,
+                plan,
+                diff: reportsCount - plan
+            };
+        });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        return stats
+            .filter(s => s.name !== 'Неизвестно' && s.totalDeals > 10)
+            .sort((a, b) => b.reportsCount - a.reportsCount);
     };
 
     useEffect(() => {
-        const L = (window as any).L;
-        if (!L || !mapRef.current || deals.length === 0) return;
-
-        const bounds = L.latLngBounds([]);
-
-        deals.forEach(deal => {
-            if (deal.lat && deal.lng) {
-                const marker = L.circleMarker([deal.lat, deal.lng], {
-                    radius: 4,
-                    fillColor: "#ff4444",
-                    color: "#fff",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                })
-                .addTo(mapRef.current)
-                .bindPopup(`<b>${deal.title}</b><br>ID: ${deal.id}<br>Coords: ${deal.lat}, ${deal.lng}`);
-                
-                bounds.extend([deal.lat, deal.lng]);
-            }
-        });
-
-        // Добавим вашу локацию в границы, если она есть
-        if (location) {
-            bounds.extend([location.lat, location.lng]);
-            
-            L.circle([location.lat, location.lng], {
-                radius: 1000, // Сделаем побольше, чтобы было видно на общем плане
-                color: '#3b82f6',
-                fillColor: '#3b82f6',
-                fillOpacity: 0.2
-            }).addTo(mapRef.current);
-            
-            L.marker([location.lat, location.lng])
-                .addTo(mapRef.current)
-                .bindPopup('Вы здесь');
-        }
-
-        if (bounds.isValid()) {
-            mapRef.current.fitBounds(bounds, { padding: [50, 50] });
-        }
-    }, [deals, location]);
+        fetchData();
+    }, [startDate, endDate]);
 
     return (
-        <div className="h-screen w-full bg-brand-light flex flex-col pt-20">
-            <div className="bg-white p-6 shadow-sm flex justify-between items-center z-10">
-                <div>
-                    <h1 className="text-2xl font-black uppercase text-brand-dark">Карта Объектов</h1>
-                    <p className="text-xs font-bold text-brand-dark/40 uppercase tracking-widest mt-1">
-                        {isLoading ? 'Загрузка данных из Bitrix...' : `Найдено ${deals.length} точек на карте`}
-                    </p>
-                </div>
-                <div className="flex gap-4">
-                    <button 
-                        onClick={() => window.location.href = '/reports/daily'}
-                        className="btn-premium px-6 py-3"
-                    >
-                        Вернуться к опросу
-                    </button>
+        <div className="min-h-screen w-full bg-[#f6f7f3] flex flex-col pt-0 overflow-x-hidden">
+            {/* Header */}
+            <div className="bg-white p-6 border-b border-black/5 z-20 shadow-sm sticky top-0 min-h-[100px] flex items-center">
+                <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row justify-between items-center gap-6 relative">
+                    
+                    {/* Left: Logo & Title */}
+                    <div className="flex items-center gap-5 lg:w-1/3">
+                        <div className="w-12 h-12 bg-brand-green/10 rounded-[20px] flex items-center justify-center">
+                            <Layout className="text-brand-green" size={24} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-black uppercase text-brand-dark tracking-tight leading-none">Дешборд</h1>
+                            <p className="text-[10px] font-bold text-brand-dark/40 uppercase tracking-widest leading-none mt-1.5">
+                                {isLoading ? 'Синхронизация...' : `Объектов: ${currentData.deals.length} | Аудитов: ${currentData.reports.length}`}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Right: Navigation & Sync & Mode Switcher */}
+                    <div className="flex items-center gap-4 lg:w-2/3 lg:justify-end">
+                        {/* Mode Switcher */}
+                        <div className="flex p-1 bg-brand-dark/5 rounded-[20px] border border-black/5 mr-2">
+                            <button 
+                                onClick={() => setMode('audits')}
+                                className={`px-4 py-2 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'audits' ? 'bg-white shadow-sm text-brand-dark' : 'text-brand-dark/30 hover:text-brand-dark/60'}`}
+                            >
+                                Аудиты
+                            </button>
+                            <button 
+                                onClick={() => setMode('calls')}
+                                className={`px-4 py-2 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'calls' ? 'bg-white shadow-sm text-brand-dark' : 'text-brand-dark/30 hover:text-brand-dark/60'}`}
+                            >
+                                Обзвоны
+                            </button>
+                        </div>
+
+                        <div className="flex p-1.5 bg-brand-dark/5 rounded-[24px] border border-black/5 backdrop-blur-sm">
+                            <div className="px-8 py-3 rounded-[18px] bg-white shadow-premium text-[11px] font-bold uppercase tracking-widest text-brand-dark border border-black/5">
+                                Дешборд
+                            </div>
+                            <Link 
+                                to="/reports/daily"
+                                className="px-8 py-3 rounded-[18px] text-[11px] font-bold uppercase tracking-widest text-brand-dark/40 hover:text-brand-dark transition-all"
+                            >
+                                Анкета
+                            </Link>
+                        </div>
+
+                        <button 
+                            onClick={fetchData}
+                            disabled={isLoading}
+                            className={`flex items-center gap-2 px-5 py-3 rounded-[20px] bg-brand-green text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:grayscale`}
+                        >
+                            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                            <span>{isLoading ? '...' : 'Синхр.'}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div id="map" className="flex-1 w-full z-0" style={{ height: 'calc(100vh - 100px)' }} />
-            
-            <style>{`
-                .leaflet-container {
-                    background: #f1f5f9;
-                }
-            `}</style>
+
+            <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-8">
+                
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="premium-card p-8 rounded-[32px] border border-black/5 bg-white relative overflow-hidden group">
+                        <div className="relative z-10">
+                            <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center mb-4">
+                                <FileText className="text-brand-green" size={20} />
+                            </div>
+                            <div className="text-[10px] font-black text-brand-dark/30 uppercase tracking-widest mb-1">Всего {mode === 'audits' ? 'отчетов' : 'обзвонов'}</div>
+                            <div className="text-4xl font-black text-brand-dark">{currentData.reports.length}</div>
+                        </div>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                            <FileText size={120} />
+                        </div>
+                    </div>
+
+                    <div className="premium-card p-8 rounded-[32px] border border-black/5 bg-white relative overflow-hidden group">
+                        <div className="relative z-10">
+                            <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4">
+                                <Users className="text-blue-500" size={20} />
+                            </div>
+                            <div className="text-[10px] font-black text-brand-dark/30 uppercase tracking-widest mb-1">Команда</div>
+                            <div className="text-4xl font-black text-brand-dark">{currentData.analytics.length} чел.</div>
+                        </div>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                            <Users size={120} />
+                        </div>
+                    </div>
+
+                    <div className="premium-card p-8 rounded-[32px] border border-black/5 bg-white relative overflow-hidden group">
+                        <div className="relative z-10">
+                            <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center mb-4">
+                                <TrendingUp className="text-brand-green" size={20} />
+                            </div>
+                            <div className="text-[10px] font-black text-brand-dark/30 uppercase tracking-widest mb-1">Покрытие объектов</div>
+                            <div className="text-4xl font-black text-brand-green">
+                                {Math.round((currentData.reports.length / (currentData.deals.length || 1)) * 100)}%
+                            </div>
+                        </div>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                            <TrendingUp size={120} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Premium Date Range Picker */}
+                <div className="flex justify-center mb-12">
+                    <div className="group relative">
+                        {/* Glow effect for background */}
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-green/20 to-blue-500/20 rounded-[34px] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                        
+                        <div className="relative flex items-center gap-1 bg-white/80 backdrop-blur-xl p-2 rounded-[32px] border border-black/[0.03] shadow-premium ring-1 ring-black/[0.02]">
+                            
+                            <div className="flex items-center gap-4 px-6 py-3 bg-brand-light/40 rounded-[26px] border border-black/[0.02] hover:bg-white hover:shadow-sm transition-all duration-300">
+                                <Calendar size={16} className="text-brand-green" />
+                                
+                                <div className="flex items-center gap-6">
+                                    {/* Start Date */}
+                                    <div className="relative flex flex-col min-w-[80px]">
+                                        <span className="text-[8px] font-black text-brand-dark/20 uppercase tracking-[0.2em] mb-0.5">Начало</span>
+                                        <input 
+                                            type="date" 
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                        />
+                                        <div className="text-[13px] font-black text-brand-dark tracking-tight">
+                                            {startDate ? startDate.split('-').reverse().join('.') : '—'}
+                                        </div>
+                                    </div>
+
+                                    <div className="w-[1px] h-6 bg-brand-dark/5" />
+
+                                    {/* End Date */}
+                                    <div className="relative flex flex-col min-w-[80px]">
+                                        <span className="text-[8px] font-black text-brand-dark/20 uppercase tracking-[0.2em] mb-0.5">Конец</span>
+                                        <input 
+                                            type="date" 
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                        />
+                                        <div className="text-[13px] font-black text-brand-dark tracking-tight">
+                                            {endDate ? endDate.split('-').reverse().join('.') : '—'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Clear Button */}
+                            {(startDate || endDate) && (
+                                <button 
+                                    onClick={() => {
+                                        setStartDate('');
+                                        setEndDate('');
+                                    }}
+                                    className="w-12 h-12 flex items-center justify-center rounded-[24px] bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-500 active:scale-95"
+                                    title="Сбросить даты"
+                                >
+                                    <X size={18} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Table */}
+                <div className="premium-card bg-white rounded-[40px] border border-black/5 shadow-premium overflow-hidden">
+                    <div className="px-8 py-6 border-b border-black/5 bg-brand-light/20">
+                        <h2 className="text-sm font-black uppercase text-brand-dark flex items-center gap-3">
+                            <div className="w-1.5 h-6 bg-brand-green rounded-full" />
+                            Рейтинг активности ответственных
+                        </h2>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-brand-light/10">
+                                    <th className="px-10 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest">№</th>
+                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest">Ответственный</th>
+                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">{mode === 'audits' ? 'Проведено чеков' : 'Проведено обзвонов'}</th>
+                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">План</th>
+                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">Разница</th>
+                                    <th className="px-10 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-right">Статус выполнения</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-black/5">
+                                {currentData.analytics.map((stat, idx) => {
+                                    const progress = Math.min((stat.reportsCount / (stat.plan || 1)) * 100, 100);
+                                    
+                                    return (
+                                        <tr key={stat.id} className="hover:bg-brand-light/40 transition-all group">
+                                            <td className="px-10 py-6 text-xs font-black text-brand-dark/20">{idx + 1}</td>
+                                            <td className="px-6 py-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-2xl bg-brand-green/10 flex items-center justify-center text-[11px] font-black text-brand-green border border-brand-green/10">
+                                                        {stat.name.split(' ').map((n: string) => n[0]).join('')}
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-bold text-brand-dark group-hover:text-brand-green transition-colors">{stat.name}</div>
+                                                        <div className="text-[9px] font-bold text-brand-dark/30 uppercase">{stat.dealsCount} объектов</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-6 text-center">
+                                                <div className="text-lg font-black text-brand-dark">{stat.reportsCount}</div>
+                                            </td>
+                                            <td className="px-6 py-6 text-center">
+                                                <div className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">{stat.plan}</div>
+                                            </td>
+                                            <td className="px-6 py-6 text-center">
+                                                <div className={`text-sm font-black ${stat.diff >= 0 ? 'text-brand-green' : 'text-red-500'}`}>
+                                                    {stat.diff > 0 ? `+${stat.diff}` : stat.diff}
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-6">
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <div className="text-[10px] font-bold text-brand-dark/30 uppercase tracking-widest">
+                                                        План выполнен на {Math.round(progress)}%
+                                                    </div>
+                                                    <div className="w-32 h-1.5 bg-brand-light rounded-full overflow-hidden border border-black/5">
+                                                        <div 
+                                                            className={`h-full transition-all duration-1000 ${
+                                                                progress >= 100 ? 'bg-brand-green' : progress >= 50 ? 'bg-orange-400' : 'bg-red-500'
+                                                            }`}
+                                                            style={{ width: `${progress}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

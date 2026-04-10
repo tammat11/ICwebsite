@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { CheckCircle2, Send, MapPin, Search, AlertCircle } from 'lucide-react';
 import { createDailyReportItem, getNearestDeal, createRemarkDeal } from '../utils/bitrix';
 import objectsCache from '../data/objects_cache.json';
@@ -369,8 +370,24 @@ const DailyReportPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-brand-light pt-32 pb-20 px-6">
+        <div className="min-h-screen bg-brand-light pt-24 md:pt-32 pb-20 px-6">
             <div className="max-w-3xl mx-auto">
+                <div className="flex justify-center mb-8">
+                    <div className="inline-flex p-1.5 bg-brand-dark/5 backdrop-blur-md rounded-[24px] border border-black/5">
+                        <Link 
+                            to="/admin/map"
+                            className="px-6 py-2.5 rounded-[18px] text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-dark/40 hover:text-brand-dark transition-all"
+                        >
+                            Дешборд
+                        </Link>
+                        <div 
+                            className="px-6 py-2.5 rounded-[18px] bg-white shadow-premium text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-dark border border-black/5"
+                        >
+                            Анкета
+                        </div>
+                    </div>
+                </div>
+
                 <div className="mb-12">
                     <div className="section-tag text-center mx-auto">Аудит</div>
                     <h1 className="section-header text-center block uppercase">ПРОВЕРКА <br /><span className="text-brand-green">КАЧЕСТВА</span></h1>

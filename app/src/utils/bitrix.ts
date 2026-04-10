@@ -403,7 +403,7 @@ export const getNearestDeal = async (userLat: number, userLng: number) => {
     }
 };
 
-export const getAllDealsWithCoords = async () => {
+export const getAllDealsWithCoords = async (startDate?: string, endDate?: string) => {
     try {
         let allDeals: any[] = [];
         let start = 0;
@@ -412,25 +412,37 @@ export const getAllDealsWithCoords = async () => {
         const LAT_FIELD_ID = 'UF_CRM_1732276400585';
         const LNG_FIELD_ID = 'UF_CRM_1732276407859';
 
-        while (hasNext && allDeals.length < 1500) { // Ограничим 1500 для безопасности
+        const filterParams: any = { 'CATEGORY_ID': '69' };
+        if (startDate) filterParams['>=DATE_CREATE'] = startDate + 'T00:00:00';
+        if (endDate) filterParams['<=DATE_CREATE'] = endDate + 'T23:59:59';
+
+        while (hasNext && allDeals.length < 2500) { 
+            const bodyObj: any = {
+                'select[0]': 'ID',
+                'select[1]': 'TITLE',
+                'select[2]': LAT_FIELD_ID,
+                'select[3]': LNG_FIELD_ID,
+                'select[4]': 'COMPANY_ID',
+                'select[5]': 'CONTACT_ID',
+                'select[6]': 'ASSIGNED_BY_ID',
+                'select[7]': 'UF_CRM_1707153439',
+                'select[8]': 'UF_CRM_1743501476',
+                'select[9]': 'UF_CRM_1742459776',
+                'select[10]': 'UF_CRM_1743669674',
+                'select[11]': 'DATE_CREATE',
+                'order[ID]': 'DESC',
+                'start': String(start)
+            };
+
+            // Добавляем фильтры в тело запроса
+            Object.keys(filterParams).forEach(key => {
+                bodyObj[`filter[${key}]`] = filterParams[key];
+            });
+
             const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.list.json`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    'filter[CATEGORY_ID]': '69',
-                    'select[0]': 'ID',
-                    'select[1]': 'TITLE',
-                    'select[2]': LAT_FIELD_ID,
-                    'select[3]': LNG_FIELD_ID,
-                    'select[4]': 'COMPANY_ID',
-                    'select[5]': 'CONTACT_ID',
-                    'select[6]': 'ASSIGNED_BY_ID',
-                    'select[7]': 'UF_CRM_1707153439', // Город
-                    'select[8]': 'UF_CRM_1743501476', // Адрес объекта инфо
-                    'select[9]': 'UF_CRM_1742459776', // Наименование ИП инфо
-                    'select[10]': 'UF_CRM_1743669674', // Ответственное лицо ИП инфо
-                    'start': String(start)
-                }).toString()
+                body: new URLSearchParams(bodyObj).toString()
             });
 
             const result = await response.json();
@@ -445,6 +457,7 @@ export const getAllDealsWithCoords = async () => {
                         contactId: d.CONTACT_ID,
                         companyId: d.COMPANY_ID,
                         assignedById: d.ASSIGNED_BY_ID,
+                        dateCreate: d.DATE_CREATE,
                         city: d.UF_CRM_1707153439,
                         address: d.UF_CRM_1743501476,
                         ipName: d.UF_CRM_1742459776,
@@ -462,7 +475,6 @@ export const getAllDealsWithCoords = async () => {
                 hasNext = false;
             }
         }
-
         return allDeals;
     } catch (error) {
         console.error('Error fetching all deals for map:', error);
@@ -470,4 +482,83 @@ export const getAllDealsWithCoords = async () => {
     }
 };
 
-export default { createBitrixLead, createHrCandidate, createDailyReportItem, getNearestDeal, getAllDealsWithCoords };
+// Загрузка всех отчетов из Смарт-процесса 105 (Ограничим последними 1000 для скорости)
+export const getDailyReports = async (entityTypeId: number = 1204, categoryId: number = 445, startDate?: string, endDate?: string) => {
+    try {
+        let allItems: any[] = [];
+        let start = 0;
+        let hasMore = true;
+        let pageCount = 0;
+
+        // Формируем фильтр (используем точные названия полей Битрикс)
+        const filter: any = { "categoryId": String(categoryId) };
+        if (startDate) filter[">=createdTime"] = startDate + "T00:00:00+03:00"; 
+        if (endDate) filter["<=createdTime"] = endDate + "T23:59:59+03:00";
+
+        while (hasMore && pageCount < 50) { 
+            const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    entityTypeId: entityTypeId,
+                    filter: filter,
+                    select: ['id', 'assignedById', 'createdTime', 'categoryId'],
+                    start: start
+                })
+            });
+            const data = await response.json();
+            if (data.result && data.result.items) {
+                allItems = [...allItems, ...data.result.items];
+                if (data.next && data.result.items.length >= 50) {
+                    start = data.next;
+                    pageCount++;
+                } else {
+                    hasMore = false;
+                }
+            } else {
+                hasMore = false;
+            }
+        }
+        return allItems;
+    } catch (error) {
+        console.error('Error fetching reports:', error);
+        return [];
+    }
+};
+
+// Загрузка полного списка пользователей Битрикса (с пагинацией)
+export const getBitrixUsers = async () => {
+    try {
+        let allUsers: any[] = [];
+        let start = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+            const response = await fetch(`${BITRIX_WEBHOOK_URL}user.get.json?start=${start}`);
+            const data = await response.json();
+            
+            if (data.result) {
+                allUsers = [...allUsers, ...data.result];
+                if (data.next) {
+                    start = data.next;
+                } else {
+                    hasMore = false;
+                }
+            } else {
+                hasMore = false;
+            }
+        }
+
+        const usersMap: any = {};
+        allUsers.forEach((user: any) => {
+            usersMap[String(user.ID)] = `${user.NAME} ${user.LAST_NAME || ''}`.trim();
+        });
+        
+        return usersMap;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        return {};
+    }
+};
+
+export default { createBitrixLead, createHrCandidate, createDailyReportItem, getNearestDeal, getAllDealsWithCoords, getDailyReports, getBitrixUsers };
