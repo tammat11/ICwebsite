@@ -4,72 +4,16 @@ import { getAllDealsWithCoords, getDailyReports, getBitrixUsers } from '../utils
 import { Layout, Users, FileText, CheckCircle2, TrendingUp, RefreshCw, Calendar, X } from 'lucide-react';
 
 const AdminMapPage = () => {
-    const [auditData, setAuditData] = useState<{ deals: any[], reports: any[], analytics: any[] }>({ deals: [], reports: [], analytics: [] });
-    const [callData, setCallData] = useState<{ deals: any[], reports: any[], analytics: any[] }>({ deals: [], reports: [], analytics: [] });
     // Raw fetched data for local filtering
     const [rawAuditReports, setRawAuditReports] = useState<any[]>([]);
     const [rawCallReports, setRawCallReports] = useState<any[]>([]);
     const [allDeals, setAllDeals] = useState<any[]>([]);
+    const [usersMap, setUsersMap] = useState<any>({});
     
     const [isLoading, setIsLoading] = useState(true);
     const [mode, setMode] = useState<'audits' | 'calls'>('audits');
     
-    // Filters State
-    const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const today = now.toISOString().split('T')[0];
-    const [startDate, setStartDate] = useState(firstDayOfMonth);
-    const [endDate, setEndDate] = useState(today);
-
-    // Filtered data calculated in real-time from memory
-    const currentData = React.useMemo(() => {
-        const sourceData = mode === 'audits' ? { deals: allDeals, reports: rawAuditReports } : { deals: allDeals, reports: rawCallReports };
-        
-        // Local Filter by Date
-        const filteredReports = sourceData.reports.filter((r: any) => {
-            const rDate = r.createdTime?.split('T')[0];
-            if (!rDate) return false;
-            if (startDate && rDate < startDate) return false;
-            if (endDate && rDate > endDate) return false;
-            return true;
-        });
-
-        const analytics = calculateStatsInternal(sourceData.deals, filteredReports, mode, allDeals);
-
-        return {
-            deals: sourceData.deals,
-            reports: filteredReports,
-            analytics
-        };
-    }, [mode, startDate, endDate, rawAuditReports, rawCallReports, allDeals]);
-
-    // Track previously fetched range to avoid redundant API calls
-    const [fetchedRange, setFetchedRange] = useState({ start: '', end: '' });
-
-    const fetchData = () => {
-        setIsLoading(true);
-        
-        // We fetch a wide range (or current period) to allow local filtering
-        Promise.all([
-            getAllDealsWithCoords(), 
-            getDailyReports(1204, 445, startDate, endDate),
-            getDailyReports(1364, 431, startDate, endDate),
-            getBitrixUsers()
-        ]).then(([deals, reportsAudits, reportsCalls, usersMap]) => {
-            window.usersMap = usersMap; // Cache users globally for calculation
-            setAllDeals(deals);
-            setRawAuditReports(reportsAudits);
-            setRawCallReports(reportsCalls);
-            setFetchedRange({ start: startDate, end: endDate });
-            setIsLoading(false);
-        }).catch((err) => {
-            console.error('Fetch Error:', err);
-            setIsLoading(false);
-        });
-    };
-
-    const calculateStatsInternal = (currentDeals: any[], currentReports: any[], targetMode: 'audits' | 'calls', allDealsTotal: any[]) => {
-        const usersMap = window.usersMap || {};
+    const calculateStatsInternal = (currentDeals: any[], currentReports: any[], targetMode: 'audits' | 'calls', allDealsTotal: any[], uMap: any) => {
         const reportsByUser = currentReports.reduce((acc: any, r: any) => {
             const uid = String(r.assignedById);
             if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
@@ -96,7 +40,7 @@ const AdminMapPage = () => {
 
             return {
                 id: uid,
-                name: usersMap[uid] || 'Неизвестно',
+                name: uMap[uid] || 'Неизвестно',
                 dealsCount: totalDealsForUser,
                 totalDeals: totalDealsForUser,
                 reportsCount,
@@ -108,6 +52,61 @@ const AdminMapPage = () => {
         return stats
             .filter(s => s.name !== 'Неизвестно' && s.totalDeals > 10)
             .sort((a, b) => b.reportsCount - a.reportsCount);
+    };
+
+    // Filters State
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const today = now.toISOString().split('T')[0];
+    const [startDate, setStartDate] = useState(firstDayOfMonth);
+    const [endDate, setEndDate] = useState(today);
+
+    // Filtered data calculated in real-time from memory
+    const currentData = React.useMemo(() => {
+        const sourceData = (mode === 'audits') 
+            ? { deals: allDeals, reports: rawAuditReports } 
+            : { deals: allDeals, reports: rawCallReports };
+        
+        // Local Filter by Date
+        const filteredReports = (sourceData.reports || []).filter((r: any) => {
+            const rDate = r.createdTime?.split('T')[0];
+            if (!rDate) return false;
+            if (startDate && rDate < startDate) return false;
+            if (endDate && rDate > endDate) return false;
+            return true;
+        });
+
+        const analytics = calculateStatsInternal(sourceData.deals, filteredReports, mode, allDeals, usersMap);
+
+        return {
+            deals: sourceData.deals,
+            reports: filteredReports,
+            analytics
+        };
+    }, [mode, startDate, endDate, rawAuditReports, rawCallReports, allDeals, usersMap]);
+
+    // Track previously fetched range to avoid redundant API calls
+    const [fetchedRange, setFetchedRange] = useState({ start: '', end: '' });
+
+    const fetchData = () => {
+        setIsLoading(true);
+        
+        Promise.all([
+            getAllDealsWithCoords(), 
+            getDailyReports(1204, 445, startDate, endDate),
+            getDailyReports(1364, 431, startDate, endDate),
+            getBitrixUsers()
+        ]).then(([deals, reportsAudits, reportsCalls, uMap]) => {
+            setUsersMap(uMap);
+            setAllDeals(deals);
+            setRawAuditReports(reportsAudits);
+            setRawCallReports(reportsCalls);
+            setFetchedRange({ start: startDate, end: endDate });
+            setIsLoading(false);
+        }).catch((err) => {
+            console.error('Fetch Error:', err);
+            setIsLoading(false);
+        });
     };
 
     useEffect(() => {
