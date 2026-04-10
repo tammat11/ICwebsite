@@ -143,6 +143,7 @@ const AdminMapPage = () => {
                     {/* Right: Navigation & Sync & Mode Switcher */}
                     <div className="flex items-center gap-4 lg:w-2/3 lg:justify-end">
                         {/* Mode Switcher */}
+                        <div className="flex p-1 bg-brand-dark/5 rounded-[20px] border border-black/5 mr-2">
                             <button 
                                 onClick={() => setMode('audits')}
                                 className={`px-4 py-2 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'audits' ? 'bg-white shadow-sm text-brand-dark' : 'text-brand-dark/30 hover:text-brand-dark/60'}`}
