@@ -13,7 +13,7 @@ const AdminMapPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [mode, setMode] = useState<'audits' | 'calls' | 'map'>('audits');
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    const [mapStatusFilter, setMapStatusFilter] = useState<'all' | 'unvisited'>('all');
+    const [mapStatusFilter, setMapStatusFilter] = useState<'all' | 'visited' | 'unvisited'>('all');
     
     const calculateStatsInternal = (currentDeals: any[] = [], currentReports: any[] = [], targetMode: 'audits' | 'calls', allDealsTotal: any[] = [], uMap: any = {}) => {
         try {
@@ -324,6 +324,16 @@ const AdminMapPage = () => {
                                 Показать все
                             </button>
                             <button 
+                                onClick={() => setMapStatusFilter('visited')}
+                                className={`px-6 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all border ${
+                                    mapStatusFilter === 'visited' 
+                                    ? 'bg-blue-500 text-white border-blue-500 shadow-lg' 
+                                    : 'bg-white text-brand-dark/40 border-black/5 hover:border-blue-500/20'
+                                }`}
+                            >
+                                Посещенные
+                            </button>
+                            <button 
                                 onClick={() => setMapStatusFilter('unvisited')}
                                 className={`px-6 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all border ${
                                     mapStatusFilter === 'unvisited' 
@@ -488,8 +498,9 @@ const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any)
             if (deal.lat && deal.lng) {
                 const hasReport = reportMap[deal.companyId];
                 
-                // FILTER: If statusFilter is 'unvisited', only show deals without reports
+                // FILTER: Status handling
                 if (statusFilter === 'unvisited' && hasReport) return;
+                if (statusFilter === 'visited' && !hasReport) return;
 
                 const color = hasReport ? '#10b981' : '#ef4444'; // Green or Red
 
