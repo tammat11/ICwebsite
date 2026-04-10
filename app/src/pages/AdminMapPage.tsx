@@ -451,7 +451,7 @@ const AdminMapPage = () => {
                     <div className="premium-card bg-white rounded-[40px] border border-black/5 shadow-premium overflow-hidden h-[600px] relative">
                         <MapComponent 
                             deals={currentData.deals} 
-                            reports={rawAuditReports} 
+                            reports={currentData.reports} 
                             startDate={startDate} 
                             endDate={endDate} 
                             statusFilter={mapStatusFilter}
@@ -484,19 +484,18 @@ const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any)
         // Clear existing markers
         markersGroup.current.clearLayers();
 
-        // Object with reports within date range
+        // Object with reports (already filtered by mode/date)
         const reportMap = (reports || []).reduce((acc: any, r: any) => {
-            const rDate = r.createdTime?.split('T')[0];
-            if (startDate && rDate < startDate) return acc;
-            if (endDate && rDate > endDate) return acc;
-            acc[r.companyId] = true;
+            // ufCrm105_1753336038 is our Deal/Object ID field in reports
+            const dealId = r.ufCrm105_1753336038;
+            if (dealId) acc[String(dealId)] = true;
             return acc;
         }, {});
 
         // Add markers
         (deals || []).forEach((deal: any) => {
             if (deal.lat && deal.lng) {
-                const hasReport = reportMap[deal.companyId];
+                const hasReport = reportMap[String(deal.id)];
                 
                 // FILTER: Status handling
                 if (statusFilter === 'unvisited' && hasReport) return;
