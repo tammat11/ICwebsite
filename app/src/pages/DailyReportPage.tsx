@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Send, MapPin, Search, AlertCircle } from 'lucide-react';
-import { createDailyReportItem, getNearestDeal, createRemarkDeal } from '../utils/bitrix';
+import { createDailyReportItem, getNearestDeal, createRemarkDeal, getDailyReports } from '../utils/bitrix';
 import objectsCache from '../data/objects_cache.json';
 
 const DailyReportPage = () => {
@@ -85,6 +85,57 @@ const DailyReportPage = () => {
     const [isFindingObject, setIsFindingObject] = useState(false);
     const [showObjectPicker, setShowObjectPicker] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [auditedObjectIds, setAuditedObjectIds] = useState<Set<string>>(new Set());
+
+    // Fetch already audited objects for the current month
+    useEffect(() => {
+        const fetchMonthHistory = async () => {
+            try {
+                const now = new Date();
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                
+                // Get reports for current month
+                const reports = await getDailyReports(1204, 445, startOfMonth);
+                const ids = new Set<string>();
+                
+                reports.forEach((r: any) => {
+                    // ufCrm105_1753336038 is our Deal/Object ID field
+                    const objectId = r.ufCrm105_1753336038;
+                    if (objectId) ids.add(String(objectId));
+                });
+                
+                setAuditedObjectIds(ids);
+            } catch (err) {
+                console.error("History fetch error:", err);
+            }
+        };
+        fetchMonthHistory();
+    }, []);
+
+    useEffect(() => {
+        if (!location || auditedObjectIds.size === 0) return;
+
+        const findObject = async () => {
+            setIsFindingObject(true);
+            const deals = await getNearestDeal(location.lat, location.lng);
+            if (deals && deals.length > 0) {
+                // FILTER: Only show deals that haven't been audited this month
+                const freshDeals = deals.filter((d: any) => !auditedObjectIds.has(String(d.id)));
+                
+                setNearestDeals(freshDeals);
+                if (freshDeals.length > 0) {
+                    if (freshDeals.length > 1 && (freshDeals[1].distance - freshDeals[0].distance <= 0.15)) {
+                        setSelectedDeal(null);
+                        setShowObjectPicker(true);
+                    } else {
+                        setSelectedDeal(freshDeals[0]);
+                    }
+                }
+            }
+            setIsFindingObject(false);
+        };
+        findObject();
+    }, [location, auditedObjectIds]);
 
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -95,21 +146,6 @@ const DailyReportPage = () => {
                         lng: position.coords.longitude
                     };
                     setLocation(coords);
-                    
-                    setIsFindingObject(true);
-                    const deals = await getNearestDeal(coords.lat, coords.lng);
-                    if (deals && deals.length > 0) {
-                        setNearestDeals(deals);
-                        // Если разница расстояний до топ-2 объектов минимальна (менее 150 метров)
-                        // Значит мы стоим в ТРЦ или около комплекса - просим выбрать вручную.
-                        if (deals.length > 1 && (deals[1].distance - deals[0].distance <= 0.15)) {
-                            setSelectedDeal(null);
-                            setShowObjectPicker(true);
-                        } else {
-                            setSelectedDeal(deals[0]);
-                        }
-                    }
-                    setIsFindingObject(false);
                 },
                 (err) => {
                     console.error("Geolocation error:", err);
@@ -462,8 +498,9 @@ const DailyReportPage = () => {
                                                     })
                                                     .sort((a, b) => a.distance - b.distance)
                                                     .slice(0, 15)
-                                                : nearestDeals // distance <= 0.7 уже отфильтровано в utils/bitrix.ts
-                                            ).map(deal => (
+                                                : nearestDeals 
+                                            ).filter(deal => !auditedObjectIds.has(String(deal.id)))
+                                             .map(deal => (
                                                 <button
                                                     key={deal.id}
                                                     type="button"

@@ -502,7 +502,7 @@ export const getDailyReports = async (entityTypeId: number = 1204, categoryId: n
                 body: JSON.stringify({
                     entityTypeId: entityTypeId,
                     filter: filter,
-                    select: ['id', 'assignedById', 'createdTime', 'categoryId'],
+                    select: ['id', 'assignedById', 'createdTime', 'categoryId', 'ufCrm105_1753336038'],
                     start: start
                 })
             });
