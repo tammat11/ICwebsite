@@ -6,6 +6,11 @@ import { Layout, Users, FileText, CheckCircle2, TrendingUp, RefreshCw, Calendar,
 const AdminMapPage = () => {
     const [auditData, setAuditData] = useState<{ deals: any[], reports: any[], analytics: any[] }>({ deals: [], reports: [], analytics: [] });
     const [callData, setCallData] = useState<{ deals: any[], reports: any[], analytics: any[] }>({ deals: [], reports: [], analytics: [] });
+    // Raw fetched data for local filtering
+    const [rawAuditReports, setRawAuditReports] = useState<any[]>([]);
+    const [rawCallReports, setRawCallReports] = useState<any[]>([]);
+    const [allDeals, setAllDeals] = useState<any[]>([]);
+    
     const [isLoading, setIsLoading] = useState(true);
     const [mode, setMode] = useState<'audits' | 'calls'>('audits');
     
@@ -16,26 +21,46 @@ const AdminMapPage = () => {
     const [startDate, setStartDate] = useState(firstDayOfMonth);
     const [endDate, setEndDate] = useState(today);
 
-    // Current displayed data based on mode
-    const currentData = mode === 'audits' ? auditData : callData;
+    // Filtered data calculated in real-time from memory
+    const currentData = React.useMemo(() => {
+        const sourceData = mode === 'audits' ? { deals: allDeals, reports: rawAuditReports } : { deals: allDeals, reports: rawCallReports };
+        
+        // Local Filter by Date
+        const filteredReports = sourceData.reports.filter((r: any) => {
+            const rDate = r.createdTime?.split('T')[0];
+            if (!rDate) return false;
+            if (startDate && rDate < startDate) return false;
+            if (endDate && rDate > endDate) return false;
+            return true;
+        });
+
+        const analytics = calculateStatsInternal(sourceData.deals, filteredReports, mode, allDeals);
+
+        return {
+            deals: sourceData.deals,
+            reports: filteredReports,
+            analytics
+        };
+    }, [mode, startDate, endDate, rawAuditReports, rawCallReports, allDeals]);
+
+    // Track previously fetched range to avoid redundant API calls
+    const [fetchedRange, setFetchedRange] = useState({ start: '', end: '' });
 
     const fetchData = () => {
         setIsLoading(true);
         
+        // We fetch a wide range (or current period) to allow local filtering
         Promise.all([
             getAllDealsWithCoords(), 
             getDailyReports(1204, 445, startDate, endDate),
             getDailyReports(1364, 431, startDate, endDate),
             getBitrixUsers()
-        ]).then(([allDeals, reportsAudits, reportsCalls, usersMap]) => {
-            // Calculate Audit analytics
-            const auditStats = calculateStatsInternal(allDeals, reportsAudits, usersMap, 'audits', allDeals);
-            setAuditData({ deals: allDeals, reports: reportsAudits, analytics: auditStats });
-
-            // Calculate Call analytics
-            const callStats = calculateStatsInternal(allDeals, reportsCalls, usersMap, 'calls', allDeals);
-            setCallData({ deals: allDeals, reports: reportsCalls, analytics: callStats });
-
+        ]).then(([deals, reportsAudits, reportsCalls, usersMap]) => {
+            window.usersMap = usersMap; // Cache users globally for calculation
+            setAllDeals(deals);
+            setRawAuditReports(reportsAudits);
+            setRawCallReports(reportsCalls);
+            setFetchedRange({ start: startDate, end: endDate });
             setIsLoading(false);
         }).catch((err) => {
             console.error('Fetch Error:', err);
@@ -43,7 +68,8 @@ const AdminMapPage = () => {
         });
     };
 
-    const calculateStatsInternal = (currentDeals: any[], currentReports: any[], usersMap: any, targetMode: 'audits' | 'calls', allDeals: any[]) => {
+    const calculateStatsInternal = (currentDeals: any[], currentReports: any[], targetMode: 'audits' | 'calls', allDealsTotal: any[]) => {
+        const usersMap = window.usersMap || {};
         const reportsByUser = currentReports.reduce((acc: any, r: any) => {
             const uid = String(r.assignedById);
             if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
@@ -58,11 +84,8 @@ const AdminMapPage = () => {
 
         const allUserIds = Array.from(new Set([...Object.keys(dealsByUser), ...Object.keys(reportsByUser)]));
         const stats = allUserIds.map(uid => {
-            const periodDealsCount = dealsByUser[uid] || 0;
             const reportsCount = reportsByUser[uid] || 0;
-            
-            // План и фильтрация по общему кол-ву объектов (чтобы таблица не пустела)
-            const totalDealsForUser = allDeals.filter(d => String(d.assignedById) === uid).length;
+            const totalDealsForUser = allDealsTotal.filter(d => String(d.assignedById) === uid).length;
 
             let plan = 0;
             if (targetMode === 'audits') {
@@ -74,7 +97,7 @@ const AdminMapPage = () => {
             return {
                 id: uid,
                 name: usersMap[uid] || 'Неизвестно',
-                dealsCount: targetMode === 'audits' ? totalDealsForUser : periodDealsCount,
+                dealsCount: totalDealsForUser,
                 totalDeals: totalDealsForUser,
                 reportsCount,
                 plan,
@@ -88,7 +111,10 @@ const AdminMapPage = () => {
     };
 
     useEffect(() => {
-        fetchData();
+        // Only fetch if date range is outside what we have or empty
+        if (!rawAuditReports.length || startDate < fetchedRange.start || endDate > fetchedRange.end) {
+            fetchData();
+        }
     }, [startDate, endDate]);
 
     return (
