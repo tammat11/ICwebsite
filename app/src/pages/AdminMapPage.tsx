@@ -17,22 +17,31 @@ const AdminMapPage = () => {
     
     const calculateStatsInternal = (currentDeals: any[] = [], currentReports: any[] = [], targetMode: 'audits' | 'calls', allDealsTotal: any[] = [], uMap: any = {}) => {
         try {
+            // Helper to get ID from string, number or object
+            const parseId = (val: any) => {
+                if (!val) return '0';
+                if (typeof val === 'object') return String(val.id || val.ID || val.value || '0');
+                return String(val);
+            };
+
             const reportsByUser = (currentReports || []).reduce((acc: any, r: any) => {
-                const uid = String(r.assignedById);
+                if (!r) return acc;
+                const uid = parseId(r.assignedById || r.ASSIGNED_BY_ID || r.createdBy);
                 if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
                 return acc;
             }, {});
 
             const dealsByUser = (currentDeals || []).reduce((acc: any, d: any) => {
-                const uid = String(d.assignedById);
-                if (uid) acc[uid] = (acc[uid] || 0) + 1;
+                if (!d) return acc;
+                const uid = parseId(d.assignedById || d.ASSIGNED_BY_ID);
+                if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
                 return acc;
             }, {});
 
             const allUserIds = Array.from(new Set([...Object.keys(dealsByUser), ...Object.keys(reportsByUser)]));
             const stats = allUserIds.map(uid => {
                 const reportsCount = reportsByUser[uid] || 0;
-                const totalDealsForUser = (allDealsTotal || []).filter(d => String(d.assignedById) === uid).length;
+                const totalDealsForUser = (allDealsTotal || []).filter(d => d && parseId(d.assignedById || d.ASSIGNED_BY_ID) === uid).length;
 
                 let plan = 0;
                 if (targetMode === 'audits') {
@@ -53,7 +62,7 @@ const AdminMapPage = () => {
             });
 
             return stats
-                .filter(s => s.name !== 'Неизвестно' && s.totalDeals > 10)
+                .filter(s => s && s.name !== 'Неизвестно' && (s.totalDeals > 1 || s.reportsCount > 0))
                 .sort((a, b) => b.reportsCount - a.reportsCount);
         } catch (e) {
             console.error('Calculation error:', e);
@@ -77,18 +86,31 @@ const AdminMapPage = () => {
 
         const sourceReports = (mode === 'audits') ? rawAuditReports : rawCallReports;
         let filteredReports = (sourceReports || []).filter((r: any) => {
-            const rDate = r.createdTime?.split('T')[0];
+            if (!r) return false;
+            // Flexible date lookup
+            const rawDate = r.createdTime || r.UF_CRM_69_CREATED_TIME || r.createdAt || r.DATE_CREATE || r.created_time;
+            const rDate = rawDate ? String(rawDate).split('T')[0] : null;
+            
             if (!rDate) return false;
             if (startDate && rDate < startDate) return false;
             if (endDate && rDate > endDate) return false;
-            if (selectedUserId && String(r.assignedById) !== selectedUserId) return false;
+            
+            // Flexible manager ID lookup
+            const parseId = (val: any) => {
+                if (!val) return '0';
+                if (typeof val === 'object') return String(val.id || val.ID || val.value || '0');
+                return String(val);
+            };
+            const rManagerId = parseId(r.assignedById || r.ASSIGNED_BY_ID || r.createdBy || r.created_by);
+            if (selectedUserId && rManagerId !== selectedUserId) return false;
+            
             return true;
         });
 
         const analytics = calculateStatsInternal(allDeals, filteredReports, mode, allDeals, usersMap);
-        const displayAnalytics = selectedUserId 
-            ? analytics.filter(s => s.id === selectedUserId)
-            : analytics;
+        const displayAnalytics = Array.isArray(analytics) && selectedUserId 
+            ? analytics.filter(s => s && s.id === selectedUserId)
+            : (analytics || []);
 
         return {
             deals: filteredDeals,
@@ -465,6 +487,17 @@ const AdminMapPage = () => {
 
 // Separate Map Component to isolate Leaflet logic
 const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any) => {
+    // Helper to calculate distance for geofencing fallback
+    const calcDist = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    };
+
     const mapRef = React.useRef<any>(null);
     const mapInstance = React.useRef<any>(null);
     const markersGroup = React.useRef<any>(null);
@@ -482,52 +515,100 @@ const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any)
         }
 
         // Clear existing markers
-        markersGroup.current.clearLayers();
+        if (markersGroup.current) {
+            markersGroup.current.clearLayers();
+        }
 
-        // Object with reports (already filtered by mode/date)
-        const reportMap = (reports || []).reduce((acc: any, r: any) => {
-            // ufCrm105_1753336038 is our Deal/Object ID field in reports
-            const dealId = r.ufCrm105_1753336038;
-            if (dealId) acc[String(dealId)] = true;
-            return acc;
-        }, {});
-
-        // Add markers
-        (deals || []).forEach((deal: any) => {
-            if (deal.lat && deal.lng) {
-                const hasReport = reportMap[String(deal.id)];
+        if (statusFilter === 'visited') {
+            // MODE: DIRECT FROM SMART PROCESS
+            (reports || []).forEach((r: any) => {
+                if (!r) return;
+                // Flexible field lookup for POS (Position)
+                const rLat = parseFloat(r.ufCrm105_1775650060 || r.ufCrm265_1775650060 || r.UF_CRM_105_1775650060 || r.UF_CRM_265_1775650060 || '0');
+                const rLng = parseFloat(r.ufCrm105_1775650055 || r.ufCrm265_1775650055 || r.UF_CRM_105_1775650055 || r.UF_CRM_265_1775650055 || '0');
                 
-                // FILTER: Status handling
+                const reportTitle = r.title || r.TITLE || r.name || 'Отчет';
+                const rawDate = r.createdTime || r.DATE_CREATE || r.createdAt || '';
+                const reportDate = rawDate ? new Date(rawDate).toLocaleDateString() : '';
+
+                // Try to find the associated deal for more info
+                const dealIdField = 
+                    r.ufCrm105_1753336038 || r.ufCrm105_1753784383 || 
+                    r.ufCrm265_1753336038 || r.ufCrm265_1753784383 ||
+                    r.UF_CRM_105_1753336038 || r.UF_CRM_265_1753336038 || '';
+                
+                const dealId = String(dealIdField || '');
+                const linkedDeal = (deals || []).find((d: any) => d && String(d.id || d.ID) === dealId);
+                
+                const finalLat = (rLat && rLat !== 0) ? rLat : (linkedDeal?.lat);
+                const finalLng = (rLng && rLng !== 0) ? rLng : (linkedDeal?.lng);
+
+                if (finalLat && finalLng && !isNaN(finalLat) && !isNaN(finalLng)) {
+                    const marker = window.L.circleMarker([finalLat, finalLng], {
+                        radius: 8,
+                        fillColor: '#10b981',
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    });
+                    marker.bindPopup(`
+                        <div style="font-family: 'Montserrat', sans-serif; padding: 10px;">
+                            <div style="font-weight: 900; font-size: 14px; margin-bottom: 5px; color: #1a2215;">${reportTitle}</div>
+                            <div style="font-size: 10px; color: #10b981; font-weight: bold; text-transform: uppercase;">Дата: ${reportDate}</div>
+                            ${linkedDeal ? `<div style="font-size: 11px; margin-top: 5px; opacity: 0.6;">${linkedDeal.city || ''} ${linkedDeal.address || ''}</div>` : ''}
+                        </div>
+                    `);
+                    markersGroup.current.addLayer(marker);
+                }
+            });
+        } else {
+            // MODE: BASED ON ALL OBJECTS (Filtered by visited/unvisited)
+            const reportMap = (reports || []).reduce((acc: any, r: any) => {
+                if (!r) return acc;
+                const dealId = String(
+                    r.ufCrm105_1753336038 || r.ufCrm105_1753784383 || 
+                    r.ufCrm265_1753336038 || r.ufCrm265_1753784383 ||
+                    r.UF_CRM_105_1753336038 || r.UF_CRM_265_1753336038 || ''
+                );
+                if (dealId && dealId !== '0') acc[dealId] = true;
+                return acc;
+            }, {});
+
+            (deals || []).forEach((deal: any) => {
+                if (!deal) return;
+                const dealId = String(deal.id || deal.ID || '');
+                const hasReport = reportMap[dealId];
+                
+                // If unvisited, only show ones without reports
                 if (statusFilter === 'unvisited' && hasReport) return;
                 if (statusFilter === 'visited' && !hasReport) return;
-
-                const color = hasReport ? '#10b981' : '#ef4444'; // Green or Red
-
-                const marker = window.L.circleMarker([deal.lat, deal.lng], {
-                    radius: 6,
-                    fillColor: color,
-                    color: '#fff',
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                });
-
-                marker.bindPopup(`
-                    <div style="font-family: 'Montserrat', sans-serif; padding: 10px;">
-                        <div style="font-weight: 900; font-size: 14px; margin-bottom: 5px; color: #1a2215;">${deal.title}</div>
-                        <div style="font-size: 10px; color: ${color}; font-weight: bold; text-transform: uppercase;">
-                            ${hasReport ? 'Выполнено' : 'Не выполнено'}
+                
+                if (deal.lat && deal.lng && !isNaN(deal.lat) && !isNaN(deal.lng)) {
+                    const color = hasReport ? '#10b981' : '#ef4444';
+                    const marker = window.L.circleMarker([deal.lat, deal.lng], {
+                        radius: 6,
+                        fillColor: color,
+                        color: '#fff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                    marker.bindPopup(`
+                        <div style="font-family: 'Montserrat', sans-serif; padding: 10px;">
+                            <div style="font-weight: 900; font-size: 14px; margin-bottom: 5px; color: #1a2215;">${deal.title || 'Без названия'}</div>
+                            <div style="font-size: 10px; color: ${color}; font-weight: bold; text-transform: uppercase;">
+                                ${hasReport ? 'Выполнено' : 'Не выполнено'}
+                            </div>
                         </div>
-                        <div style="font-size: 11px; margin-top: 5px; opacity: 0.6;">${deal.city || ''}</div>
-                    </div>
-                `);
-
-                markersGroup.current.addLayer(marker);
-            }
-        });
+                    `);
+                    markersGroup.current.addLayer(marker);
+                }
+            });
+        }
 
         // Fit bounds if has markers
-        if (deals.length > 0 && markersGroup.current.getLayers().length > 0) {
+        if (deals && deals.length > 0 && markersGroup.current && markersGroup.current.getLayers().length > 0) {
             // mapInstance.current.fitBounds(markersGroup.current.getBounds());
         }
 

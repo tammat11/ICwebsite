@@ -502,7 +502,13 @@ export const getDailyReports = async (entityTypeId: number = 1204, categoryId: n
                 body: JSON.stringify({
                     entityTypeId: entityTypeId,
                     filter: filter,
-                    select: ['id', 'assignedById', 'createdTime', 'categoryId', 'ufCrm105_1753336038'],
+                    select: [
+                        'id', 'assignedById', 'createdTime', 'categoryId', 
+                        'ufCrm105_1753336038', 'ufCrm105_1753784383', 
+                        'ufCrm265_1753336038', 'ufCrm265_1753784383',
+                        'ufCrm105_1775650060', 'ufCrm105_1775650055',
+                        'ufCrm265_1775650060', 'ufCrm265_1775650055'
+                    ],
                     start: start
                 })
             });
