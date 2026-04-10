@@ -13,45 +13,50 @@ const AdminMapPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [mode, setMode] = useState<'audits' | 'calls'>('audits');
     
-    const calculateStatsInternal = (currentDeals: any[], currentReports: any[], targetMode: 'audits' | 'calls', allDealsTotal: any[], uMap: any) => {
-        const reportsByUser = currentReports.reduce((acc: any, r: any) => {
-            const uid = String(r.assignedById);
-            if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
-            return acc;
-        }, {});
+    const calculateStatsInternal = (currentDeals: any[] = [], currentReports: any[] = [], targetMode: 'audits' | 'calls', allDealsTotal: any[] = [], uMap: any = {}) => {
+        try {
+            const reportsByUser = (currentReports || []).reduce((acc: any, r: any) => {
+                const uid = String(r.assignedById);
+                if (uid && uid !== '0') acc[uid] = (acc[uid] || 0) + 1;
+                return acc;
+            }, {});
 
-        const dealsByUser = currentDeals.reduce((acc: any, d: any) => {
-            const uid = String(d.assignedById);
-            if (uid) acc[uid] = (acc[uid] || 0) + 1;
-            return acc;
-        }, {});
+            const dealsByUser = (currentDeals || []).reduce((acc: any, d: any) => {
+                const uid = String(d.assignedById);
+                if (uid) acc[uid] = (acc[uid] || 0) + 1;
+                return acc;
+            }, {});
 
-        const allUserIds = Array.from(new Set([...Object.keys(dealsByUser), ...Object.keys(reportsByUser)]));
-        const stats = allUserIds.map(uid => {
-            const reportsCount = reportsByUser[uid] || 0;
-            const totalDealsForUser = allDealsTotal.filter(d => String(d.assignedById) === uid).length;
+            const allUserIds = Array.from(new Set([...Object.keys(dealsByUser), ...Object.keys(reportsByUser)]));
+            const stats = allUserIds.map(uid => {
+                const reportsCount = reportsByUser[uid] || 0;
+                const totalDealsForUser = (allDealsTotal || []).filter(d => String(d.assignedById) === uid).length;
 
-            let plan = 0;
-            if (targetMode === 'audits') {
-                plan = totalDealsForUser < 100 ? 60 : 40;
-            } else {
-                plan = totalDealsForUser < 100 ? 20 : 100;
-            }
+                let plan = 0;
+                if (targetMode === 'audits') {
+                    plan = totalDealsForUser < 100 ? 60 : 40;
+                } else {
+                    plan = totalDealsForUser < 100 ? 20 : 100;
+                }
 
-            return {
-                id: uid,
-                name: uMap[uid] || 'Неизвестно',
-                dealsCount: totalDealsForUser,
-                totalDeals: totalDealsForUser,
-                reportsCount,
-                plan,
-                diff: reportsCount - plan
-            };
-        });
+                return {
+                    id: uid,
+                    name: uMap[uid] || 'Неизвестно',
+                    dealsCount: totalDealsForUser,
+                    totalDeals: totalDealsForUser,
+                    reportsCount,
+                    plan,
+                    diff: reportsCount - plan
+                };
+            });
 
-        return stats
-            .filter(s => s.name !== 'Неизвестно' && s.totalDeals > 10)
-            .sort((a, b) => b.reportsCount - a.reportsCount);
+            return stats
+                .filter(s => s.name !== 'Неизвестно' && s.totalDeals > 10)
+                .sort((a, b) => b.reportsCount - a.reportsCount);
+        } catch (e) {
+            console.error('Calculation error:', e);
+            return [];
+        }
     };
 
     // Filters State
