@@ -13,6 +13,7 @@ const AdminMapPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [mode, setMode] = useState<'audits' | 'calls' | 'map'>('audits');
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [mapStatusFilter, setMapStatusFilter] = useState<'all' | 'unvisited'>('all');
     
     const calculateStatsInternal = (currentDeals: any[] = [], currentReports: any[] = [], targetMode: 'audits' | 'calls', allDealsTotal: any[] = [], uMap: any = {}) => {
         try {
@@ -307,32 +308,59 @@ const AdminMapPage = () => {
                     </div>
                 </div>
 
-                {/* Account Buttons (Only in Map Mode) */}
+                {/* Account & Status Buttons (Only in Map Mode) */}
                 {mode === 'map' && (
-                    <div className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto">
-                        <button 
-                            onClick={() => setSelectedUserId(null)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                !selectedUserId 
-                                ? 'bg-brand-dark text-white border-brand-dark shadow-lg scale-105' 
-                                : 'bg-white text-brand-dark/40 border-black/5 hover:border-brand-dark/20'
-                            }`}
-                        >
-                            Все
-                        </button>
-                        {activeManagers.map(m => (
+                    <div className="flex flex-col gap-4 mb-10 max-w-4xl mx-auto">
+                        {/* Status Filter */}
+                        <div className="flex justify-center gap-2">
                             <button 
-                                key={m.id}
-                                onClick={() => setSelectedUserId(m.id)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                    selectedUserId === m.id 
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg scale-105' 
-                                    : 'bg-white text-brand-dark/40 border-black/5 hover:border-blue-600/20'
+                                onClick={() => setMapStatusFilter('all')}
+                                className={`px-6 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all border ${
+                                    mapStatusFilter === 'all' 
+                                    ? 'bg-brand-green text-white border-brand-green shadow-lg' 
+                                    : 'bg-white text-brand-dark/40 border-black/5 hover:border-brand-green/20'
                                 }`}
                             >
-                                {m.name}
+                                Показать все
                             </button>
-                        ))}
+                            <button 
+                                onClick={() => setMapStatusFilter('unvisited')}
+                                className={`px-6 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all border ${
+                                    mapStatusFilter === 'unvisited' 
+                                    ? 'bg-red-500 text-white border-red-500 shadow-lg' 
+                                    : 'bg-white text-brand-dark/40 border-black/5 hover:border-red-500/20'
+                                }`}
+                            >
+                                Не посещенные
+                            </button>
+                        </div>
+
+                        {/* Managers Filter */}
+                        <div className="flex flex-wrap justify-center gap-2 pt-4 border-t border-black/5">
+                            <button 
+                                onClick={() => setSelectedUserId(null)}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                    !selectedUserId 
+                                    ? 'bg-brand-dark text-white border-brand-dark shadow-lg' 
+                                    : 'bg-white text-brand-dark/40 border-black/5'
+                                }`}
+                            >
+                                Все менеджеры
+                            </button>
+                            {activeManagers.map(m => (
+                                <button 
+                                    key={m.id}
+                                    onClick={() => setSelectedUserId(m.id)}
+                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                        selectedUserId === m.id 
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
+                                        : 'bg-white text-brand-dark/40 border-black/5'
+                                    }`}
+                                >
+                                    {m.name}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -412,10 +440,11 @@ const AdminMapPage = () => {
                 ) : (
                     <div className="premium-card bg-white rounded-[40px] border border-black/5 shadow-premium overflow-hidden h-[600px] relative">
                         <MapComponent 
-                            deals={allDeals} 
+                            deals={currentData.deals} 
                             reports={rawAuditReports} 
                             startDate={startDate} 
                             endDate={endDate} 
+                            statusFilter={mapStatusFilter}
                         />
                     </div>
                 )}
@@ -425,7 +454,7 @@ const AdminMapPage = () => {
 };
 
 // Separate Map Component to isolate Leaflet logic
-const MapComponent = ({ deals, reports, startDate, endDate }: any) => {
+const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any) => {
     const mapRef = React.useRef<any>(null);
     const mapInstance = React.useRef<any>(null);
     const markersGroup = React.useRef<any>(null);
@@ -458,6 +487,10 @@ const MapComponent = ({ deals, reports, startDate, endDate }: any) => {
         (deals || []).forEach((deal: any) => {
             if (deal.lat && deal.lng) {
                 const hasReport = reportMap[deal.companyId];
+                
+                // FILTER: If statusFilter is 'unvisited', only show deals without reports
+                if (statusFilter === 'unvisited' && hasReport) return;
+
                 const color = hasReport ? '#10b981' : '#ef4444'; // Green or Red
 
                 const marker = window.L.circleMarker([deal.lat, deal.lng], {
