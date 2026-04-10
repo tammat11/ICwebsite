@@ -246,30 +246,8 @@ const AdminMapPage = () => {
                     </div>
                 </div>
 
-                {/* Premium Filters: Date & Account */}
-                <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12">
-                    
-                    {/* Account Selector */}
-                    <div className="group relative">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-brand-green/20 rounded-[32px] blur opacity-10 group-hover:opacity-30 transition duration-1000"></div>
-                        <div className="relative flex items-center gap-3 bg-white/80 backdrop-blur-xl p-2 rounded-[32px] border border-black/[0.03] shadow-premium ring-1 ring-black/[0.02]">
-                            <div className="flex items-center gap-3 px-6 py-3 bg-brand-light/40 rounded-[26px] border border-black/[0.02] hover:bg-white transition-all">
-                                <Users size={16} className="text-blue-500" />
-                                <select 
-                                    value={selectedUserId || ''} 
-                                    onChange={(e) => setSelectedUserId(e.target.value || null)}
-                                    className="bg-transparent text-[13px] font-black text-brand-dark outline-none cursor-pointer min-w-[150px]"
-                                >
-                                    <option value="">Все аккаунты</option>
-                                    {activeManagers.map(m => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Date Picker */}
+                {/* Premium Date Range Picker (Always Visible) */}
+                <div className="flex justify-center mb-6">
                     <div className="group relative">
                         {/* Glow effect for background */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-green/20 to-blue-500/20 rounded-[34px] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
@@ -313,15 +291,14 @@ const AdminMapPage = () => {
                             </div>
 
                             {/* Clear Button */}
-                            {(startDate || endDate || selectedUserId) && (
+                            {(startDate || endDate) && (
                                 <button 
                                     onClick={() => {
                                         setStartDate('');
                                         setEndDate('');
-                                        setSelectedUserId(null);
                                     }}
                                     className="w-12 h-12 flex items-center justify-center rounded-[24px] bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-500 active:scale-95"
-                                    title="Сбросить фильтры"
+                                    title="Сбросить даты"
                                 >
                                     <X size={18} />
                                 </button>
@@ -329,6 +306,35 @@ const AdminMapPage = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Account Buttons (Only in Map Mode) */}
+                {mode === 'map' && (
+                    <div className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto">
+                        <button 
+                            onClick={() => setSelectedUserId(null)}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                !selectedUserId 
+                                ? 'bg-brand-dark text-white border-brand-dark shadow-lg scale-105' 
+                                : 'bg-white text-brand-dark/40 border-black/5 hover:border-brand-dark/20'
+                            }`}
+                        >
+                            Все
+                        </button>
+                        {activeManagers.map(m => (
+                            <button 
+                                key={m.id}
+                                onClick={() => setSelectedUserId(m.id)}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                    selectedUserId === m.id 
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg scale-105' 
+                                    : 'bg-white text-brand-dark/40 border-black/5 hover:border-blue-600/20'
+                                }`}
+                            >
+                                {m.name}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {/* Main Content: Table or Map */}
                 {mode !== 'map' ? (
