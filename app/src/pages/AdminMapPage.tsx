@@ -11,7 +11,7 @@ const AdminMapPage = () => {
     const [usersMap, setUsersMap] = useState<any>({});
     
     const [isLoading, setIsLoading] = useState(true);
-    const [mode, setMode] = useState<'audits' | 'calls'>('audits');
+    const [mode, setMode] = useState<'audits' | 'calls' | 'map'>('audits');
     
     const calculateStatsInternal = (currentDeals: any[] = [], currentReports: any[] = [], targetMode: 'audits' | 'calls', allDealsTotal: any[] = [], uMap: any = {}) => {
         try {
@@ -143,7 +143,6 @@ const AdminMapPage = () => {
                     {/* Right: Navigation & Sync & Mode Switcher */}
                     <div className="flex items-center gap-4 lg:w-2/3 lg:justify-end">
                         {/* Mode Switcher */}
-                        <div className="flex p-1 bg-brand-dark/5 rounded-[20px] border border-black/5 mr-2">
                             <button 
                                 onClick={() => setMode('audits')}
                                 className={`px-4 py-2 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'audits' ? 'bg-white shadow-sm text-brand-dark' : 'text-brand-dark/30 hover:text-brand-dark/60'}`}
@@ -155,6 +154,12 @@ const AdminMapPage = () => {
                                 className={`px-4 py-2 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'calls' ? 'bg-white shadow-sm text-brand-dark' : 'text-brand-dark/30 hover:text-brand-dark/60'}`}
                             >
                                 Обзвоны
+                            </button>
+                            <button 
+                                onClick={() => setMode('map')}
+                                className={`px-4 py-2 rounded-[16px] text-[9px] font-black uppercase tracking-widest transition-all ${mode === 'map' ? 'bg-white shadow-sm text-brand-dark' : 'text-brand-dark/30 hover:text-brand-dark/60'}`}
+                            >
+                                Карта
                             </button>
                         </div>
 
@@ -289,78 +294,165 @@ const AdminMapPage = () => {
                     </div>
                 </div>
 
-                {/* Main Table */}
-                <div className="premium-card bg-white rounded-[40px] border border-black/5 shadow-premium overflow-hidden">
-                    <div className="px-8 py-6 border-b border-black/5 bg-brand-light/20">
-                        <h2 className="text-sm font-black uppercase text-brand-dark flex items-center gap-3">
-                            <div className="w-1.5 h-6 bg-brand-green rounded-full" />
-                            Рейтинг активности ответственных
-                        </h2>
-                    </div>
+                {/* Main Content: Table or Map */}
+                {mode !== 'map' ? (
+                    <div className="premium-card bg-white rounded-[40px] border border-black/5 shadow-premium overflow-hidden">
+                        <div className="px-8 py-6 border-b border-black/5 bg-brand-light/20">
+                            <h2 className="text-sm font-black uppercase text-brand-dark flex items-center gap-3">
+                                <div className="w-1.5 h-6 bg-brand-green rounded-full" />
+                                {mode === 'audits' ? 'Рейтинг активности (Аудиты)' : 'Рейтинг активности (Обзвоны)'}
+                            </h2>
+                        </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-brand-light/10">
-                                    <th className="px-10 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest">№</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest">Ответственный</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">{mode === 'audits' ? 'Проведено чеков' : 'Проведено обзвонов'}</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">План</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">Разница</th>
-                                    <th className="px-10 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-right">Статус выполнения</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-black/5">
-                                {currentData.analytics.map((stat, idx) => {
-                                    const progress = Math.min((stat.reportsCount / (stat.plan || 1)) * 100, 100);
-                                    
-                                    return (
-                                        <tr key={stat.id} className="hover:bg-brand-light/40 transition-all group">
-                                            <td className="px-10 py-6 text-xs font-black text-brand-dark/20">{idx + 1}</td>
-                                            <td className="px-6 py-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-2xl bg-brand-green/10 flex items-center justify-center text-[11px] font-black text-brand-green border border-brand-green/10">
-                                                        {stat.name.split(' ').map((n: string) => n[0]).join('')}
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-brand-light/10">
+                                        <th className="px-10 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest">№</th>
+                                        <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest">Ответственный</th>
+                                        <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">{mode === 'audits' ? 'Проведено чеков' : 'Проведено обзвонов'}</th>
+                                        <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">План</th>
+                                        <th className="px-6 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-center">Разница</th>
+                                        <th className="px-10 py-5 text-[10px] font-black uppercase text-brand-dark/30 tracking-widest text-right">Статус выполнения</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-black/5">
+                                    {currentData.analytics.map((stat, idx) => {
+                                        const progress = Math.min((stat.reportsCount / (stat.plan || 1)) * 100, 100);
+                                        
+                                        return (
+                                            <tr key={stat.id} className="hover:bg-brand-light/40 transition-all group">
+                                                <td className="px-10 py-6 text-xs font-black text-brand-dark/20">{idx + 1}</td>
+                                                <td className="px-6 py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-2xl bg-brand-green/10 flex items-center justify-center text-[11px] font-black text-brand-green border border-brand-green/10">
+                                                            {stat.name.split(' ').map((n: string) => n[0]).join('')}
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-sm font-bold text-brand-dark group-hover:text-brand-green transition-colors">{stat.name}</div>
+                                                            <div className="text-[9px] font-bold text-brand-dark/30 uppercase">{stat.dealsCount} объектов</div>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <div className="text-sm font-bold text-brand-dark group-hover:text-brand-green transition-colors">{stat.name}</div>
-                                                        <div className="text-[9px] font-bold text-brand-dark/30 uppercase">{stat.dealsCount} объектов</div>
+                                                </td>
+                                                <td className="px-6 py-6 text-center">
+                                                    <div className="text-lg font-black text-brand-dark">{stat.reportsCount}</div>
+                                                </td>
+                                                <td className="px-6 py-6 text-center">
+                                                    <div className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">{stat.plan}</div>
+                                                </td>
+                                                <td className="px-6 py-6 text-center">
+                                                    <div className={`text-sm font-black ${stat.diff >= 0 ? 'text-brand-green' : 'text-red-500'}`}>
+                                                        {stat.diff > 0 ? `+${stat.diff}` : stat.diff}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-6 text-center">
-                                                <div className="text-lg font-black text-brand-dark">{stat.reportsCount}</div>
-                                            </td>
-                                            <td className="px-6 py-6 text-center">
-                                                <div className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">{stat.plan}</div>
-                                            </td>
-                                            <td className="px-6 py-6 text-center">
-                                                <div className={`text-sm font-black ${stat.diff >= 0 ? 'text-brand-green' : 'text-red-500'}`}>
-                                                    {stat.diff > 0 ? `+${stat.diff}` : stat.diff}
-                                                </div>
-                                            </td>
-                                            <td className="px-10 py-6">
-                                                <div className="flex flex-col items-end gap-2">
-                                                    <div className="text-[10px] font-bold text-brand-dark/30 uppercase tracking-widest">
-                                                        План выполнен на {Math.round(progress)}%
+                                                </td>
+                                                <td className="px-10 py-6">
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <div className="text-[10px] font-bold text-brand-dark/30 uppercase tracking-widest">
+                                                            План выполнен на {Math.round(progress)}%
+                                                        </div>
+                                                        <div className="w-32 h-1.5 bg-brand-light rounded-full overflow-hidden border border-black/5">
+                                                            <div 
+                                                                className={`h-full transition-all duration-1000 ${
+                                                                    progress >= 100 ? 'bg-brand-green' : progress >= 50 ? 'bg-orange-400' : 'bg-red-500'
+                                                                }`}
+                                                                style={{ width: `${progress}%` }}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div className="w-32 h-1.5 bg-brand-light rounded-full overflow-hidden border border-black/5">
-                                                        <div 
-                                                            className={`h-full transition-all duration-1000 ${
-                                                                progress >= 100 ? 'bg-brand-green' : progress >= 50 ? 'bg-orange-400' : 'bg-red-500'
-                                                            }`}
-                                                            style={{ width: `${progress}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="premium-card bg-white rounded-[40px] border border-black/5 shadow-premium overflow-hidden h-[600px] relative">
+                        <MapComponent 
+                            deals={allDeals} 
+                            reports={rawAuditReports} 
+                            startDate={startDate} 
+                            endDate={endDate} 
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// Separate Map Component to isolate Leaflet logic
+const MapComponent = ({ deals, reports, startDate, endDate }: any) => {
+    const mapRef = React.useRef<any>(null);
+    const mapInstance = React.useRef<any>(null);
+    const markersGroup = React.useRef<any>(null);
+
+    useEffect(() => {
+        if (!mapRef.current || !window.L) return;
+
+        // Initialize Map if not exists
+        if (!mapInstance.current) {
+            mapInstance.current = window.L.map(mapRef.current).setView([48.0196, 66.9237], 5); // Kazakhstan center
+            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(mapInstance.current);
+            markersGroup.current = window.L.layerGroup().addTo(mapInstance.current);
+        }
+
+        // Clear existing markers
+        markersGroup.current.clearLayers();
+
+        // Object with reports within date range
+        const reportMap = (reports || []).reduce((acc: any, r: any) => {
+            const rDate = r.createdTime?.split('T')[0];
+            if (startDate && rDate < startDate) return acc;
+            if (endDate && rDate > endDate) return acc;
+            acc[r.companyId] = true;
+            return acc;
+        }, {});
+
+        // Add markers
+        (deals || []).forEach((deal: any) => {
+            if (deal.lat && deal.lng) {
+                const hasReport = reportMap[deal.companyId];
+                const color = hasReport ? '#10b981' : '#ef4444'; // Green or Red
+
+                const marker = window.L.circleMarker([deal.lat, deal.lng], {
+                    radius: 6,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.bindPopup(`
+                    <div style="font-family: 'Montserrat', sans-serif; padding: 10px;">
+                        <div style="font-weight: 900; font-size: 14px; margin-bottom: 5px; color: #1a2215;">${deal.title}</div>
+                        <div style="font-size: 10px; color: ${color}; font-weight: bold; text-transform: uppercase;">
+                            ${hasReport ? 'Аудит проведен' : 'Аудит не найден'}
+                        </div>
+                        <div style="font-size: 11px; margin-top: 5px; opacity: 0.6;">${deal.city || ''}</div>
+                    </div>
+                `);
+
+                markersGroup.current.addLayer(marker);
+            }
+        });
+
+        // Fit bounds if has markers
+        if (deals.length > 0) {
+            // mapInstance.current.fitBounds(markersGroup.current.getBounds());
+        }
+
+        return () => {
+            // Optional: cleanup
+        };
+    }, [deals, reports, startDate, endDate]);
+
+    return <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 10 }} />;
+};
             </div>
         </div>
     );
