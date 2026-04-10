@@ -454,9 +454,5 @@ const MapComponent = ({ deals, reports, startDate, endDate }: any) => {
 
     return <div ref={mapRef} style={{ width: '100%', height: '100%', zIndex: 10 }} />;
 };
-            </div>
-        </div>
-    );
-};
 
 export default AdminMapPage;
