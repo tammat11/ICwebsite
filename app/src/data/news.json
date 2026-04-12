@@ -1,15 +1,5 @@
 [
   {
-    "title": "Test",
-    "desc": "",
-    "date": "12.04.2026",
-    "category": "Новости",
-    "tag": "NEW",
-    "image": "",
-    "readTime": "3 мин",
-    "id": "1775984586206"
-  },
-  {
     "id": "kaspi-case",
     "company": "AO «Kaspi Bank»",
     "stat": "Kaspi Bank",
