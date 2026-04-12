@@ -325,6 +325,7 @@ const AdminPage = () => {
                             </div>
                             <h1 className="text-2xl font-bold uppercase tracking-tight text-brand-dark">GitHub Token</h1>
                             <p className="text-sm text-brand-dark/40 mt-2 italic">Введите токен репозитория</p>
+                            {error && <p className="text-red-500 text-[10px] font-bold uppercase mt-4 bg-red-50 p-2 rounded-lg text-center">{error}</p>}
                         </div>
                         <form
                             onSubmit={(e) => {
