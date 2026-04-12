@@ -504,10 +504,10 @@ export const getDailyReports = async (entityTypeId: number = 1204, categoryId: n
                     filter: filter,
                     select: [
                         'id', 'assignedById', 'createdTime', 'categoryId', 
-                        'ufCrm105_1753336038', 'ufCrm105_1753784383', 
-                        'ufCrm265_1753336038', 'ufCrm265_1753784383',
-                        'ufCrm105_1775650060', 'ufCrm105_1775650055',
-                        'ufCrm265_1775650060', 'ufCrm265_1775650055'
+                        'UF_CRM_105_1753336038', 'UF_CRM_105_1753784383', 
+                        'UF_CRM_265_1753336038', 'UF_CRM_265_1753784383',
+                        'UF_CRM_105_1775650060', 'UF_CRM_105_1775650055',
+                        'UF_CRM_265_1775650060', 'UF_CRM_265_1775650055'
                     ],
                     start: start
                 })

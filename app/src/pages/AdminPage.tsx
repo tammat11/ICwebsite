@@ -10,7 +10,7 @@ const FILE_PATH = 'app/src/data/news.json';
 const TG_BOT_TOKEN = '8459731566:AAGbkYk43Fyg7kxcqMuDxbBXgC1LHfSL9bU';
 const TG_CHAT_ID = '-5105161509';
 
-const ALLOWED_PHONES = ['77070522006', '77026666113'];
+const ALLOWED_PHONES = ['77070522006', '77026666113', '77470620428'];
 
 interface NewsArticle {
     id: string;
@@ -91,7 +91,7 @@ const AdminPage = () => {
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
-            if (!res.ok) throw new Error('Не удалось загрузить данные. Проверьте токен.');
+            if (!res.ok) throw new Error(`Ошибка ${res.status}: Не удалось загрузить данные. Проверьте токен.`);
             const data = await res.json();
             setFileSha(data.sha);
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
@@ -99,7 +99,7 @@ const AdminPage = () => {
         } catch (err: any) {
             setError(err.message);
             if (err.message.includes('401')) {
-                logout();
+                logout(true); // Clear token only on unauthorized error
             }
         }
         setLoading(false);
@@ -145,10 +145,10 @@ const AdminPage = () => {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('gh_token');
+    const logout = (clearToken = false) => {
+        if (clearToken) localStorage.removeItem('gh_token');
         localStorage.removeItem('admin_authenticated');
-        setToken(null);
+        if (clearToken) setToken(null);
         setIsAuthed(false);
         setNews([]);
     };
@@ -266,7 +266,10 @@ const AdminPage = () => {
                         </div>
                         
                         {step === 'phone' ? (
-                            <div className="space-y-4">
+                            <form 
+                                onSubmit={(e) => { e.preventDefault(); sendTgCode(); }}
+                                className="space-y-4"
+                            >
                                 <input
                                     type="tel"
                                     value={phone}
@@ -275,14 +278,17 @@ const AdminPage = () => {
                                     className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                                 />
                                 <button
-                                    onClick={sendTgCode}
+                                    type="submit"
                                     className="w-full flex items-center justify-center gap-3 bg-brand-dark text-white py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-brand-green transition-all"
                                 >
                                     Получить код
                                 </button>
-                            </div>
+                            </form>
                         ) : (
-                            <div className="space-y-4">
+                            <form 
+                                onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
+                                className="space-y-4"
+                            >
                                 <input
                                     type="text"
                                     value={inputCode}
@@ -292,15 +298,15 @@ const AdminPage = () => {
                                     className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-3xl font-bold tracking-[0.5em] text-center focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                                 />
                                 <button
-                                    onClick={handleLogin}
+                                    type="submit"
                                     className="w-full flex items-center justify-center gap-3 bg-brand-green text-white py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-brand-dark transition-all"
                                 >
                                     Войти
                                 </button>
-                                <button onClick={() => setStep('phone')} className="w-full text-[10px] uppercase tracking-widest text-brand-dark/30 hover:text-brand-dark transition-colors">
+                                <button type="button" onClick={() => setStep('phone')} className="w-full text-[10px] uppercase tracking-widest text-brand-dark/30 hover:text-brand-dark transition-colors">
                                     ← Другой номер
                                 </button>
-                            </div>
+                            </form>
                         )}
                     </div>
                 </div>
@@ -320,7 +326,17 @@ const AdminPage = () => {
                             <h1 className="text-2xl font-bold uppercase tracking-tight text-brand-dark">GitHub Token</h1>
                             <p className="text-sm text-brand-dark/40 mt-2 italic">Введите токен репозитория</p>
                         </div>
-                        <div className="space-y-4">
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                if (inputToken.trim()) {
+                                    localStorage.setItem('gh_token', inputToken.trim());
+                                    setToken(inputToken.trim());
+                                    setInputToken('');
+                                }
+                            }}
+                            className="space-y-4"
+                        >
                             <input
                                 type="password"
                                 value={inputToken}
@@ -329,18 +345,12 @@ const AdminPage = () => {
                                 className="w-full px-5 py-4 bg-brand-light rounded-2xl border border-black/5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-green/30"
                             />
                             <button
-                                onClick={() => {
-                                    if (inputToken.trim()) {
-                                        localStorage.setItem('gh_token', inputToken.trim());
-                                        setToken(inputToken.trim());
-                                        setInputToken('');
-                                    }
-                                }}
+                                type="submit"
                                 className="w-full flex items-center justify-center gap-3 bg-brand-dark text-white py-4 rounded-2xl font-bold uppercase text-sm tracking-widest hover:bg-brand-green transition-all"
                             >
                                 Сохранить токен
                             </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>

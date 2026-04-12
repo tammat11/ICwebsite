@@ -122,7 +122,9 @@ const AdminMapPage = () => {
     // Managers list for the filter (those with > 10 objects)
     const activeManagers = React.useMemo(() => {
         const stats = calculateStatsInternal(allDeals, [], 'audits', allDeals, usersMap);
-        return stats.map(s => ({ id: s.id, name: s.name }));
+        return stats
+            .filter(s => (s.totalDeals || 0) > 10)
+            .map(s => ({ id: s.id, name: s.name }));
     }, [allDeals, usersMap]);
 
     // Track previously fetched range to avoid redundant API calls
@@ -505,71 +507,90 @@ const MapComponent = ({ deals, reports, startDate, endDate, statusFilter }: any)
     useEffect(() => {
         if (!mapRef.current || !window.L) return;
 
+        const L = window.L;
+
         // Initialize Map if not exists
         if (!mapInstance.current) {
-            mapInstance.current = window.L.map(mapRef.current).setView([48.0196, 66.9237], 5); // Kazakhstan center
-            window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            console.log("Map: Initializing with Kazakhstan center");
+            mapInstance.current = L.map(mapRef.current).setView([48.0196, 66.9237], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap'
             }).addTo(mapInstance.current);
-            markersGroup.current = window.L.layerGroup().addTo(mapInstance.current);
+            markersGroup.current = L.layerGroup().addTo(mapInstance.current);
         }
+
+        // Force resize
+        setTimeout(() => {
+            if (mapInstance.current) mapInstance.current.invalidateSize();
+        }, 300);
 
         // Clear existing markers
         if (markersGroup.current) {
             markersGroup.current.clearLayers();
         }
 
+        console.log(`Map: Status Filter - ${statusFilter}. Reports: ${reports?.length}, Deals: ${deals?.length}`);
+
         if (statusFilter === 'visited') {
-            // MODE: DIRECT FROM SMART PROCESS
+            let renderedCount = 0;
             (reports || []).forEach((r: any) => {
                 if (!r) return;
-                // Flexible field lookup for POS (Position)
-                const rLat = parseFloat(r.ufCrm105_1775650060 || r.ufCrm265_1775650060 || r.UF_CRM_105_1775650060 || r.UF_CRM_265_1775650060 || '0');
-                const rLng = parseFloat(r.ufCrm105_1775650055 || r.ufCrm265_1775650055 || r.UF_CRM_105_1775650055 || r.UF_CRM_265_1775650055 || '0');
                 
-                const reportTitle = r.title || r.TITLE || r.name || 'Отчет';
-                const rawDate = r.createdTime || r.DATE_CREATE || r.createdAt || '';
-                const reportDate = rawDate ? new Date(rawDate).toLocaleDateString() : '';
+                // Flexible field lookup (Bitrix often uses Uppercase)
+                let finalLat = parseFloat(r.UF_CRM_105_1775650060 || r.UF_CRM_265_1775650060 || r.ufCrm105_1775650060 || r.ufCrm265_1775650060 || '0');
+                let finalLng = parseFloat(r.UF_CRM_105_1775650055 || r.UF_CRM_265_1775650055 || r.ufCrm105_1775650055 || r.ufCrm265_1775650055 || '0');
+                
+                const dealId = String(
+                    r.UF_CRM_105_1753336038 || r.UF_CRM_265_1753336038 || 
+                    r.ufCrm105_1753336038 || r.ufCrm265_1753336038 || ''
+                );
 
-                // Try to find the associated deal for more info
-                const dealIdField = 
-                    r.ufCrm105_1753336038 || r.ufCrm105_1753784383 || 
-                    r.ufCrm265_1753336038 || r.ufCrm265_1753784383 ||
-                    r.UF_CRM_105_1753336038 || r.UF_CRM_265_1753336038 || '';
-                
-                const dealId = String(dealIdField || '');
-                const linkedDeal = (deals || []).find((d: any) => d && String(d.id || d.ID) === dealId);
-                
-                const finalLat = (rLat && rLat !== 0) ? rLat : (linkedDeal?.lat);
-                const finalLng = (rLng && rLng !== 0) ? rLng : (linkedDeal?.lng);
+                if ((!finalLat || finalLat === 0) && dealId) {
+                    const cached = objectsCache.find((o: any) => String(o.id) === dealId);
+                    if (cached) {
+                        finalLat = parseFloat(cached.lat);
+                        finalLng = parseFloat(cached.lng);
+                    }
+                }
 
-                if (finalLat && finalLng && !isNaN(finalLat) && !isNaN(finalLng)) {
-                    const marker = window.L.circleMarker([finalLat, finalLng], {
-                        radius: 8,
+                if (finalLat && finalLng && finalLat !== 0) {
+                    renderedCount++;
+                    const reportTitle = r.title || r.TITLE || 'Отчет по объекту';
+                    const rawDate = r.createdTime || r.DATE_CREATE || r.createdAt || '';
+                    const reportDate = rawDate ? new Date(rawDate).toLocaleDateString() : 'Неизвестно';
+
+                    const marker = L.circleMarker([finalLat, finalLng], {
+                        radius: 12, // Bigger green dots
                         fillColor: '#10b981',
-                        color: '#fff',
-                        weight: 2,
+                        color: '#064e3b',
+                        weight: 3,
                         opacity: 1,
-                        fillOpacity: 0.9
+                        fillOpacity: 1
                     });
+                    
                     marker.bindPopup(`
-                        <div style="font-family: 'Montserrat', sans-serif; padding: 10px;">
-                            <div style="font-weight: 900; font-size: 14px; margin-bottom: 5px; color: #1a2215;">${reportTitle}</div>
-                            <div style="font-size: 10px; color: #10b981; font-weight: bold; text-transform: uppercase;">Дата: ${reportDate}</div>
-                            ${linkedDeal ? `<div style="font-size: 11px; margin-top: 5px; opacity: 0.6;">${linkedDeal.city || ''} ${linkedDeal.address || ''}</div>` : ''}
+                        <div style="font-family: 'Montserrat', sans-serif; padding: 12px; min-width: 150px;">
+                            <div style="font-weight: 800; font-size: 14px; color: #1a2215; border-bottom: 2px solid #10b981; padding-bottom: 5px; margin-bottom: 8px;">
+                                ${reportTitle}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px; color: #10b981; font-weight: 600; font-size: 11px;">
+                                <span style="font-size: 14px;">📅</span> Посещено: ${reportDate}
+                            </div>
+                            <div style="font-size: 10px; color: #666; margin-top: 8px;">ID Сделки: ${dealId}</div>
                         </div>
                     `);
                     markersGroup.current.addLayer(marker);
                 }
             });
+            console.log(`Map: Successfully rendered ${renderedCount} visited markers`);
         } else {
             // MODE: BASED ON ALL OBJECTS (Filtered by visited/unvisited)
             const reportMap = (reports || []).reduce((acc: any, r: any) => {
                 if (!r) return acc;
                 const dealId = String(
-                    r.ufCrm105_1753336038 || r.ufCrm105_1753784383 || 
-                    r.ufCrm265_1753336038 || r.ufCrm265_1753784383 ||
-                    r.UF_CRM_105_1753336038 || r.UF_CRM_265_1753336038 || ''
+                    r.UF_CRM_105_1753336038 || r.UF_CRM_265_1753336038 || 
+                    r.ufCrm105_1753336038 || r.ufCrm265_1753336038 || 
+                    r.UF_CRM_105_1753784383 || r.ufCrm105_1753784383 || ''
                 );
                 if (dealId && dealId !== '0') acc[dealId] = true;
                 return acc;
