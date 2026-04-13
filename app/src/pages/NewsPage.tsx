@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import { useInView } from '../hooks/useInView';
 import newsData from '../data/news.json';
 import SeoHead from '../components/SeoHead';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 interface NewsArticle {
     id: string;
@@ -37,6 +38,7 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
 
             <main className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
+                    <Breadcrumbs items={[{ label: 'Новости' }]} />
                     {/* Hero Section */}
                     <div className="mb-12 md:mb-16 relative reveal-on-scroll" style={{ animationDelay: '0s' }}>
                         <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9] text-brand-dark mb-4">
@@ -71,8 +73,9 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                 <div className="relative h-56 overflow-hidden">
                                     <img
                                         src={article.image}
-                                        alt={article.title}
+                                        alt={`${article.title} — новости клининговой компании IC Group`}
                                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
+                                        loading="lazy"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-500 group-hover:from-black/90 group-hover:via-black/30" />
 

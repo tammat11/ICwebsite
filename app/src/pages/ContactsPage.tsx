@@ -5,6 +5,7 @@ import { useInView } from '../hooks/useInView';
 import { createBitrixLead } from '../utils/bitrix';
 import { formatPhone } from '../utils/phone';
 import SeoHead from '../components/SeoHead';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const ContactsPage = () => {
     const [rootRef, inView] = useInView();
@@ -66,6 +67,9 @@ const ContactsPage = () => {
             />
 
             <main className="pt-24 sm:pt-32 pb-20 px-6">
+                <div className="max-w-7xl mx-auto">
+                    <Breadcrumbs items={[{ label: 'Контакты' }]} />
+                </div>
 
                 {/* Header */}
                 <div className="max-w-7xl mx-auto mb-16 md:mb-20 relative text-left reveal-on-scroll" style={{ animationDelay: '0s' }}>

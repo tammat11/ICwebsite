@@ -26,8 +26,9 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                             <div className="w-10 h-10 md:w-12 md:h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center">
                                 <img
                                     src="/logo_IC_group.png"
-                                    alt="IC GROUP"
+                                    alt="IC GROUP — крупнейшая клининговая компания в Казахстане"
                                     className="h-6 md:h-7 w-auto object-contain"
+                                    loading="lazy"
                                 />
                             </div>
                             <span className="text-xl md:text-3xl font-bold tracking-tighter">IC GROUP</span>
@@ -168,6 +169,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                 <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left text-[10px] md:text-xs font-medium text-white/20 uppercase tracking-widest">
                     <p>© 2026 IC Group Holding. Все права защищены.</p>
                     <div className="flex gap-8">
+                        <a href="/sitemap.xml" className="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Карта сайта</a>
                         <a href="#" className="hover:text-white transition-colors">Политика конфиденциальности</a>
                         <a href="#" className="hover:text-white transition-colors">Условия использования</a>
                     </div>

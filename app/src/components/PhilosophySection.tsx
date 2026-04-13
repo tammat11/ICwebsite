@@ -18,9 +18,11 @@ const PhilosophySection = () => {
                     <div className="absolute inset-y-0 -left-1/3 z-20 w-1/3 bg-gradient-to-r from-transparent via-white/75 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                     <img
                         src={photoPath}
-                        alt="Larion Lyan"
+                        alt="Ларион Викторович Лян — основатель и лидер клининговой отрасли IC Group в Казахстане"
                         className="w-full h-full object-cover scale-[1.3] translate-y-7 transition-transform duration-1000 group-hover:scale-[1.4]"
+                        loading="lazy"
                     />
+...
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-brand-green/30" />
                     </svg>

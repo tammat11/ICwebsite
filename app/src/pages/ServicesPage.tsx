@@ -2,6 +2,7 @@ import { Clock, ShieldCheck, Zap, Sparkles, Droplets, Mountain, Flower2, Bug, Se
 import { Link } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
 import SeoHead from '../components/SeoHead';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const services = [
     {
@@ -112,6 +113,11 @@ const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
             />
             <main className="pt-40 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
+                    <Breadcrumbs
+                        items={[
+                            { label: 'Услуги' },
+                        ]}
+                    />
                     {/* Hero Section */}
                     <div className="mb-32 relative reveal-on-scroll" style={{ animationDelay: '0s' }}>
                         <span className="text-brand-green font-bold tracking-[0.4em] uppercase text-sm block mb-4">

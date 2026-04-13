@@ -2,6 +2,7 @@ import { ArrowUpRight, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import SeoHead from '../components/SeoHead';
+import Breadcrumbs from '../components/Breadcrumbs';
 import type { SeoLanding } from '../data/seoLandings';
 
 type SeoLandingPageProps = {
@@ -73,6 +74,12 @@ const SeoLandingPage = ({ landing, onCalcOpen }: SeoLandingPageProps) => {
 
       <main className="pt-28 md:pt-36 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
+          <Breadcrumbs
+            items={[
+              { label: 'Услуги', to: '/services' },
+              { label: landing.title },
+            ]}
+          />
           <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
             <div>
               <span className="section-eyebrow mb-5">
