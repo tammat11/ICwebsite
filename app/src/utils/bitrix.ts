@@ -1,10 +1,4 @@
 import objectsCache from '../data/objects_cache.json';
-const BITRIX_WEBHOOK_URL = 'https://tootopbrass.bitrix24.kz/rest/281/6730mf4ivq497k0n/';
-
-
-/** Воронка 111, стадия "Лиды (от маркетинга)" — при необходимости уточните STAGE_ID в настройках CRM */
-const DEAL_FUNNEL_ID = 111;
-const DEAL_STAGE_ID = 'C111:PREPARATION'; // Стадия "Лиды (от маркетинга)"
 
 export interface LeadData {
     title: string;
@@ -22,72 +16,20 @@ export interface LeadData {
     files?: File[];
 }
 
-
-async function createContact(data: LeadData): Promise<number | null> {
-    const params = new URLSearchParams();
-    params.append('fields[NAME]', data.name || 'Клиент');
-    if (data.lastName) params.append('fields[LAST_NAME]', data.lastName);
-    if (data.company) params.append('fields[COMPANY_TITLE]', data.company);
-    if (data.comments) params.append('fields[COMMENTS]', data.comments);
-
-    if (data.phone) {
-        params.append('fields[PHONE][0][VALUE]', data.phone);
-        params.append('fields[PHONE][0][VALUE_TYPE]', 'WORK');
-    }
-    if (data.email) {
-        params.append('fields[EMAIL][0][VALUE]', data.email);
-        params.append('fields[EMAIL][0][VALUE_TYPE]', 'WORK');
-    }
-
-    const res = await fetch(`${BITRIX_WEBHOOK_URL}crm.contact.add.json`, {
+const postBitrixAction = async <T>(action: string, payload: Record<string, unknown>) => {
+    const response = await fetch('/api/bitrix', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString(),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, payload }),
     });
-    const json = await res.json();
-    if (json.error) {
-        console.error('Bitrix Contact Error:', json.error_description || json.error);
-        return null;
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || `Bitrix proxy error (${response.status})`);
     }
-    return json.result ?? null;
-}
 
-export const createBitrixLead = async (data: LeadData) => {
-    try {
-        const contactId = await createContact(data);
-        const params = new URLSearchParams();
-
-        params.append('fields[TITLE]', data.title);
-        params.append('fields[CATEGORY_ID]', String(DEAL_FUNNEL_ID));
-        params.append('fields[STAGE_ID]', DEAL_STAGE_ID);
-        if (data.comments) params.append('fields[COMMENTS]', data.comments);
-        if (contactId) params.append('fields[CONTACT_ID]', String(contactId));
-
-        // Add custom fields
-        if (data.extraFields) {
-            Object.entries(data.extraFields).forEach(([key, value]) => {
-                params.append(`fields[${key}]`, String(value));
-            });
-        }
-
-        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.add.json`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params.toString(),
-        });
-
-        const result = await response.json();
-        console.log('Bitrix Response:', result);
-        if (result.error) {
-            console.error('Bitrix Error:', result.error_description || result.error);
-        }
-        return result;
-    } catch (error) {
-        console.error('Error creating Bitrix deal:', error);
-        throw error;
-    }
+    return result as T;
 };
 
 const fileToBase64 = (file: File): Promise<string> =>
@@ -109,6 +51,9 @@ const fileToBase64 = (file: File): Promise<string> =>
         reader.readAsDataURL(file);
     });
 
+export const createBitrixLead = async (data: LeadData) =>
+    postBitrixAction('createBitrixLead', { data });
+
 export const createHrCandidate = async (data: {
     firstName: string;
     lastName: string;
@@ -116,265 +61,76 @@ export const createHrCandidate = async (data: {
     resumeFile?: File;
     resumeFiles?: { name: string; content: string }[];
 }) => {
-    try {
-        const params = new URLSearchParams();
-        params.append('entityTypeId', '1232');
-        params.append('fields[title]', `Анкета кандидата: ${data.firstName} ${data.lastName}`);
-        params.append('fields[categoryId]', '369');
-        params.append('fields[stageId]', 'DT1232_369:NEW');
-        
-        // Маппинг полей
-        params.append('fields[ufCrm119_1763461461473]', data.firstName);
-        params.append('fields[ufCrm119_1763461467290]', data.lastName);
-        params.append('fields[ufCrm119_1763461482839]', data.phone);
+    const resumeFiles = [...(data.resumeFiles || [])];
 
-        // Обработка одного файла (для совместимости)
-        if (data.resumeFile) {
-            const base64 = await fileToBase64(data.resumeFile);
-            params.append('fields[ufCrm119_1763461489623][fileData][0]', data.resumeFile.name);
-            params.append('fields[ufCrm119_1763461489623][fileData][1]', base64);
-        }
-
-        // Обработка нескольких файлов (если переданы уже в base64)
-        if (data.resumeFiles && data.resumeFiles.length > 0) {
-            data.resumeFiles.forEach((file, index) => {
-                params.append(`fields[ufCrm119_1763461489623][${index}][fileData][0]`, file.name);
-                params.append(`fields[ufCrm119_1763461489623][${index}][fileData][1]`, file.content);
-            });
-        }
-
-        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString(),
+    if (data.resumeFile) {
+        resumeFiles.push({
+            name: data.resumeFile.name,
+            content: await fileToBase64(data.resumeFile),
         });
-
-        const result = await response.json();
-        console.log('Bitrix HR candidate response:', result);
-
-        if (result.error) {
-            console.error('Bitrix HR candidate error:', result.error_description || result.error);
-            throw new Error(result.error_description || result.error);
-        }
-
-        return result;
-    } catch (error) {
-        console.error('Error creating Bitrix HR candidate item:', error);
-        throw error;
     }
+
+    return postBitrixAction('createHrCandidate', {
+        data: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            resumeFiles,
+        },
+    });
 };
-export const updateSanitaryStats = async (score: number, curatorName: string) => {
-    try {
-        const ENTITY_TYPE_ID = 1254;
-        const CATEGORY_ID = 311;
-        const MONTH_FIELD = 'ufCrm127_1756290422310'; // Номер месяца
-        const COUNT_FIELD = 'ufCrm127_1756291224885'; // Количество пройденных
-        const TOTAL_FIELD = 'ufCrm_LKJSAND12';       // Общая сумма
-        const AVG_FIELD = 'ufCrm_KASJD12';           // Средняя сумма
-        const CURATOR_FIELD = 'ufCrm127_1762769620';  // Поле куратора
 
-        // 1. Поиск записи. Пробуем найти с точным именем или с ведущим пробелом (бывает в базе)
-        // И приоритезируем месяц "03", но если нет - берем пустой
-        const searchVariations = [
-            { title: curatorName, month: '03' },
-            { title: ' ' + curatorName, month: '03' },
-            { title: curatorName, month: '' },
-            { title: ' ' + curatorName, month: '' }
-        ];
-
-        let targetItem = null;
-
-        for (const variant of searchVariations) {
-            const listParams = new URLSearchParams();
-            listParams.append('entityTypeId', String(ENTITY_TYPE_ID));
-            listParams.append('filter[title]', variant.title);
-            listParams.append('filter[' + MONTH_FIELD + ']', variant.month);
-            listParams.append('filter[categoryId]', String(CATEGORY_ID));
-
-            const listRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
-                method: 'POST',
-                body: listParams
-            });
-            const listData = await listRes.json();
-
-            if (listData.result && listData.result.items && listData.result.items.length > 0) {
-                targetItem = listData.result.items[0];
-                break;
-            }
-        }
-
-        if (targetItem) {
-            const currentCount = parseInt(targetItem[COUNT_FIELD]) || 0;
-            const currentTotal = parseFloat(targetItem[TOTAL_FIELD]) || 0;
-
-            const newCount = currentCount + 1;
-            const newTotal = currentTotal + score;
-            const newAvg = newTotal / newCount;
-
-            // Обновление существующей записи
-            const updateParams = new URLSearchParams();
-            updateParams.append('entityTypeId', String(ENTITY_TYPE_ID));
-            updateParams.append('id', targetItem.id);
-            updateParams.append('fields[' + COUNT_FIELD + ']', String(newCount));
-            updateParams.append('fields[' + TOTAL_FIELD + ']', String(newTotal));
-            updateParams.append('fields[' + AVG_FIELD + ']', String(newAvg.toFixed(2)));
-            updateParams.append('fields[' + CURATOR_FIELD + ']', curatorName);
-            // Если месяц был пустым - устанавливаем 03
-            if (!targetItem[MONTH_FIELD]) {
-                updateParams.append('fields[' + MONTH_FIELD + ']', '03');
-            }
-
-            const updateRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.update.json`, {
-                method: 'POST',
-                body: updateParams
-            });
-            return await updateRes.json();
-        } else {
-            // Если запись вообще не найдена - создаем новую для этого куратора на март
-            console.log(`Creating new record for ${curatorName} for month 03`);
-            const addParams = new URLSearchParams();
-            addParams.append('entityTypeId', String(ENTITY_TYPE_ID));
-            addParams.append('fields[title]', curatorName);
-            addParams.append('fields[categoryId]', String(CATEGORY_ID));
-            addParams.append('fields[' + MONTH_FIELD + ']', '03');
-            addParams.append('fields[' + COUNT_FIELD + ']', '1');
-            addParams.append('fields[' + TOTAL_FIELD + ']', String(score));
-            addParams.append('fields[' + AVG_FIELD + ']', String(score.toFixed(2)));
-            addParams.append('fields[' + CURATOR_FIELD + ']', curatorName);
-
-            const addRes = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
-                method: 'POST',
-                body: addParams
-            });
-            return await addRes.json();
-        }
-    } catch (error) {
-        console.error('Error updating sanitary stats in Bitrix:', error);
-        throw error;
-    }
-};
+export const updateSanitaryStats = async (score: number, curatorName: string) =>
+    postBitrixAction('updateSanitaryStats', { score, curatorName });
 
 export const createDailyReportItem = async (data: LeadData) => {
-    try {
-        // Подготовка данных для JSON
-        const fields: Record<string, any> = {
-            title: data.title,
-            categoryId: '445',
-            // ФИО клиента (Поле ФИО клиента)
-            ufCrm105_1775651155077: (data as any).clientName || '',
-        };
-        
-        if (data.assignedById) fields.assignedById = data.assignedById;
-        if (data.contactId) fields.contactId = data.contactId;
-        if (data.companyId) fields.companyId = data.companyId;
-        
-        // Добавление пользовательских полей
-        if (data.extraFields) {
-            Object.entries(data.extraFields).forEach(([key, value]) => {
-                fields[key] = value;
-            });
-        }
+    const files = data.files
+        ? await Promise.all(data.files.map(async file => ({
+            name: file.name,
+            content: await fileToBase64(file),
+        })))
+        : [];
 
-        // Добавление фотографий (формат name/content)
-        if (data.files && data.files.length > 0) {
-            fields.ufCrm105_1775650024571 = [];
-            for (const file of data.files) {
-                const base64 = await fileToBase64(file);
-                fields.ufCrm105_1775650024571.push({
-                    name: file.name,
-                    content: base64
-                });
-            }
-        }
-
-        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.add.json`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                entityTypeId: '1204',
-                fields: fields
-            }),
-        });
-
-        const result = await response.json();
-        console.log('Bitrix SPA Response:', result);
-        if (result.error) {
-            console.error('Bitrix SPA Error:', result.error_description || result.error);
-        }
-        return result;
-    } catch (error) {
-        console.error('Error creating Bitrix SPA item:', error);
-        throw error;
-    }
+    return postBitrixAction('createDailyReportItem', {
+        data: {
+            ...data,
+            files,
+        },
+    });
 };
 
 export const createRemarkDeal = async (data: any) => {
-    try {
-        const fields: Record<string, any> = {
-            TITLE: `ЗАМЕЧАНИЕ (${data.objectTitle}): ${data.date}`,
-            CATEGORY_ID: '81',
-            STAGE_ID: 'C81:PREPARATION', // Отработка Партнера
-            COMPANY_ID: data.companyId || '',
-            CONTACT_ID: data.contactId || '',
-            ASSIGNED_BY_ID: data.assignedById || '',
-            COMMENTS: data.comments,
-            // Маппинг данных объекта
-            UF_CRM_1707153439: data.city || '', // Город
-            UF_CRM_1743501476: data.address || '', // Адрес объекта инфо
-            UF_CRM_1742459776: data.ipName || '', // Наименование ИП инфо
-            UF_CRM_1743669674: data.ipResp || '', // Ответственное лицо ИП инфо
-            // Источник, Тип и Вид уборки
-            UF_CRM_1716804677915: '43437', // Качество уборки
-            UF_CRM_1719824872888: '43735', // От аккаунта замечание исходящее
-            UF_CRM_1723523640792: '44881', // Базовая уборка
-        };
+    const files = data.files
+        ? await Promise.all(data.files.map(async (file: File) => ({
+            name: file.name,
+            content: await fileToBase64(file),
+        })))
+        : [];
 
-        // Добавление фотографий (Фото отзыва/замечания)
-        if (data.files && data.files.length > 0) {
-            fields.UF_CRM_1716804439763 = [];
-            for (const file of data.files) {
-                const base64 = await fileToBase64(file);
-                fields.UF_CRM_1716804439763.push({
-                    name: file.name,
-                    content: base64
-                });
-            }
-        }
-
-        const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.add.json`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fields: fields })
-        });
-        
-        const result = await response.json();
-        console.log('Remark Deal created:', result);
-        return result;
-    } catch (error) {
-        console.error('Error creating Remark Deal:', error);
-        throw error;
-    }
+    return postBitrixAction('createRemarkDeal', {
+        data: {
+            ...data,
+            files,
+        },
+    });
 };
 
-// Function to calculate distance between two points (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 };
 
 export const getNearestDeal = async (userLat: number, userLng: number) => {
     try {
-        // Мы теперь используем локальную базу (objects_cache.json)
-        // Это мгновенно и не нагружает сеть.
         const deals: any[] = [];
-        
+
         objectsCache.forEach((deal: any) => {
             if (deal.lat && deal.lng) {
                 const dist = calculateDistance(userLat, userLng, deal.lat, deal.lng);
@@ -389,12 +145,11 @@ export const getNearestDeal = async (userLat: number, userLng: number) => {
                     address: deal.address,
                     ipName: deal.ipName,
                     ipResp: deal.ipResp,
-                    extraFields: deal.extraFields
+                    extraFields: deal.extraFields,
                 });
             }
         });
 
-        // Сортируем по дистанции и отдаем самые близкие (радиус 700м отсечем для чистоты)
         const filteredDeals = deals.filter(d => d.distance <= 0.7);
         return filteredDeals.sort((a, b) => a.distance - b.distance).slice(0, 50);
     } catch (error) {
@@ -403,168 +158,21 @@ export const getNearestDeal = async (userLat: number, userLng: number) => {
     }
 };
 
-export const getAllDealsWithCoords = async (startDate?: string, endDate?: string) => {
-    try {
-        let allDeals: any[] = [];
-        let start = 0;
-        let hasNext = true;
+export const getAllDealsWithCoords = async (startDate?: string, endDate?: string) =>
+    postBitrixAction('getAllDealsWithCoords', { startDate, endDate });
 
-        const LAT_FIELD_ID = 'UF_CRM_1732276400585';
-        const LNG_FIELD_ID = 'UF_CRM_1732276407859';
+export const getDailyReports = async (entityTypeId = 1204, categoryId = 445, startDate?: string, endDate?: string) =>
+    postBitrixAction('getDailyReports', { entityTypeId, categoryId, startDate, endDate });
 
-        const filterParams: any = { 'CATEGORY_ID': '69' };
-        if (startDate) filterParams['>=DATE_CREATE'] = startDate + 'T00:00:00';
-        if (endDate) filterParams['<=DATE_CREATE'] = endDate + 'T23:59:59';
+export const getBitrixUsers = async () =>
+    postBitrixAction('getBitrixUsers', {});
 
-        while (hasNext && allDeals.length < 2500) { 
-            const bodyObj: any = {
-                'select[0]': 'ID',
-                'select[1]': 'TITLE',
-                'select[2]': LAT_FIELD_ID,
-                'select[3]': LNG_FIELD_ID,
-                'select[4]': 'COMPANY_ID',
-                'select[5]': 'CONTACT_ID',
-                'select[6]': 'ASSIGNED_BY_ID',
-                'select[7]': 'UF_CRM_1707153439',
-                'select[8]': 'UF_CRM_1743501476',
-                'select[9]': 'UF_CRM_1742459776',
-                'select[10]': 'UF_CRM_1743669674',
-                'select[11]': 'DATE_CREATE',
-                'order[ID]': 'DESC',
-                'start': String(start)
-            };
-
-            // Добавляем фильтры в тело запроса
-            Object.keys(filterParams).forEach(key => {
-                bodyObj[`filter[${key}]`] = filterParams[key];
-            });
-
-            const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.deal.list.json`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(bodyObj).toString()
-            });
-
-            const result = await response.json();
-            if (result.result && result.result.length > 0) {
-                const processed = result.result
-                    .filter((d: any) => d[LAT_FIELD_ID] && d[LNG_FIELD_ID])
-                    .map((d: any) => ({
-                        id: d.ID,
-                        title: d.TITLE,
-                        lat: parseFloat(d[LAT_FIELD_ID]),
-                        lng: parseFloat(d[LNG_FIELD_ID]),
-                        contactId: d.CONTACT_ID,
-                        companyId: d.COMPANY_ID,
-                        assignedById: d.ASSIGNED_BY_ID,
-                        dateCreate: d.DATE_CREATE,
-                        city: d.UF_CRM_1707153439,
-                        address: d.UF_CRM_1743501476,
-                        ipName: d.UF_CRM_1742459776,
-                        ipResp: d.UF_CRM_1743669674
-                    }));
-                
-                allDeals = [...allDeals, ...processed];
-                
-                if (result.next) {
-                    start = result.next;
-                } else {
-                    hasNext = false;
-                }
-            } else {
-                hasNext = false;
-            }
-        }
-        return allDeals;
-    } catch (error) {
-        console.error('Error fetching all deals for map:', error);
-        return [];
-    }
+export default {
+    createBitrixLead,
+    createHrCandidate,
+    createDailyReportItem,
+    getNearestDeal,
+    getAllDealsWithCoords,
+    getDailyReports,
+    getBitrixUsers,
 };
-
-// Загрузка всех отчетов из Смарт-процесса 105 (Ограничим последними 1000 для скорости)
-export const getDailyReports = async (entityTypeId: number = 1204, categoryId: number = 445, startDate?: string, endDate?: string) => {
-    try {
-        let allItems: any[] = [];
-        let start = 0;
-        let hasMore = true;
-        let pageCount = 0;
-
-        // Формируем фильтр (используем точные названия полей Битрикс)
-        const filter: any = { "categoryId": String(categoryId) };
-        if (startDate) filter[">=createdTime"] = startDate + "T00:00:00+03:00"; 
-        if (endDate) filter["<=createdTime"] = endDate + "T23:59:59+03:00";
-
-        while (hasMore && pageCount < 50) { 
-            const response = await fetch(`${BITRIX_WEBHOOK_URL}crm.item.list.json`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    entityTypeId: entityTypeId,
-                    filter: filter,
-                    select: [
-                        'id', 'assignedById', 'createdTime', 'categoryId', 
-                        'UF_CRM_105_1753336038', 'UF_CRM_105_1753784383', 
-                        'UF_CRM_265_1753336038', 'UF_CRM_265_1753784383',
-                        'UF_CRM_105_1775650060', 'UF_CRM_105_1775650055',
-                        'UF_CRM_265_1775650060', 'UF_CRM_265_1775650055'
-                    ],
-                    start: start
-                })
-            });
-            const data = await response.json();
-            if (data.result && data.result.items) {
-                allItems = [...allItems, ...data.result.items];
-                if (data.next && data.result.items.length >= 50) {
-                    start = data.next;
-                    pageCount++;
-                } else {
-                    hasMore = false;
-                }
-            } else {
-                hasMore = false;
-            }
-        }
-        return allItems;
-    } catch (error) {
-        console.error('Error fetching reports:', error);
-        return [];
-    }
-};
-
-// Загрузка полного списка пользователей Битрикса (с пагинацией)
-export const getBitrixUsers = async () => {
-    try {
-        let allUsers: any[] = [];
-        let start = 0;
-        let hasMore = true;
-
-        while (hasMore) {
-            const response = await fetch(`${BITRIX_WEBHOOK_URL}user.get.json?start=${start}`);
-            const data = await response.json();
-            
-            if (data.result) {
-                allUsers = [...allUsers, ...data.result];
-                if (data.next) {
-                    start = data.next;
-                } else {
-                    hasMore = false;
-                }
-            } else {
-                hasMore = false;
-            }
-        }
-
-        const usersMap: any = {};
-        allUsers.forEach((user: any) => {
-            usersMap[String(user.ID)] = `${user.NAME} ${user.LAST_NAME || ''}`.trim();
-        });
-        
-        return usersMap;
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        return {};
-    }
-};
-
-export default { createBitrixLead, createHrCandidate, createDailyReportItem, getNearestDeal, getAllDealsWithCoords, getDailyReports, getBitrixUsers };

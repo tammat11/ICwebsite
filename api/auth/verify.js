@@ -1,7 +1,6 @@
 import crypto from 'crypto';
 
 const AUTH_SECRET = process.env.AUTH_SECRET || 'ic-group-admin-secret-2026';
-const ALLOWED_PHONE = process.env.ALLOWED_PHONE || '77070522006';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -36,7 +35,7 @@ export default async function handler(req, res) {
 
         // Generate session token (valid 24 hours)
         const sessionPayload = JSON.stringify({
-            phone: ALLOWED_PHONE,
+            phone: data.phone,
             role: 'admin',
             exp: Date.now() + 24 * 60 * 60 * 1000
         });

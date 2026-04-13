@@ -1,11 +1,15 @@
 const fs = require('fs');
 const https = require('https');
 
-const BITRIX_WEBHOOK_URL = 'https://tootopbrass.bitrix24.kz/rest/281/6730mf4ivq497k0n/';
+const BITRIX_WEBHOOK_URL = process.env.BITRIX_WEBHOOK_URL;
 const LAT_FIELD_ID = 'UF_CRM_1732276400585';
 const LNG_FIELD_ID = 'UF_CRM_1732276407859';
 
 async function fetchDeals() {
+    if (!BITRIX_WEBHOOK_URL) {
+        throw new Error('Set BITRIX_WEBHOOK_URL before running update_cache.cjs');
+    }
+
     let allDeals = [];
     let start = 0;
     while (start < 1500) {

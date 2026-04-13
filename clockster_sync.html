@@ -37,13 +37,18 @@
     </div>
 
     <script>
-        const CLOCKSTER_TOKEN = 'tiFDpyYU1c9m6IFEXvfBgRlLu3QUugPqOBc9tOHRada84010';
-        const BITRIX_WEBHOOK = 'https://tootopbrass.bitrix24.kz/rest/281/6730mf4ivq497k0n/';
+        const CLOCKSTER_TOKEN = window.prompt('Вставьте Clockster token');
+        const BITRIX_WEBHOOK = window.prompt('Вставьте Bitrix webhook URL');
         let clocksterLocations = [];
 
         async function fetchClockster() {
             const status = document.getElementById('status-box');
             status.innerText = "Подключение к Clockster (через ваш браузер)...";
+
+            if (!CLOCKSTER_TOKEN) {
+                status.innerText = 'Clockster token не указан.';
+                return;
+            }
             
             try {
                 // Пытаемся достучаться до API v2 Clockster

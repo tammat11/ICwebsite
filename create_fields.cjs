@@ -1,6 +1,13 @@
 const https = require('https');
-const WEBHOOK_PATH = '/rest/281/6730mf4ivq497k0n/';
-const HOST = 'tootopbrass.bitrix24.kz';
+const webhookUrl = process.env.BITRIX_WEBHOOK_URL;
+
+if (!webhookUrl) {
+    throw new Error('Set BITRIX_WEBHOOK_URL before running create_fields.cjs');
+}
+
+const parsedUrl = new URL(webhookUrl);
+const WEBHOOK_PATH = parsedUrl.pathname.endsWith('/') ? parsedUrl.pathname : `${parsedUrl.pathname}/`;
+const HOST = parsedUrl.host;
 
 const fields = [
     { key: 'feedbackSpeed', label: 'Скорость обратной связи куратора' },
