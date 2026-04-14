@@ -92,7 +92,7 @@ export default async function handler(req, res) {
             throw new Error(`GitHub upload failed (${uploadRes.status}): ${errorText}`);
         }
 
-        const publicUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${DEFAULT_BRANCH}/${filename.replace(/^app\/public\//, '')}`;
+        const publicUrl = filename.replace(/^app\/public/, '');
 
         return res.status(200).json({ url: publicUrl, contentType });
     } catch (error) {

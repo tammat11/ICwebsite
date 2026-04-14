@@ -36,6 +36,21 @@ interface VerifyResponse {
 }
 
 const SESSION_STORAGE_KEY = 'admin_session';
+const BROKEN_GITHUB_UPLOAD_PREFIXES = [
+    'https://raw.githubusercontent.com/tammat11/ICwebsite/main/uploads/',
+    'https://raw.githubusercontent.com/tammat11/ICwebsite/master/uploads/',
+];
+
+const normalizeImageUrl = (image?: string) => {
+    if (!image) return '';
+
+    const brokenPrefix = BROKEN_GITHUB_UPLOAD_PREFIXES.find(prefix => image.startsWith(prefix));
+    if (brokenPrefix) {
+        return image.replace(brokenPrefix, '/uploads/');
+    }
+
+    return image;
+};
 
 const AdminLayout = ({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) => (
     <div className="min-h-screen bg-brand-light flex">
@@ -174,7 +189,9 @@ const AdminPage = () => {
                 }
 
                 if (!cancelled) {
-                    setNews(Array.isArray(data) ? data : []);
+                    setNews(Array.isArray(data)
+                        ? data.map(item => ({ ...item, image: normalizeImageUrl(item.image) }))
+                        : []);
                 }
             } catch (err) {
                 if (!cancelled) {
@@ -357,7 +374,7 @@ const AdminPage = () => {
                 throw new Error(data.error || 'Не удалось загрузить изображение');
             }
 
-            setEditingArticle(prev => prev ? { ...prev, image: data.url } : null);
+            setEditingArticle(prev => prev ? { ...prev, image: normalizeImageUrl(data.url) } : null);
             alert('Изображение загружено.');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Не удалось загрузить изображение');
@@ -510,7 +527,7 @@ const AdminPage = () => {
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Изображение (URL или загрузка)</label>
                                 <div className="relative group">
                                     {editingArticle.image ? (
-                                        <img src={editingArticle.image} alt="" className="w-full h-[116px] object-cover rounded-xl border border-black/5 mb-2" />
+                                        <img src={normalizeImageUrl(editingArticle.image)} alt="" className="w-full h-[116px] object-cover rounded-xl border border-black/5 mb-2" />
                                     ) : (
                                         <div className="w-full h-[116px] rounded-xl bg-brand-light border-2 border-dashed border-black/5 flex items-center justify-center mb-2">
                                             <ImageIcon className="text-brand-dark/10" size={32} />

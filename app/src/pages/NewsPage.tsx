@@ -21,6 +21,22 @@ interface NewsPageProps {
     onCalcOpen?: () => void;
 }
 
+const BROKEN_GITHUB_UPLOAD_PREFIXES = [
+    'https://raw.githubusercontent.com/tammat11/ICwebsite/main/uploads/',
+    'https://raw.githubusercontent.com/tammat11/ICwebsite/master/uploads/',
+];
+
+const normalizeImageUrl = (image?: string) => {
+    if (!image) return '';
+
+    const brokenPrefix = BROKEN_GITHUB_UPLOAD_PREFIXES.find(prefix => image.startsWith(prefix));
+    if (brokenPrefix) {
+        return image.replace(brokenPrefix, '/uploads/');
+    }
+
+    return image;
+};
+
 const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     const [articles] = useState<NewsArticle[]>(newsData as NewsArticle[]);
     const [loading] = useState(false);
@@ -72,7 +88,7 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                 {/* Image */}
                                 <div className="relative h-56 overflow-hidden">
                                     <img
-                                        src={article.image}
+                                        src={normalizeImageUrl(article.image)}
                                         alt={`${article.title} — новости клининговой компании IC Group`}
                                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
                                         loading="lazy"
