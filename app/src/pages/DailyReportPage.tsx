@@ -113,7 +113,7 @@ const DailyReportPage = () => {
     }, []);
 
     useEffect(() => {
-        if (!location || auditedObjectIds.size === 0) return;
+        if (!location) return;
 
         const findObject = async () => {
             setIsFindingObject(true);
@@ -121,7 +121,7 @@ const DailyReportPage = () => {
             if (deals && deals.length > 0) {
                 // FILTER: Only show deals that haven't been audited this month
                 const freshDeals = deals.filter((d: any) => !auditedObjectIds.has(String(d.id)));
-                
+
                 setNearestDeals(freshDeals);
                 if (freshDeals.length > 0) {
                     if (freshDeals.length > 1 && (freshDeals[1].distance - freshDeals[0].distance <= 0.15)) {
@@ -129,8 +129,16 @@ const DailyReportPage = () => {
                         setShowObjectPicker(true);
                     } else {
                         setSelectedDeal(freshDeals[0]);
+                        setShowObjectPicker(false);
                     }
+                } else {
+                    setSelectedDeal(null);
+                    setShowObjectPicker(false);
                 }
+            } else {
+                setNearestDeals([]);
+                setSelectedDeal(null);
+                setShowObjectPicker(false);
             }
             setIsFindingObject(false);
         };
