@@ -162,12 +162,14 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                         <p className={`text-[14px] text-brand-dark/60 font-medium leading-relaxed mb-4 transition-all duration-500 ${expandedArticles.has(article.id) ? '' : 'line-clamp-4'}`}>
                                             {article.desc}
                                         </p>
-                                        <button 
-                                            onClick={() => toggleExpand(article.id)}
-                                            className="text-[10px] font-bold uppercase tracking-widest text-brand-green hover:text-brand-dark transition-colors mb-4"
-                                        >
-                                            {expandedArticles.has(article.id) ? 'Свернуть' : 'Раскрыть подробнее'}
-                                        </button>
+                                        {article.desc.length > 180 && (
+                                            <button 
+                                                onClick={() => toggleExpand(article.id)}
+                                                className="text-[10px] font-bold uppercase tracking-widest text-brand-green hover:text-brand-dark transition-colors mb-4"
+                                            >
+                                                {expandedArticles.has(article.id) ? 'Свернуть' : 'Раскрыть подробнее'}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
