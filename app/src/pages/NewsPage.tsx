@@ -5,6 +5,7 @@ import { useInView } from '../hooks/useInView';
 import newsData from '../data/news.json';
 import SeoHead from '../components/SeoHead';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { buildBreadcrumbSchema, SITE_URL } from '../utils/seo';
 
 interface NewsArticle {
     id: string;
@@ -41,6 +42,28 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     const [articles] = useState<NewsArticle[]>(newsData as NewsArticle[]);
     const [loading] = useState(false);
     const [rootRef, inView] = useInView();
+    const breadcrumbSchema = buildBreadcrumbSchema([
+        { name: 'Главная', path: '/' },
+        { name: 'Новости', path: '/news' },
+    ]);
+    const newsCollectionSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Новости и кейсы IC Group',
+        url: `${SITE_URL}/news`,
+        hasPart: articles.slice(0, 12).map((article) => ({
+            '@type': 'Article',
+            headline: article.title,
+            description: article.desc,
+            datePublished: article.date,
+            image: normalizeImageUrl(article.image).startsWith('http')
+                ? normalizeImageUrl(article.image)
+                : `${SITE_URL}${normalizeImageUrl(article.image)}`,
+            author: {
+                '@id': `${SITE_URL}#organization`,
+            },
+        })),
+    };
 
     return (
         <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
@@ -49,6 +72,7 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                 description="Новости, проекты и кейсы клининговой компании IC Group. Реальные результаты, новые объекты и развитие профессионального клининга в Казахстане."
                 path="/news"
                 keywords="новости клининговой компании, кейсы клининг, проекты IC Group, профессиональный клининг Казахстан"
+                schema={[breadcrumbSchema, newsCollectionSchema]}
             />
             <Navbar alwaysVisible />
 

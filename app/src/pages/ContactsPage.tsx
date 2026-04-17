@@ -6,6 +6,7 @@ import { createBitrixLead } from '../utils/bitrix';
 import { formatPhone } from '../utils/phone';
 import SeoHead from '../components/SeoHead';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { buildBreadcrumbSchema, SITE_URL } from '../utils/seo';
 
 const ContactsPage = () => {
     const [rootRef, inView] = useInView();
@@ -21,6 +22,20 @@ const ContactsPage = () => {
         { title: "HR Департамент", email: "hr@ic-group.kz", phone: "+7 771 780 2366", icon: Globe },
         { title: "Тендерный отдел", email: "tenders@ic-group.kz", phone: "+7 707 808 3003", icon: Mail },
     ];
+    const breadcrumbSchema = buildBreadcrumbSchema([
+        { name: 'Главная', path: '/' },
+        { name: 'Контакты', path: '/contacts' },
+    ]);
+
+    const contactSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        name: 'Контакты IC Group',
+        url: `${SITE_URL}/contacts`,
+        mainEntity: {
+            '@id': `${SITE_URL}#organization`,
+        },
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,12 +73,7 @@ const ContactsPage = () => {
                 description="Контакты клининговой компании IC Group. Отдел продаж, HR и тендерный отдел. Закажите профессиональный клининг для бизнеса в Казахстане."
                 path="/contacts"
                 keywords="контакты клининговой компании, заказать клининг, клининг для бизнеса, ic group контакты"
-                schema={{
-                    '@context': 'https://schema.org',
-                    '@type': 'ContactPage',
-                    name: 'Контакты IC Group',
-                    url: 'https://ic-group.kz/contacts',
-                }}
+                schema={[contactSchema, breadcrumbSchema]}
             />
 
             <main className="pt-24 sm:pt-32 pb-20 px-6">

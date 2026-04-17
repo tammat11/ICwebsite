@@ -1,9 +1,154 @@
 {
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
+    "redirects": [
+        {
+            "source": "/about-company",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/about-company/",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/company-history",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/company-history/",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/how-we-work",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/how-we-work/",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/team",
+            "destination": "/careers",
+            "permanent": true
+        },
+        {
+            "source": "/team/",
+            "destination": "/careers",
+            "permanent": true
+        },
+        {
+            "source": "/life-in-ic-group",
+            "destination": "/careers",
+            "permanent": true
+        },
+        {
+            "source": "/life-in-ic-group/",
+            "destination": "/careers",
+            "permanent": true
+        },
+        {
+            "source": "/author/:slug*",
+            "destination": "/news",
+            "permanent": true
+        },
+        {
+            "source": "/baza-support",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/baza-support/",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/b2b-cleaner",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/b2b-cleaner/",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/ic-pro",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/ic-pro/",
+            "destination": "/services",
+            "permanent": true
+        },
+        {
+            "source": "/index/terms-of-use",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/index/terms-of-use/",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/%D0%B4%D0%BB%D1%8F-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2",
+            "destination": "/",
+            "permanent": true
+        },
+        {
+            "source": "/%D0%B4%D0%BB%D1%8F-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2/",
+            "destination": "/",
+            "permanent": true
+        }
+    ],
+    "headers": [
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow, noarchive"
+                }
+            ]
+        },
+        {
+            "source": "/admin",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow, noarchive"
+                }
+            ]
+        },
+        {
+            "source": "/admin/(.*)",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow, noarchive"
+                }
+            ]
+        },
+        {
+            "source": "/reports/(.*)",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow, noarchive"
+                }
+            ]
+        }
+    ],
     "rewrites": [
         {
-            "source": "/(.*)",
+            "source": "/:path((?!sitemap\\.xml$)(?!robots\\.txt$)(?!.*\\.[^/]+$).*)",
             "destination": "/index.html"
         }
     ]

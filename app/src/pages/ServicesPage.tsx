@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useInView } from '../hooks/useInView';
 import SeoHead from '../components/SeoHead';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { buildBreadcrumbSchema, SITE_URL } from '../utils/seo';
 
 const services = [
     {
@@ -93,6 +94,23 @@ const services = [
 
 const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     const [rootRef, inView] = useInView();
+    const breadcrumbSchema = buildBreadcrumbSchema([
+        { name: 'Главная', path: '/' },
+        { name: 'Услуги', path: '/services' },
+    ]);
+
+    const serviceCatalogSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'Услуги клининговой компании IC Group',
+        itemListElement: services.map((service, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: service.title,
+            description: service.desc,
+        })),
+    };
+
     return (
         <div ref={rootRef} className={`min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20 ${inView ? 'in-view' : ''}`}>
             <SeoHead
@@ -100,16 +118,22 @@ const ServicesPage = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                 description="Услуги клининговой компании IC Group: клининг офисов, генеральная и послестроительная уборка, мойка витражей, химчистка и специализированный клининг для бизнеса."
                 path="/services"
                 keywords="услуги клининговой компании, клининг офисов, генеральная уборка, послестроительная уборка, мойка витражей, химчистка"
-                schema={{
-                    '@context': 'https://schema.org',
-                    '@type': 'Service',
-                    serviceType: 'Профессиональный клининг для бизнеса',
-                    provider: {
-                        '@type': 'Organization',
-                        name: 'IC Group',
+                schema={[
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'CleaningService',
+                        '@id': `${SITE_URL}/services#service`,
+                        name: 'Услуги клининговой компании IC Group',
+                        serviceType: 'Профессиональный клининг для бизнеса',
+                        url: `${SITE_URL}/services`,
+                        provider: {
+                            '@id': `${SITE_URL}#organization`,
+                        },
+                        areaServed: 'KZ',
                     },
-                    areaServed: 'KZ',
-                }}
+                    breadcrumbSchema,
+                    serviceCatalogSchema,
+                ]}
             />
             <main className="pt-40 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">

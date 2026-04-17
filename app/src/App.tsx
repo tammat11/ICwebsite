@@ -28,6 +28,7 @@ import AICalculator from './components/AICalculator';
 import ScrollProgress from './components/ScrollProgress';
 import SeoHead from './components/SeoHead';
 import { getSeoLanding } from './data/seoLandings';
+import { buildBreadcrumbSchema, SITE_URL } from './utils/seo';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -127,10 +128,11 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
 
   const localBusinessSchema = {
     '@context': 'https://schema.org',
-    '@type': 'ProfessionalService',
+    '@type': 'CleaningService',
+    '@id': `${SITE_URL}/#service`,
     name: 'IC Group',
-    url: 'https://ic-group.kz/',
-    image: 'https://ic-group.kz/logo_IC_group.png',
+    url: `${SITE_URL}/`,
+    image: `${SITE_URL}/logo_IC_group.png`,
     serviceType: [
       'Профессиональный клининг',
       'Клининг офисов',
@@ -142,7 +144,14 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
     areaServed: ['Алматы', 'Астана', 'Казахстан'],
     telephone: '+7 777 008 73 60',
     email: 'sales@ic-group.kz',
+    provider: {
+      '@id': `${SITE_URL}#organization`,
+    },
   };
+
+  const homeBreadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Главная', path: '/' },
+  ]);
 
   return (
     <div className="min-h-screen bg-white relative selection:bg-brand-green/20 overflow-x-hidden w-full">
@@ -151,7 +160,7 @@ function Home({ onCalcOpen }: { onCalcOpen: () => void }) {
         description="IC Group — клининговая компания для бизнеса в Казахстане. Профессиональный клининг офисов, генеральная и послестроительная уборка, мойка витражей и химчистка."
         path="/"
         keywords="клининговая компания, клининг казахстан, клининг алматы, клининг астана, клининг офисов, генеральная уборка, послестроительная уборка"
-        schema={[localBusinessSchema, faqSchema]}
+        schema={[localBusinessSchema, faqSchema, homeBreadcrumbSchema]}
       />
 
       {/* Global background elements removed for maximum cleanliness and performance */}

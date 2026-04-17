@@ -1,22 +1,135 @@
-const clients = [
-    { name: "Magnum", domain: "magnum.kz" },
-    { name: "Kaspi Bank", domain: "kaspi.kz" },
-    { name: "Forte Bank", domain: "forte.kz" },
-    { name: "Technodom", domain: "technodom.kz" },
-    { name: "H&M", domain: "hm.com" },
-    { name: "Bank RBK", domain: "bankrbk.kz" },
-    { name: "Home Credit", domain: "homecredit.kz" },
-    { name: "Eurasian Bank", domain: "eubank.kz" },
-    { name: "JTI", domain: "jti.com" },
-    { name: "Defacto", domain: "defacto.com.tr" },
-    { name: "LPP", domain: "lpp.com" },
-    { name: "KOTON", domain: "koton.com" },
-    { name: "Air Astana", domain: "airastana.com" },
-    { name: "Samsung", domain: "samsung.com" },
-];
-
 import { useRef, useState, useEffect } from 'react';
 import { useInView } from '../hooks/useInView';
+
+type Client = {
+    name: string;
+    accent: string;
+    textClassName: string;
+    logo: {
+        primary: string;
+        secondary?: string;
+        badge?: string;
+        shape?: 'rounded' | 'pill';
+        size?: 'default' | 'wide';
+    };
+};
+
+const clients: Client[] = [
+    {
+        name: "Magnum",
+        accent: "from-red-500/15 to-transparent",
+        textClassName: "text-[#d71920]",
+        logo: { primary: "Magnum", shape: "rounded" },
+    },
+    {
+        name: "Kaspi Bank",
+        accent: "from-[#ef2b56]/15 to-transparent",
+        textClassName: "text-[#ef2b56]",
+        logo: { primary: "Kaspi", secondary: "Bank", shape: "rounded" },
+    },
+    {
+        name: "Forte Bank",
+        accent: "from-[#7d1538]/15 to-transparent",
+        textClassName: "text-[#7d1538]",
+        logo: { primary: "Forte", secondary: "Bank", badge: "f", shape: "rounded" },
+    },
+    {
+        name: "Technodom",
+        accent: "from-[#2a9d4b]/15 to-transparent",
+        textClassName: "text-[#2a9d4b]",
+        logo: { primary: "TECHNODOM", shape: "rounded" },
+    },
+    {
+        name: "H&M",
+        accent: "from-[#cf102d]/15 to-transparent",
+        textClassName: "text-[#cf102d]",
+        logo: { primary: "H&M", shape: "rounded" },
+    },
+    {
+        name: "Bank RBK",
+        accent: "from-[#69d4d1]/20 to-transparent",
+        textClassName: "text-[#69d4d1]",
+        logo: { primary: "BANK", secondary: "RBK", shape: "rounded" },
+    },
+    {
+        name: "Home Credit",
+        accent: "from-[#e0204f]/15 to-transparent",
+        textClassName: "text-[#e0204f]",
+        logo: { primary: "Home", secondary: "Credit", badge: "HC", shape: "rounded" },
+    },
+    {
+        name: "Eurasian Bank",
+        accent: "from-[#f2b233]/15 to-transparent",
+        textClassName: "text-[#f2b233]",
+        logo: { primary: "Eurasian", secondary: "Bank", shape: "rounded" },
+    },
+    {
+        name: "JTI",
+        accent: "from-[#2d5be3]/15 to-transparent",
+        textClassName: "text-[#2d5be3]",
+        logo: { primary: "JTI", shape: "pill" },
+    },
+    {
+        name: "Defacto",
+        accent: "from-[#4b2ca3]/15 to-transparent",
+        textClassName: "text-[#4b2ca3]",
+        logo: { primary: "DeFacto", shape: "rounded" },
+    },
+    {
+        name: "LPP",
+        accent: "from-[#111111]/10 to-transparent",
+        textClassName: "text-[#111111]",
+        logo: { primary: "LPP", shape: "pill" },
+    },
+    {
+        name: "KOTON",
+        accent: "from-[#000000]/10 to-transparent",
+        textClassName: "text-[#000000]",
+        logo: { primary: "KOTON", shape: "wide" },
+    },
+    {
+        name: "Air Astana",
+        accent: "from-[#0c5a87]/15 to-transparent",
+        textClassName: "text-[#0c5a87]",
+        logo: { primary: "Air", secondary: "Astana", shape: "rounded" },
+    },
+    {
+        name: "Samsung",
+        accent: "from-[#1428a0]/15 to-transparent",
+        textClassName: "text-[#1428a0]",
+        logo: { primary: "SAMSUNG", shape: "pill" },
+    },
+];
+
+const ClientLogo = ({ client }: { client: Client }) => {
+    const shapeClassName = client.logo.shape === 'pill'
+        ? 'rounded-full px-3 py-2'
+        : client.logo.size === 'wide'
+            ? 'rounded-2xl px-3 py-2'
+            : 'rounded-2xl p-3';
+
+    return (
+        <div className={`relative z-10 flex min-h-[56px] min-w-[56px] max-w-full items-center justify-center border border-black/5 bg-white/90 shadow-[0_10px_30px_rgba(255,255,255,0.65)] ${shapeClassName}`}>
+            <div className="flex items-center gap-2 text-center leading-none">
+                {client.logo.badge ? (
+                    <span className={`flex h-7 w-7 items-center justify-center rounded-full bg-black/5 text-[11px] font-black uppercase ${client.textClassName}`}>
+                        {client.logo.badge}
+                    </span>
+                ) : null}
+                <div className="flex flex-col items-center">
+                    <span className={`text-[12px] md:text-[14px] font-black uppercase tracking-[0.08em] ${client.textClassName}`}>
+                        {client.logo.primary}
+                    </span>
+                    {client.logo.secondary ? (
+                        <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.22em] text-brand-dark/45">
+                            {client.logo.secondary}
+                        </span>
+                    ) : null}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const ClientsMarquee = () => {
     const [sectionRef, inView] = useInView();
@@ -70,25 +183,8 @@ const ClientsMarquee = () => {
                                 >
                                     <div className={`w-20 h-20 md:w-32 md:h-32 rounded-full bg-white border border-black/5 flex items-center justify-center p-5 md:p-6 transition-all duration-500 group-hover:border-brand-green/30 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.05)] group-hover:-translate-y-2 relative overflow-hidden ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`}>
                                         <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/90 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
-                                        <img
-                                            src={`https://logo.clearbit.com/${client.domain}`}
-                                            alt={client.name}
-                                            className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 animate-logo-drift"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                if (!target.src.includes('google.com')) {
-                                                    target.src = `https://www.google.com/s2/favicons?sz=128&domain=${client.domain}`;
-                                                } else {
-                                                    target.style.display = 'none';
-                                                    const parent = target.parentElement;
-                                                    if (parent) {
-                                                        const initials = client.name.split(' ').map(n => n[0]).join('').slice(0, 2);
-                                                        parent.innerHTML = `<span class="text-xl font-black text-brand-dark/20">${initials}</span>`;
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-brand-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <ClientLogo client={client} />
+                                        <div className={`absolute inset-0 bg-gradient-to-tr ${client.accent} opacity-70 group-hover:opacity-100 transition-opacity`} />
                                     </div>
                                     <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/20 group-hover:text-brand-green transition-colors duration-500">
                                         {client.name}

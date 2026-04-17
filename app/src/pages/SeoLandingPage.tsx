@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import SeoHead from '../components/SeoHead';
 import Breadcrumbs from '../components/Breadcrumbs';
 import type { SeoLanding } from '../data/seoLandings';
+import { buildBreadcrumbSchema, SITE_URL } from '../utils/seo';
 
 type SeoLandingPageProps = {
   landing: SeoLanding;
@@ -26,41 +27,22 @@ const SeoLandingPage = ({ landing, onCalcOpen }: SeoLandingPageProps) => {
 
   const serviceSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Service',
+    '@type': 'CleaningService',
+    '@id': `${SITE_URL}${landing.path}#service`,
     name: landing.title,
     description: landing.metaDescription,
     areaServed: 'KZ',
+    url: `${SITE_URL}${landing.path}`,
     provider: {
-      '@type': 'Organization',
-      name: 'IC Group',
-      url: 'https://ic-group.kz',
+      '@id': `${SITE_URL}#organization`,
     },
   };
 
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Главная',
-        item: 'https://ic-group.kz/',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Услуги',
-        item: 'https://ic-group.kz/services',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: landing.title,
-        item: `https://ic-group.kz${landing.path}`,
-      },
-    ],
-  };
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Главная', path: '/' },
+    { name: 'Услуги', path: '/services' },
+    { name: landing.title, path: landing.path },
+  ]);
 
   return (
     <div className="min-h-screen bg-brand-light text-brand-dark selection:bg-brand-green/20">

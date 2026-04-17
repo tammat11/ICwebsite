@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "npm run dev --prefix app",
-    "build": "npm run build --prefix app && cp -R app/dist dist",
+    "generate:sitemap": "node scripts/generate-sitemap.mjs",
+    "build": "npm run generate:sitemap && npm run build --prefix app && rm -rf dist && cp -R app/dist dist",
     "lint": "npm run lint --prefix app",
     "preview": "npm run preview --prefix app"
   },

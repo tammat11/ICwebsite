@@ -5,11 +5,28 @@ import { ArrowUpRight, Briefcase, HardHat, Users, Star, Clock, GraduationCap } f
 import ApplicationModal from '../components/ApplicationModal';
 import { useInView } from '../hooks/useInView';
 import SeoHead from '../components/SeoHead';
+import { buildBreadcrumbSchema, SITE_URL } from '../utils/seo';
 
 const CareersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [category, setCategory] = useState<string>('Office');
     const [root, inView] = useInView();
+    const breadcrumbSchema = buildBreadcrumbSchema([
+        { name: 'Главная', path: '/' },
+        { name: 'Карьера', path: '/careers' },
+    ]);
+
+    const jobPostingSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Вакансии IC Group',
+        url: `${SITE_URL}/careers`,
+        about: [
+            'Вакансии в офисе',
+            'Работа в клининге',
+            'Партнерские направления',
+        ],
+    };
 
     const openModal = (cat: string) => {
         setCategory(cat);
@@ -23,6 +40,7 @@ const CareersPage = () => {
                 description="Работа в клининговой компании IC Group: вакансии в офисе, клининге и партнерских направлениях. Карьера и обучение сотрудников в Казахстане."
                 path="/careers"
                 keywords="вакансии клининговая компания, работа клининг, работа в клининге, вакансии IC Group"
+                schema={[jobPostingSchema, breadcrumbSchema]}
             />
             <main className="pt-24 sm:pt-32 pb-20 px-6">
                 {/* Hero Section */}
