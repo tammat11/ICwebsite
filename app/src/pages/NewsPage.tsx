@@ -41,6 +41,17 @@ const normalizeImageUrl = (image?: string) => {
 const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     const [articles] = useState<NewsArticle[]>(newsData as NewsArticle[]);
     const [loading] = useState(false);
+    const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
+
+    const toggleExpand = (id: string) => {
+        setExpandedArticles(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
     const [rootRef, inView] = useInView();
     const breadcrumbSchema = buildBreadcrumbSchema([
         { name: 'Главная', path: '/' },
@@ -132,13 +143,11 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                     </div>
                                 </div>
 
-                                {/* Content */}
+                                 {/* Content */}
                                 <div className="p-8 flex-1 flex flex-col relative z-10">
                                     <div className="flex items-center gap-2 mb-4">
                                         <Calendar size={14} className="text-brand-green" />
                                         <span className="text-[11px] font-medium text-brand-dark/60 uppercase tracking-wider">{article.date}</span>
-                                        <span className="text-brand-dark/10">•</span>
-                                        <span className="text-[11px] font-medium text-brand-dark/60 uppercase tracking-wider">{article.readTime}</span>
                                     </div>
 
                                     <div className="text-[9px] font-bold uppercase tracking-[0.4em] text-brand-green mb-3">
@@ -149,16 +158,15 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                         {article.title}
                                     </h3>
 
-                                    <p className="text-[14px] text-brand-dark/60 font-medium leading-relaxed mb-6 flex-1">
-                                        {article.desc}
-                                    </p>
-
-                                    <div className="pt-5 border-t border-black/[0.05] flex items-center justify-between">
-                                        <button className="flex items-center gap-3 group/btn">
-                                            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-dark group-hover/btn:text-brand-green transition-colors">Читать статью</span>
-                                            <div className="w-8 h-8 rounded-full border border-black/10 flex items-center justify-center group-hover/btn:bg-brand-green group-hover/btn:text-white group-hover/btn:border-brand-green transition-all duration-500">
-                                                <ArrowUpRight size={14} />
-                                            </div>
+                                    <div className="flex-1">
+                                        <p className={`text-[14px] text-brand-dark/60 font-medium leading-relaxed mb-4 transition-all duration-500 ${expandedArticles.has(article.id) ? '' : 'line-clamp-4'}`}>
+                                            {article.desc}
+                                        </p>
+                                        <button 
+                                            onClick={() => toggleExpand(article.id)}
+                                            className="text-[10px] font-bold uppercase tracking-widest text-brand-green hover:text-brand-dark transition-colors mb-4"
+                                        >
+                                            {expandedArticles.has(article.id) ? 'Свернуть' : 'Раскрыть подробнее'}
                                         </button>
                                     </div>
                                 </div>
