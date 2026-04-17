@@ -125,10 +125,10 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                     <img
                                         src={normalizeImageUrl(article.image)}
                                         alt={`${article.title} — новости клининговой компании IC Group`}
-                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
+                                        className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-all duration-1000"
                                         loading="lazy"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-all duration-500 group-hover:from-black/90 group-hover:via-black/30" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-all duration-500" />
 
                                     {/* Tag */}
                                     <div className="absolute top-5 left-5">
