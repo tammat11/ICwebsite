@@ -16,6 +16,8 @@ interface NewsArticle {
     image: string;
     tag: string;
     readTime: string;
+    imagePositionX?: number;
+    imagePositionY?: number;
 }
 
 interface NewsPageProps {
@@ -37,6 +39,14 @@ const normalizeImageUrl = (image?: string) => {
 
     return image;
 };
+
+const normalizeImagePositionValue = (value?: number) => {
+    if (typeof value !== 'number' || Number.isNaN(value)) return 50;
+    return Math.min(100, Math.max(0, value));
+};
+
+const getImageObjectPosition = (article: NewsArticle) =>
+    `${normalizeImagePositionValue(article.imagePositionX)}% ${normalizeImagePositionValue(article.imagePositionY)}%`;
 
 const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
     const [articles] = useState<NewsArticle[]>(newsData as NewsArticle[]);
@@ -126,6 +136,7 @@ const NewsPage = ({ onCalcOpen }: NewsPageProps) => {
                                         src={normalizeImageUrl(article.image)}
                                         alt={`${article.title} — новости клининговой компании IC Group`}
                                         className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-all duration-1000"
+                                        style={{ objectPosition: getImageObjectPosition(article) }}
                                         loading="lazy"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-all duration-500" />

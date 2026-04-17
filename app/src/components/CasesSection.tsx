@@ -16,7 +16,17 @@ interface NewsArticle {
     company?: string;
     stat?: string;
     metric?: string;
+    imagePositionX?: number;
+    imagePositionY?: number;
 }
+
+const normalizeImagePositionValue = (value?: number) => {
+    if (typeof value !== 'number' || Number.isNaN(value)) return 50;
+    return Math.min(100, Math.max(0, value));
+};
+
+const getImageObjectPosition = (article: NewsArticle) =>
+    `${normalizeImagePositionValue(article.imagePositionX)}% ${normalizeImagePositionValue(article.imagePositionY)}%`;
 
 const CasesSection = () => {
     const [sectionRef, inView] = useInView();
@@ -113,7 +123,12 @@ const CasesSection = () => {
                                 <div className="relative h-[180px] md:h-[280px] rounded-[20px] md:rounded-[32px] overflow-hidden border border-black/[0.05] shadow-sm group-hover:shadow-2xl transition-all duration-700">
                                     <div className="absolute inset-y-0 -left-1/3 z-20 w-1/3 bg-gradient-to-r from-transparent via-white/65 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                                     <div className="case-image-inner w-full h-full opacity-90 group-hover:opacity-100 transition-all duration-[1500ms]">
-                                        <img src={item.image} alt={item.company || item.title} className={`w-full h-full object-cover transition-transform duration-[1400ms] group-hover:scale-110 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`} />
+                                        <img
+                                            src={item.image}
+                                            alt={item.company || item.title}
+                                            className={`w-full h-full object-cover transition-transform duration-[1400ms] group-hover:scale-110 ${i % 2 === 0 ? 'animate-bob-soft' : 'animate-bob-soft-alt'}`}
+                                            style={{ objectPosition: getImageObjectPosition(item) }}
+                                        />
                                     </div>
                                     {/* Subtle gradients for text readability (bottom-left focus) */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 pointer-events-none" />

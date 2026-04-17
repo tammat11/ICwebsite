@@ -1,8 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Send, MapPin, Search, AlertCircle } from 'lucide-react';
-import { createDailyReportItem, getNearestDeal, createRemarkDeal, getDailyReports } from '../utils/bitrix';
+import { createDailyReportItem, getNearestDeal, createRemarkDeal, getDailyReports, getAllDeals, updateObjectCoordinates } from '../utils/bitrix';
 import objectsCache from '../data/objects_cache.json';
+
+const MANUAL_COORDS_LOCKS_KEY = 'daily-report-manual-coords-locks';
+
+type DealOption = {
+    id: string;
+    title: string;
+    distance: number;
+    assignedById?: string | number;
+    contactId?: string | number;
+    companyId?: string | number;
+    city?: string;
+    address?: string;
+    ipName?: string;
+    ipResp?: string;
+    lat?: number;
+    lng?: number;
+};
+
+const normalizeSearchValue = (value: string) =>
+    value
+        .toLowerCase()
+        .replace(/["'`«»().,]/g, ' ')
+        .replace(/[\/\\_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+const buildSearchNeedles = (deal: DealOption) => {
+    const normalizedTitle = normalizeSearchValue(deal.title || '');
+    const normalizedAddress = normalizeSearchValue(deal.address || '');
+    const rawTitle = (deal.title || '').toLowerCase();
+    const rawAddress = (deal.address || '').toLowerCase();
+
+    return [
+        normalizedTitle,
+        normalizedAddress,
+        `${normalizedTitle} ${normalizedAddress}`.trim(),
+        rawTitle,
+        rawAddress,
+        `${rawTitle} ${rawAddress}`.trim(),
+        String(deal.id),
+    ].filter(Boolean);
+};
+
+const matchesSmartSearch = (deal: DealOption, term: string) => {
+    if (!term) return true;
+
+    const normalizedTerm = normalizeSearchValue(term);
+    const rawTerm = term.toLowerCase().trim();
+    const termParts = normalizedTerm.split(' ').filter(Boolean);
+    const needles = buildSearchNeedles(deal);
+
+    if (needles.some(needle => needle.includes(normalizedTerm) || needle.includes(rawTerm))) {
+        return true;
+    }
+
+    if (termParts.length === 0) return true;
+
+    return termParts.every(part => needles.some(needle => needle.includes(part)));
+};
 
 const DailyReportPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,12 +139,51 @@ const DailyReportPage = () => {
 
     const [location, setLocation] = useState<{ lat: number, lng: number } | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
-    const [nearestDeals, setNearestDeals] = useState<{ id: string, title: string, distance: number }[]>([]);
-    const [selectedDeal, setSelectedDeal] = useState<{ id: string, title: string, distance: number } | null>(null);
+    const [nearestDeals, setNearestDeals] = useState<DealOption[]>([]);
+    const [selectedDeal, setSelectedDeal] = useState<DealOption | null>(null);
     const [isFindingObject, setIsFindingObject] = useState(false);
     const [showObjectPicker, setShowObjectPicker] = useState(false);
+    const [showManualObjectPicker, setShowManualObjectPicker] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [auditedObjectIds, setAuditedObjectIds] = useState<Set<string>>(new Set());
+    const [manualLockedObjectIds, setManualLockedObjectIds] = useState<Set<string>>(new Set());
+    const [isSavingManualCoordinates, setIsSavingManualCoordinates] = useState(false);
+    const [manualSelectionMessage, setManualSelectionMessage] = useState<string | null>(null);
+    const [allManualDeals, setAllManualDeals] = useState<DealOption[]>(() => objectsCache as DealOption[]);
+    const [isLoadingManualDeals, setIsLoadingManualDeals] = useState(false);
+
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    };
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            const rawValue = window.localStorage.getItem(MANUAL_COORDS_LOCKS_KEY);
+            if (!rawValue) return;
+
+            const parsed = JSON.parse(rawValue);
+            if (Array.isArray(parsed)) {
+                setManualLockedObjectIds(new Set(parsed.map(id => String(id))));
+            }
+        } catch (err) {
+            console.error('Failed to restore manual coordinate locks:', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem(
+            MANUAL_COORDS_LOCKS_KEY,
+            JSON.stringify(Array.from(manualLockedObjectIds))
+        );
+    }, [manualLockedObjectIds]);
 
     // Fetch already audited objects for the current month
     useEffect(() => {
@@ -117,10 +215,14 @@ const DailyReportPage = () => {
 
         const findObject = async () => {
             setIsFindingObject(true);
+            setManualSelectionMessage(null);
             const deals = await getNearestDeal(location.lat, location.lng);
             if (deals && deals.length > 0) {
-                // FILTER: Only show deals that haven't been audited this month
-                const freshDeals = deals.filter((d: any) => !auditedObjectIds.has(String(d.id)));
+                // Exclude audited objects and manually locked addresses from automatic selection.
+                const freshDeals = deals.filter((d: any) => {
+                    const objectId = String(d.id);
+                    return !auditedObjectIds.has(objectId) && !manualLockedObjectIds.has(objectId);
+                });
 
                 setNearestDeals(freshDeals);
                 if (freshDeals.length > 0) {
@@ -143,7 +245,7 @@ const DailyReportPage = () => {
             setIsFindingObject(false);
         };
         findObject();
-    }, [location, auditedObjectIds]);
+    }, [location, auditedObjectIds, manualLockedObjectIds]);
 
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -166,7 +268,51 @@ const DailyReportPage = () => {
         }
     }, []);
 
+    useEffect(() => {
+        const loadManualDeals = async () => {
+            setIsLoadingManualDeals(true);
+            try {
+                const deals = await getAllDeals();
+                if (Array.isArray(deals) && deals.length > 0) {
+                    setAllManualDeals(
+                        deals
+                            .filter((deal: any) => deal?.id && deal?.title)
+                            .map((deal: any) => ({
+                                ...deal,
+                                distance: Number.POSITIVE_INFINITY,
+                            }))
+                    );
+                }
+            } catch (err) {
+                console.error('Manual deals fetch error:', err);
+            } finally {
+                setIsLoadingManualDeals(false);
+            }
+        };
 
+        loadManualDeals();
+    }, []);
+
+    const searchableObjects = React.useMemo(() => {
+        const term = searchTerm.trim().toLowerCase();
+
+        return allManualDeals
+            .filter(obj => obj?.id && obj?.title)
+            .filter(obj => !manualLockedObjectIds.has(String(obj.id)))
+            .filter(obj => matchesSmartSearch(obj, term))
+            .map(obj => {
+                let distance = Number.POSITIVE_INFINITY;
+
+                if (location && typeof obj.lat === 'number' && typeof obj.lng === 'number') {
+                    distance = calculateDistance(location.lat, location.lng, obj.lat, obj.lng);
+                }
+
+                return { ...obj, distance };
+            })
+            .sort((a, b) => a.distance - b.distance);
+    }, [allManualDeals, searchTerm, manualLockedObjectIds, location]);
+
+    const visibleManualObjects = searchableObjects;
 
     const updateField = (name: string, value: string) => {
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -194,6 +340,33 @@ const DailyReportPage = () => {
         if (name === 'feedbackSpeed' && value && value !== 'Нет клиента') return true;
         if (name === 'improvementSuggestions' && value === 'Да') return true;
         return isNegativeResponse(name, value);
+    };
+
+    const handleManualObjectSelect = async (deal: any) => {
+        if (!location || isSavingManualCoordinates) return;
+
+        setIsSavingManualCoordinates(true);
+        setError(null);
+        setManualSelectionMessage(null);
+
+        try {
+            await updateObjectCoordinates(deal.id, location.lat, location.lng);
+
+            setManualLockedObjectIds(prev => new Set([...prev, String(deal.id)]));
+            setSelectedDeal({
+                ...deal,
+                distance: typeof deal.distance === 'number' ? deal.distance : 0,
+            });
+            setShowManualObjectPicker(false);
+            setShowObjectPicker(false);
+            setSearchTerm('');
+            setManualSelectionMessage('Координаты объекта сохранены. Этот адрес больше не появится в ручном выборе.');
+        } catch (err) {
+            console.error('Manual coordinates save error:', err);
+            setError('Не удалось сохранить координаты для выбранного объекта. Попробуйте еще раз.');
+        } finally {
+            setIsSavingManualCoordinates(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -356,7 +529,6 @@ const DailyReportPage = () => {
 
     const renderRadioQuestion = ({ title, name, options }: { title: string, name: string, options: string[] }) => {
         const isNegative = isNegativeResponse(name, formData[name]);
-        const showComment = shouldShowComment(name, formData[name]);
 
         return (
             <div id={`question-${name}`} className={`premium-card p-8 rounded-[32px] border transition-all duration-500 mb-5 ${isNegative ? 'border-red-500/20 bg-red-50/10' : 'border-black/5 hover:border-black/10'}`}>
@@ -451,17 +623,39 @@ const DailyReportPage = () => {
                                         </div>
                                     </div>
                                     
-                                    {nearestDeals.length > 1 && (
-                                        <button 
-                                            type="button"
-                                            onClick={() => setShowObjectPicker(!showObjectPicker)}
-                                            className="text-[10px] font-bold uppercase py-2 px-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
-                                        >
-                                            Изменить
-                                        </button>
-                                    )}
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            setShowObjectPicker(!showObjectPicker);
+                                            setShowManualObjectPicker(false);
+                                            setSearchTerm('');
+                                            setManualSelectionMessage(null);
+                                        }}
+                                        className="text-[10px] font-bold uppercase py-2 px-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                                    >
+                                        Изменить
+                                    </button>
                                 </div>
                             </div>
+                        )}
+
+                        {location && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowManualObjectPicker(prev => !prev);
+                                    setShowObjectPicker(false);
+                                    setSearchTerm('');
+                                    setManualSelectionMessage(null);
+                                }}
+                                className={`w-full px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                                    showManualObjectPicker
+                                        ? 'bg-brand-dark text-white border-brand-dark shadow-premium'
+                                        : 'bg-white text-brand-dark border-black/5 hover:border-brand-green/30'
+                                }`}
+                            >
+                                Нет объекта?
+                            </button>
                         )}
                                 
                         {/* Список выбора */}
@@ -483,38 +677,21 @@ const DailyReportPage = () => {
                                         </div>
 
                                         <div className="text-[10px] uppercase font-bold text-brand-dark/40 px-3 py-2 border-b border-brand-dark/5 mb-1 flex justify-between">
-                                            <span>{searchTerm ? 'Результаты поиска:' : 'Ближайшие объекты:'}</span>
-                                            <span>{searchTerm ? 'Весь список' : `${nearestDeals.length} точек`}</span>
-                                        </div>
-                                        <div className="max-h-[320px] overflow-y-auto scrollbar-hide py-1">
-                                            {(searchTerm 
-                                                ? (objectsCache as any[])
-                                                    .filter(obj => obj.title.toLowerCase().includes(searchTerm.toLowerCase()))
-                                                    .map(obj => {
-                                                        // Рассчитываем дистанцию на лету для сортировки
-                                                        let dist = 999;
-                                                        if (location) {
-                                                            const R = 6371;
-                                                            const dLat = (obj.lat - location.lat) * Math.PI / 180;
-                                                            const dLon = (obj.lng - location.lng) * Math.PI / 180;
-                                                            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                                                                Math.cos(location.lat * Math.PI / 180) * Math.cos(obj.lat * Math.PI / 180) *
-                                                                Math.sin(dLon/2) * Math.sin(dLon/2);
-                                                            dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                                                        }
-                                                        return { ...obj, distance: dist };
-                                                    })
-                                                    .sort((a, b) => a.distance - b.distance)
-                                                    .slice(0, 15)
-                                                : nearestDeals 
-                                            ).filter(deal => !auditedObjectIds.has(String(deal.id)))
-                                             .map(deal => (
+                                        <span>{searchTerm ? 'Результаты поиска:' : 'Ближайшие объекты:'}</span>
+                                        <span>{searchTerm ? `${visibleManualObjects.slice(0, 15).length} шт.` : `${nearestDeals.length} точек`}</span>
+                                    </div>
+                                    <div className="max-h-[320px] overflow-y-auto scrollbar-hide py-1">
+                                            {(searchTerm ? visibleManualObjects.slice(0, 15) : nearestDeals)
+                                                .filter(deal => !auditedObjectIds.has(String(deal.id)))
+                                                .filter(deal => !manualLockedObjectIds.has(String(deal.id)))
+                                                .map(deal => (
                                                 <button
                                                     key={deal.id}
                                                     type="button"
                                                     onClick={() => {
                                                         setSelectedDeal(deal);
                                                         setShowObjectPicker(false);
+                                                        setShowManualObjectPicker(false);
                                                         setSearchTerm('');
                                                     }}
                                                     className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between mb-1 ${selectedDeal?.id === deal.id ? 'bg-brand-green/10 text-brand-green' : 'hover:bg-brand-accent/30 text-brand-dark/60'}`}
@@ -532,7 +709,7 @@ const DailyReportPage = () => {
                                                     )}
                                                 </button>
                                             ))}
-                                            {searchTerm && (objectsCache as any[]).filter(obj => obj.title.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                                            {searchTerm && visibleManualObjects.length === 0 && (
                                                 <div className="px-4 py-8 text-center text-[10px] font-bold text-brand-dark/30 uppercase tracking-widest">
                                                     Объект не найден
                                                 </div>
@@ -542,6 +719,82 @@ const DailyReportPage = () => {
                                 </div>
                             )}
 
+                        {showManualObjectPicker && (
+                            <div className="w-full">
+                                <div className="mt-2 bg-white border border-brand-dark/5 rounded-2xl p-2 shadow-premium animate-fade-in-up z-20 overflow-hidden">
+                                    <div className="p-3 border-b border-brand-dark/5">
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-brand-dark mb-2">
+                                            Выберите адрес и мы сохраним текущие GPS-координаты для этого объекта
+                                        </div>
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/20" size={14} />
+                                            <input
+                                                type="text"
+                                                placeholder="Поиск по адресу или названию"
+                                                className="w-full pl-9 pr-4 py-2.5 bg-brand-accent/30 rounded-xl text-xs font-bold focus:outline-none focus:bg-brand-accent/50 transition-all"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="text-[10px] uppercase font-bold text-brand-dark/40 px-3 py-2 border-b border-brand-dark/5 mb-1 flex justify-between">
+                                        <span>Все доступные объекты</span>
+                                        <span>{visibleManualObjects.length} шт.</span>
+                                    </div>
+
+                                    <div className="max-h-[360px] overflow-y-auto scrollbar-hide py-1">
+                                        {isLoadingManualDeals && (
+                                            <div className="px-4 py-6 text-center text-[10px] font-bold text-brand-dark/30 uppercase tracking-widest">
+                                                Загружаем объекты...
+                                            </div>
+                                        )}
+
+                                        {visibleManualObjects.map((deal) => (
+                                            <button
+                                                key={`manual-${deal.id}`}
+                                                type="button"
+                                                disabled={isSavingManualCoordinates}
+                                                onClick={() => handleManualObjectSelect(deal)}
+                                                className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between mb-1 hover:bg-brand-accent/30 text-brand-dark/70 disabled:opacity-50"
+                                            >
+                                                <div className="flex flex-col flex-1 min-w-0 pr-3">
+                                                    <span className="text-[12px] leading-snug break-words">{deal.title}</span>
+                                                    <span className="text-[9px] text-brand-dark/30 mt-1 break-words">
+                                                        ID объекта: {deal.id}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[9px] font-medium opacity-40">
+                                                    {Number.isFinite(deal.distance)
+                                                        ? deal.distance < 1
+                                                            ? `${(deal.distance * 1000).toFixed(0)}м`
+                                                            : `${deal.distance.toFixed(1)}км`
+                                                        : '—'}
+                                                </span>
+                                            </button>
+                                        ))}
+
+                                        {visibleManualObjects.length === 0 && (
+                                            <div className="px-4 py-8 text-center text-[10px] font-bold text-brand-dark/30 uppercase tracking-widest">
+                                                Подходящих объектов не найдено
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {manualSelectionMessage && (
+                            <div className="w-full px-5 py-3 bg-brand-green/10 border border-brand-green/20 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-brand-green text-center">
+                                {manualSelectionMessage}
+                            </div>
+                        )}
+
+                        {isSavingManualCoordinates && (
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 animate-pulse">
+                                Сохраняем координаты для выбранного адреса...
+                            </div>
+                        )}
 
 
                         {isFindingObject && (
@@ -669,7 +922,9 @@ const DailyReportPage = () => {
                         <div className="mt-8 p-6 md:p-10 text-center bg-brand-dark/5 rounded-[32px] border border-brand-dark/10 animate-fade-in-up">
                             <MapPin className="mx-auto text-brand-dark/40 mb-4" size={32} />
                             <h3 className="text-sm font-bold uppercase tracking-widest text-brand-dark mb-2">ПОЖАЛУЙСТА, ВЫБЕРИТЕ ОБЪЕКТ</h3>
-                            <p className="text-xs text-brand-dark/60 font-medium max-w-xs mx-auto">Мы нашли несколько объектов по вашим координатам. Выберите из списка выше тот, который вы сейчас проверяете.</p>
+                            <p className="text-xs text-brand-dark/60 font-medium max-w-xs mx-auto">
+                                Если GPS не нашел нужный объект, нажмите `Нет объекта?`, выберите адрес из полного списка и мы запомним ваши координаты для него.
+                            </p>
                         </div>
                     )
                 )}

@@ -236,6 +236,21 @@ async function handleCreateRemarkDeal(data) {
     });
 }
 
+async function handleUpdateObjectCoordinates(dealId, lat, lng) {
+    const LAT_FIELD_ID = 'UF_CRM_1732276400585';
+    const LNG_FIELD_ID = 'UF_CRM_1732276407859';
+    const params = new URLSearchParams();
+
+    params.append('id', String(dealId));
+    params.append(`fields[${LAT_FIELD_ID}]`, String(lat));
+    params.append(`fields[${LNG_FIELD_ID}]`, String(lng));
+
+    return bitrixRequest('crm.deal.update.json', {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+    });
+}
+
 async function handleGetAllDealsWithCoords(startDate, endDate) {
     let allDeals = [];
     let start = 0;
@@ -289,6 +304,69 @@ async function handleGetAllDealsWithCoords(startDate, endDate) {
                     ipName: d.UF_CRM_1742459776,
                     ipResp: d.UF_CRM_1743669674,
                 }));
+
+            allDeals = [...allDeals, ...processed];
+            start = result.next || 0;
+            hasNext = Boolean(result.next);
+        } else {
+            hasNext = false;
+        }
+    }
+
+    return allDeals;
+}
+
+async function handleGetAllDeals(startDate, endDate) {
+    let allDeals = [];
+    let start = 0;
+    let hasNext = true;
+
+    const LAT_FIELD_ID = 'UF_CRM_1732276400585';
+    const LNG_FIELD_ID = 'UF_CRM_1732276407859';
+    const filterParams = { CATEGORY_ID: '69' };
+
+    if (startDate) filterParams['>=DATE_CREATE'] = `${startDate}T00:00:00`;
+    if (endDate) filterParams['<=DATE_CREATE'] = `${endDate}T23:59:59`;
+
+    while (hasNext && allDeals.length < 2500) {
+        const bodyObj = {
+            'select[0]': 'ID',
+            'select[1]': 'TITLE',
+            'select[2]': LAT_FIELD_ID,
+            'select[3]': LNG_FIELD_ID,
+            'select[4]': 'COMPANY_ID',
+            'select[5]': 'CONTACT_ID',
+            'select[6]': 'ASSIGNED_BY_ID',
+            'select[7]': 'UF_CRM_1707153439',
+            'select[8]': 'UF_CRM_1743501476',
+            'select[9]': 'UF_CRM_1742459776',
+            'select[10]': 'UF_CRM_1743669674',
+            'select[11]': 'DATE_CREATE',
+            'order[ID]': 'DESC',
+            start: String(start),
+            ...Object.fromEntries(Object.entries(filterParams).map(([key, value]) => [`filter[${key}]`, value])),
+        };
+
+        const result = await bitrixRequest('crm.deal.list.json', {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(bodyObj).toString(),
+        });
+
+        if (result.result?.length > 0) {
+            const processed = result.result.map(d => ({
+                id: d.ID,
+                title: d.TITLE,
+                lat: d[LAT_FIELD_ID] ? parseFloat(d[LAT_FIELD_ID]) : null,
+                lng: d[LNG_FIELD_ID] ? parseFloat(d[LNG_FIELD_ID]) : null,
+                contactId: d.CONTACT_ID,
+                companyId: d.COMPANY_ID,
+                assignedById: d.ASSIGNED_BY_ID,
+                dateCreate: d.DATE_CREATE,
+                city: d.UF_CRM_1707153439,
+                address: d.UF_CRM_1743501476,
+                ipName: d.UF_CRM_1742459776,
+                ipResp: d.UF_CRM_1743669674,
+            }));
 
             allDeals = [...allDeals, ...processed];
             start = result.next || 0;
@@ -381,7 +459,9 @@ const actionHandlers = {
     updateSanitaryStats: async payload => handleUpdateSanitaryStats(payload.score, payload.curatorName),
     createDailyReportItem: async payload => handleCreateDailyReportItem(payload.data),
     createRemarkDeal: async payload => handleCreateRemarkDeal(payload.data),
+    updateObjectCoordinates: async payload => handleUpdateObjectCoordinates(payload.dealId, payload.lat, payload.lng),
     getAllDealsWithCoords: async payload => handleGetAllDealsWithCoords(payload.startDate, payload.endDate),
+    getAllDeals: async payload => handleGetAllDeals(payload.startDate, payload.endDate),
     getDailyReports: async payload => handleGetDailyReports(payload.entityTypeId, payload.categoryId, payload.startDate, payload.endDate),
     getBitrixUsers: async () => handleGetBitrixUsers(),
 };

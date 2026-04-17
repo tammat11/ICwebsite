@@ -161,8 +161,14 @@ export const getNearestDeal = async (userLat: number, userLng: number) => {
 export const getAllDealsWithCoords = async (startDate?: string, endDate?: string) =>
     postBitrixAction('getAllDealsWithCoords', { startDate, endDate });
 
+export const getAllDeals = async (startDate?: string, endDate?: string) =>
+    postBitrixAction('getAllDeals', { startDate, endDate });
+
 export const getDailyReports = async (entityTypeId = 1204, categoryId = 445, startDate?: string, endDate?: string) =>
     postBitrixAction('getDailyReports', { entityTypeId, categoryId, startDate, endDate });
+
+export const updateObjectCoordinates = async (dealId: string | number, lat: number, lng: number) =>
+    postBitrixAction('updateObjectCoordinates', { dealId, lat, lng });
 
 export const getBitrixUsers = async () =>
     postBitrixAction('getBitrixUsers', {});
@@ -172,7 +178,9 @@ export default {
     createHrCandidate,
     createDailyReportItem,
     getNearestDeal,
+    getAllDeals,
     getAllDealsWithCoords,
     getDailyReports,
+    updateObjectCoordinates,
     getBitrixUsers,
 };

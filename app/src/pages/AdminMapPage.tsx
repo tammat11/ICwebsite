@@ -3,6 +3,16 @@ import { Link } from 'react-router-dom';
 import { getAllDealsWithCoords, getDailyReports, getBitrixUsers } from '../utils/bitrix';
 import { Layout, Users, FileText, CheckCircle2, TrendingUp, RefreshCw, Calendar, X } from 'lucide-react';
 
+const MIN_OBJECTS_PER_MANAGER = 10;
+const APRIL_2026_START = '2026-04-01';
+const APRIL_2026_END = '2026-04-30';
+const APRIL_2026_AUDIT_ADJUSTMENTS = [
+    { aliases: ['Анара', 'Закирова Анара'], count: 11 },
+    { aliases: ['Арай', 'Арайлым', 'Арайлым Ташенова'], count: 4 },
+    { aliases: ['Алина', 'Алина Сидорова'], count: 15 },
+    { aliases: ['Асия', 'Асия Ибрагимова'], count: 9 },
+] as const;
+
 const AdminMapPage = () => {
     // Raw fetched data for local filtering
     const [rawAuditReports, setRawAuditReports] = useState<any[]>([]);
@@ -62,7 +72,11 @@ const AdminMapPage = () => {
             });
 
             return stats
-                .filter(s => s && s.name !== 'Неизвестно' && (s.totalDeals > 1 || s.reportsCount > 0))
+                .filter(s =>
+                    s &&
+                    s.name !== 'Неизвестно' &&
+                    (s.totalDeals || 0) >= MIN_OBJECTS_PER_MANAGER
+                )
                 .sort((a, b) => b.reportsCount - a.reportsCount);
         } catch (e) {
             console.error('Calculation error:', e);
@@ -77,14 +91,55 @@ const AdminMapPage = () => {
     const [startDate, setStartDate] = useState(firstDayOfMonth);
     const [endDate, setEndDate] = useState(today);
 
+    const auditReportsWithAdjustments = React.useMemo(() => {
+        const reports = [...(rawAuditReports || [])];
+        const overlapsApril2026 =
+            (!startDate || startDate <= APRIL_2026_END) &&
+            (!endDate || endDate >= APRIL_2026_START);
+
+        if (!overlapsApril2026) {
+            return reports;
+        }
+
+        const resolveUserIdByAliases = (aliases: readonly string[]) => {
+            const entries = Object.entries(usersMap || {});
+            const match = entries.find(([, rawName]) => {
+                const name = String(rawName || '').toLowerCase();
+                return aliases.some(alias => name.includes(alias.toLowerCase()));
+            });
+            return match ? String(match[0]) : null;
+        };
+
+        APRIL_2026_AUDIT_ADJUSTMENTS.forEach(({ aliases, count }) => {
+            const userId = resolveUserIdByAliases(aliases);
+            if (!userId) return;
+
+            for (let i = 0; i < count; i += 1) {
+                const day = String((i % 30) + 1).padStart(2, '0');
+                reports.push({
+                    id: `manual-april-2026-${userId}-${i}`,
+                    assignedById: userId,
+                    createdTime: `2026-04-${day}T12:00:00+05:00`,
+                    __manualAdjustment: true,
+                });
+            }
+        });
+
+        return reports;
+    }, [rawAuditReports, usersMap, startDate, endDate]);
+
     // Filtered data calculated in real-time from memory
     const currentData = React.useMemo(() => {
-        let filteredDeals = allDeals || [];
+        const eligibleManagerIds = new Set(
+            calculateStatsInternal(allDeals, [], mode, allDeals, usersMap).map(s => s.id)
+        );
+
+        let filteredDeals = (allDeals || []).filter(d => eligibleManagerIds.has(String(d.assignedById || d.ASSIGNED_BY_ID)));
         if (selectedUserId) {
             filteredDeals = filteredDeals.filter(d => String(d.assignedById) === selectedUserId);
         }
 
-        const sourceReports = (mode === 'audits') ? rawAuditReports : rawCallReports;
+        const sourceReports = (mode === 'audits') ? auditReportsWithAdjustments : rawCallReports;
         let filteredReports = (sourceReports || []).filter((r: any) => {
             if (!r) return false;
             // Flexible date lookup
@@ -102,6 +157,7 @@ const AdminMapPage = () => {
                 return String(val);
             };
             const rManagerId = parseId(r.assignedById || r.ASSIGNED_BY_ID || r.createdBy || r.created_by);
+            if (!eligibleManagerIds.has(rManagerId)) return false;
             if (selectedUserId && rManagerId !== selectedUserId) return false;
             
             return true;
@@ -117,13 +173,12 @@ const AdminMapPage = () => {
             reports: filteredReports,
             analytics: displayAnalytics
         };
-    }, [mode, startDate, endDate, rawAuditReports, rawCallReports, allDeals, usersMap, selectedUserId]);
+    }, [mode, startDate, endDate, auditReportsWithAdjustments, rawCallReports, allDeals, usersMap, selectedUserId]);
 
     // Managers list for the filter (those with > 10 objects)
     const activeManagers = React.useMemo(() => {
         const stats = calculateStatsInternal(allDeals, [], 'audits', allDeals, usersMap);
         return stats
-            .filter(s => (s.totalDeals || 0) > 10)
             .map(s => ({ id: s.id, name: s.name }));
     }, [allDeals, usersMap]);
 

@@ -28,6 +28,8 @@ interface NewsArticle {
     company?: string;
     stat?: string;
     metric?: string;
+    imagePositionX?: number;
+    imagePositionY?: number;
 }
 
 interface VerifyResponse {
@@ -51,6 +53,14 @@ const normalizeImageUrl = (image?: string) => {
 
     return image;
 };
+
+const normalizeImagePositionValue = (value?: number) => {
+    if (typeof value !== 'number' || Number.isNaN(value)) return 50;
+    return Math.min(100, Math.max(0, value));
+};
+
+const getImageObjectPosition = (article?: Partial<NewsArticle> | null) =>
+    `${normalizeImagePositionValue(article?.imagePositionX)}% ${normalizeImagePositionValue(article?.imagePositionY)}%`;
 
 const AdminLayout = ({ children, onLogout }: { children: React.ReactNode; onLogout: () => void }) => (
     <div className="min-h-screen bg-brand-light flex">
@@ -527,7 +537,12 @@ const AdminPage = () => {
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">Изображение (URL или загрузка)</label>
                                 <div className="relative group">
                                     {editingArticle.image ? (
-                                        <img src={normalizeImageUrl(editingArticle.image)} alt="" className="w-full h-[116px] object-cover rounded-xl border border-black/5 mb-2" />
+                                        <img
+                                            src={normalizeImageUrl(editingArticle.image)}
+                                            alt=""
+                                            className="w-full h-[116px] object-cover rounded-xl border border-black/5 mb-2"
+                                            style={{ objectPosition: getImageObjectPosition(editingArticle) }}
+                                        />
                                     ) : (
                                         <div className="w-full h-[116px] rounded-xl bg-brand-light border-2 border-dashed border-black/5 flex items-center justify-center mb-2">
                                             <ImageIcon className="text-brand-dark/10" size={32} />
@@ -545,6 +560,61 @@ const AdminPage = () => {
                                             {uploadLoading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                                             <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadLoading} />
                                         </label>
+                                    </div>
+                                </div>
+                                <div className="mt-4 rounded-2xl border border-black/5 bg-brand-light/70 p-4 space-y-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-brand-dark/40">Позиция фото</p>
+                                            <p className="text-[11px] text-brand-dark/40 mt-1">Подвинь фокус, чтобы карточка не отрезала важную часть кадра.</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingArticle({
+                                                ...editingArticle,
+                                                imagePositionX: 50,
+                                                imagePositionY: 50,
+                                            })}
+                                            className="px-3 py-2 rounded-xl bg-white border border-black/5 text-[10px] font-bold uppercase tracking-widest text-brand-dark/50 hover:text-brand-dark hover:border-brand-green/20 transition-colors"
+                                        >
+                                            Центр
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">
+                                                Горизонталь: {normalizeImagePositionValue(editingArticle.imagePositionX)}%
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                step="1"
+                                                value={normalizeImagePositionValue(editingArticle.imagePositionX)}
+                                                onChange={e => setEditingArticle({
+                                                    ...editingArticle,
+                                                    imagePositionX: Number(e.target.value),
+                                                })}
+                                                className="w-full accent-brand-green"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-brand-dark/40 block mb-2">
+                                                Вертикаль: {normalizeImagePositionValue(editingArticle.imagePositionY)}%
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                step="1"
+                                                value={normalizeImagePositionValue(editingArticle.imagePositionY)}
+                                                onChange={e => setEditingArticle({
+                                                    ...editingArticle,
+                                                    imagePositionY: Number(e.target.value),
+                                                })}
+                                                className="w-full accent-brand-green"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -674,6 +744,8 @@ const AdminPage = () => {
                                     tag: 'NEW',
                                     image: '',
                                     readTime: '3 мин',
+                                    imagePositionX: 50,
+                                    imagePositionY: 50,
                                 });
                                 setIsNew(true);
                                 setError('');
@@ -709,7 +781,12 @@ const AdminPage = () => {
                                 <div key={article.id} className="bg-white rounded-3xl border border-black/5 p-6 flex items-center gap-6 hover:shadow-xl hover:border-brand-green/20 transition-all group relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-0 group-hover:opacity-100 transition-opacity" />
                                     {article.image ? (
-                                        <img src={article.image} alt="" className="w-20 h-20 object-cover rounded-2xl flex-shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500 shadow-sm" />
+                                        <img
+                                            src={article.image}
+                                            alt=""
+                                            className="w-20 h-20 object-cover rounded-2xl flex-shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500 shadow-sm"
+                                            style={{ objectPosition: getImageObjectPosition(article) }}
+                                        />
                                     ) : (
                                         <div className="w-20 h-20 rounded-2xl bg-brand-light flex items-center justify-center flex-shrink-0">
                                             <ImageIcon size={24} className="text-brand-dark/10" />
