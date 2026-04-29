@@ -107,7 +107,9 @@
     "category": "Проекты",
     "tag": "NEW",
     "image": "/uploads/upload_1776143355291_35148013.jpg",
-    "readTime": "3 мин"
+    "readTime": "3 мин",
+    "imagePositionX": 50,
+    "imagePositionY": 30
   },
   {
     "id": "0623ace5-9941-428f-921c-8abbcb8df938",
