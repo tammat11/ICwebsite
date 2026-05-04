@@ -16,6 +16,36 @@ export interface LeadData {
     files?: File[];
 }
 
+export type TenderFieldValue =
+    | string
+    | number
+    | boolean
+    | null
+    | Array<string | number | { id?: string | number; url?: string; urlMachine?: string; name?: string; type?: string }>;
+
+export interface TenderField {
+    key: string;
+    label: string;
+    value: TenderFieldValue;
+}
+
+export interface TenderApplication {
+    id: string | number;
+    title: string;
+    bitrixUrl: string;
+    stageId?: string;
+    createdTime?: string;
+    updatedTime?: string;
+    deadline?: string;
+    customer?: string;
+    announcementNumber?: string;
+    purchaseName?: string;
+    location?: string;
+    amount?: string | number;
+    note?: string;
+    fields: TenderField[];
+}
+
 const postBitrixAction = async <T>(action: string, payload: Record<string, unknown>) => {
     const response = await fetch('/api/bitrix', {
         method: 'POST',
@@ -164,6 +194,14 @@ export const getAllDealsWithCoords = async (startDate?: string, endDate?: string
 export const getAllDeals = async (startDate?: string, endDate?: string) =>
     postBitrixAction('getAllDeals', { startDate, endDate });
 
+export const getTenderApplications = async () => {
+    const result = await postBitrixAction<{ items: TenderApplication[] }>('getTenderApplications', {});
+    return result.items;
+};
+
+export const getTenderApplication = async (id: string | number) =>
+    postBitrixAction<TenderApplication>('getTenderApplication', { id });
+
 export const getDailyReports = async (entityTypeId = 1204, categoryId = 445, startDate?: string, endDate?: string) =>
     postBitrixAction('getDailyReports', { entityTypeId, categoryId, startDate, endDate });
 
@@ -173,6 +211,13 @@ export const updateObjectCoordinates = async (dealId: string | number, lat: numb
 export const getBitrixUsers = async () =>
     postBitrixAction('getBitrixUsers', {});
 
+export const updateTenderStage = async (
+    id: string | number,
+    stageId: string,
+    extraFields?: Record<string, unknown>,
+) =>
+    postBitrixAction('updateTenderStage', { id, stageId, extraFields });
+
 export default {
     createBitrixLead,
     createHrCandidate,
@@ -180,7 +225,10 @@ export default {
     getNearestDeal,
     getAllDeals,
     getAllDealsWithCoords,
+    getTenderApplications,
+    getTenderApplication,
     getDailyReports,
     updateObjectCoordinates,
     getBitrixUsers,
+    updateTenderStage,
 };

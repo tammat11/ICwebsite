@@ -2,6 +2,81 @@ const BITRIX_WEBHOOK_URL = process.env.BITRIX_WEBHOOK_URL;
 
 const DEAL_FUNNEL_ID = 111;
 const DEAL_STAGE_ID = 'C111:PREPARATION';
+const TENDER_ENTITY_TYPE_ID = 1372;
+const TENDER_CATEGORY_ID = 435;
+const TENDER_STAGE_ID = 'DT1372_435:CLIENT';
+
+const TENDER_PRIMARY_FIELDS = [
+    'id',
+    'title',
+    'createdTime',
+    'updatedTime',
+    'movedTime',
+    'stageId',
+    'categoryId',
+    'assignedById',
+    'ufCrm177_1771917018289',
+    'ufCrm177_1771917047522',
+    'ufCrm177_1771917249406',
+    'ufCrm177_1771917265826',
+    'ufCrm177_1771917306044',
+    'ufCrm177_1771917325836',
+    'ufCrm177_1771917352221',
+    'ufCrm177_1771917404692',
+    'ufCrm177_1771918963486',
+    'ufCrm177_1771918990965',
+    'ufCrm177_1771919098033',
+    'ufCrm177_1771919122183',
+    'ufCrm177_1771919156204',
+    'ufCrm177_1771919180690',
+    'ufCrm177_1771919201639',
+    'ufCrm177_1771919276245',
+    'ufCrm177_1773311202331',
+    'ufCrm177_1773311265963',
+    'ufCrm177_1773311436361',
+    'ufCrm177_1773311543646',
+    'ufCrm177_1773381811',
+    'ufCrm177_1773382125293',
+    'ufCrm177_1773382341973',
+    'ufCrm177_1773383415952',
+    'ufCrm177_1773398517150',
+];
+
+const TENDER_FIELD_LABELS = {
+    id: 'ID',
+    title: 'Название',
+    createdTime: 'Создано',
+    updatedTime: 'Обновлено',
+    movedTime: 'Перемещено на стадию',
+    stageId: 'Стадия',
+    categoryId: 'Воронка',
+    assignedById: 'Ответственный',
+    ufCrm177_1771917018289: 'Портал закупок',
+    ufCrm177_1771917047522: '№ объявления',
+    ufCrm177_1771917249406: 'Заказчик',
+    ufCrm177_1771917265826: 'Приоритет',
+    ufCrm177_1771917306044: 'Наименование закупки',
+    ufCrm177_1771917325836: 'Дополнительная характеристика',
+    ufCrm177_1771917352221: 'Срок окончания обсуждения',
+    ufCrm177_1771917404692: 'Срок окончания приема заявок',
+    ufCrm177_1771918963486: 'Сумма без НДС',
+    ufCrm177_1771918990965: 'Стоимость в месяц без НДС',
+    ufCrm177_1771919098033: 'Дата начала оказания услуг',
+    ufCrm177_1771919122183: 'Дата конца оказания услуг',
+    ufCrm177_1771919156204: 'Место оказания услуг',
+    ufCrm177_1771919180690: 'Краткая техническая спецификация',
+    ufCrm177_1771919201639: 'Примечание',
+    ufCrm177_1771919276245: 'Участвуем/Не участвуем',
+    ufCrm177_1773311202331: 'Объем оказанных услуг',
+    ufCrm177_1773311265963: 'Квалификационная сложность',
+    ufCrm177_1773311436361: 'Скидка в %',
+    ufCrm177_1773311543646: 'Ответственный с IC Line',
+    ufCrm177_1773381811: 'Ответственный IC LINE',
+    ufCrm177_1773382125293: 'Конкурсная документация',
+    ufCrm177_1773382341973: 'Ссылка на договора b2g',
+    ufCrm177_1773383415952: 'Причина не участия',
+    ufCrm177_1773398517150: 'Дата начала оказания услуг*',
+};
 
 function getWebhookUrl() {
     if (!BITRIX_WEBHOOK_URL) {
@@ -379,6 +454,141 @@ async function handleGetAllDeals(startDate, endDate) {
     return allDeals;
 }
 
+function hasTenderValue(value) {
+    if (value === null || value === undefined) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'string') return value.trim() !== '';
+    return true;
+}
+
+function normalizeTenderValue(value) {
+    if (Array.isArray(value)) {
+        return value.map(item => {
+            if (item && typeof item === 'object' && ('url' in item || 'urlMachine' in item)) {
+                return {
+                    id: item.id,
+                    url: item.url,
+                    name: item.name || item.originalName || `Файл ${item.id || ''}`.trim(),
+                };
+            }
+
+            return item;
+        });
+    }
+
+    return value;
+}
+
+function mapTenderItem(item) {
+    const fields = TENDER_PRIMARY_FIELDS
+        .filter(key => hasTenderValue(item[key]))
+        .map(key => ({
+            key,
+            label: TENDER_FIELD_LABELS[key] || key,
+            value: normalizeTenderValue(item[key]),
+        }));
+
+    return {
+        id: item.id,
+        title: item.title || `Тендер #${item.id}`,
+        bitrixUrl: `https://tootopbrass.bitrix24.kz/crm/type/${TENDER_ENTITY_TYPE_ID}/details/${item.id}/`,
+        stageId: item.stageId,
+        createdTime: item.createdTime,
+        updatedTime: item.updatedTime,
+        deadline: item.ufCrm177_1771917404692,
+        customer: item.ufCrm177_1771917249406,
+        announcementNumber: item.ufCrm177_1771917047522,
+        purchaseName: item.ufCrm177_1771917306044,
+        location: item.ufCrm177_1771919156204,
+        amount: item.ufCrm177_1771918963486,
+        note: item.ufCrm177_1771919201639,
+        fields,
+    };
+}
+
+async function handleGetTenderApplications() {
+    let allItems = [];
+    let start = 0;
+    let hasMore = true;
+    let pageCount = 0;
+
+    while (hasMore && pageCount < 20 && allItems.length < 1000) {
+        const data = await bitrixRequest('crm.item.list.json', {
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                entityTypeId: TENDER_ENTITY_TYPE_ID,
+                filter: {
+                    categoryId: TENDER_CATEGORY_ID,
+                    stageId: TENDER_STAGE_ID,
+                },
+                select: TENDER_PRIMARY_FIELDS,
+                order: { id: 'DESC' },
+                start,
+            }),
+        });
+
+        if (data.result?.items?.length > 0) {
+            allItems = [...allItems, ...data.result.items];
+            if (data.next && data.result.items.length >= 50) {
+                start = data.next;
+                pageCount += 1;
+            } else {
+                hasMore = false;
+            }
+        } else {
+            hasMore = false;
+        }
+    }
+
+    return {
+        entityTypeId: TENDER_ENTITY_TYPE_ID,
+        categoryId: TENDER_CATEGORY_ID,
+        stageId: TENDER_STAGE_ID,
+        items: allItems.map(mapTenderItem),
+    };
+}
+
+async function handleGetTenderApplication(id) {
+    const numericId = Number(id);
+
+    if (!Number.isInteger(numericId) || numericId <= 0) {
+        throw new Error('Некорректный ID тендера');
+    }
+
+    const data = await bitrixRequest('crm.item.get.json', {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            entityTypeId: TENDER_ENTITY_TYPE_ID,
+            id: numericId,
+        }),
+    });
+
+    if (!data.result?.item) {
+        throw new Error('Тендер не найден');
+    }
+
+    return mapTenderItem(data.result.item);
+}
+
+async function handleUpdateTenderStage(id, stageId, extraFields = {}) {
+    const numericId = Number(id);
+
+    if (!Number.isInteger(numericId) || numericId <= 0) {
+        throw new Error('Некорректный ID тендера');
+    }
+
+    const data = await bitrixRequest('crm.item.update.json', {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            entityTypeId: TENDER_ENTITY_TYPE_ID,
+            id: numericId,
+            fields: { stageId, ...extraFields },
+        }),
+    });
+
+    return { ok: true, result: data.result };
+}
+
 async function handleGetDailyReports(entityTypeId = 1204, categoryId = 445, startDate, endDate) {
     let allItems = [];
     let start = 0;
@@ -462,8 +672,11 @@ const actionHandlers = {
     updateObjectCoordinates: async payload => handleUpdateObjectCoordinates(payload.dealId, payload.lat, payload.lng),
     getAllDealsWithCoords: async payload => handleGetAllDealsWithCoords(payload.startDate, payload.endDate),
     getAllDeals: async payload => handleGetAllDeals(payload.startDate, payload.endDate),
+    getTenderApplications: async () => handleGetTenderApplications(),
+    getTenderApplication: async payload => handleGetTenderApplication(payload.id),
     getDailyReports: async payload => handleGetDailyReports(payload.entityTypeId, payload.categoryId, payload.startDate, payload.endDate),
     getBitrixUsers: async () => handleGetBitrixUsers(),
+    updateTenderStage: async payload => handleUpdateTenderStage(payload.id, payload.stageId, payload.extraFields),
 };
 
 export default async function handler(req, res) {
