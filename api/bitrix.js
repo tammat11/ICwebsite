@@ -192,8 +192,8 @@ async function handleUpdateSanitaryStats(score, curatorName) {
     const CURATOR_FIELD = 'ufCrm127_1762769620';
 
     const searchVariations = [
-        { title: curatorName, month: '03' },
-        { title: ` ${curatorName}`, month: '03' },
+        { title: curatorName, month: '04' },
+        { title: ` ${curatorName}`, month: '04' },
         { title: curatorName, month: '' },
         { title: ` ${curatorName}`, month: '' },
     ];
@@ -234,7 +234,7 @@ async function handleUpdateSanitaryStats(score, curatorName) {
         updateParams.append(`fields[${CURATOR_FIELD}]`, curatorName);
 
         if (!targetItem[MONTH_FIELD]) {
-            updateParams.append(`fields[${MONTH_FIELD}]`, '03');
+            updateParams.append(`fields[${MONTH_FIELD}]`, '04');
         }
 
         return bitrixRequest('crm.item.update.json', {
@@ -247,7 +247,7 @@ async function handleUpdateSanitaryStats(score, curatorName) {
     addParams.append('entityTypeId', String(ENTITY_TYPE_ID));
     addParams.append('fields[title]', curatorName);
     addParams.append('fields[categoryId]', String(CATEGORY_ID));
-    addParams.append(`fields[${MONTH_FIELD}]`, '03');
+    addParams.append(`fields[${MONTH_FIELD}]`, '04');
     addParams.append(`fields[${COUNT_FIELD}]`, '1');
     addParams.append(`fields[${TOTAL_FIELD}]`, String(score));
     addParams.append(`fields[${AVG_FIELD}]`, String(score.toFixed(2)));
