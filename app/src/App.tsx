@@ -59,12 +59,13 @@ function App() {
   const location = useLocation();
   const [isCalcOpen, setCalcOpen] = useState(false);
   const isTenderRoute = location.pathname === '/tenders' || location.pathname.startsWith('/tenders/');
+  const isPstRoute = location.pathname === '/pst';
 
   return (
     <>
       <ScrollProgress />
       <ScrollToTop />
-      {location.pathname !== '/admin' && location.pathname !== '/admin/map' && !isTenderRoute && <Navbar onCalcOpen={() => setCalcOpen(true)} />}
+      {location.pathname !== '/admin' && location.pathname !== '/admin/map' && !isTenderRoute && !isPstRoute && <Navbar onCalcOpen={() => setCalcOpen(true)} />}
       <Suspense fallback={
         <div className="fixed inset-0 bg-white z-[999] flex items-center justify-center transition-opacity duration-500">
           <div className="w-10 h-10 border-2 border-brand-green/20 border-t-brand-green rounded-full animate-spin" />

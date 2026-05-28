@@ -1,22 +1,15 @@
-import {
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   Camera,
   CheckCircle2,
-  Compass,
   ImagePlus,
   LocateFixed,
   MapPin,
-  RefreshCw,
   Search,
   Store,
   Trash2,
-  TriangleAlert,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import SeoHead from '../components/SeoHead';
 
 type PstLocation = {
@@ -48,6 +41,14 @@ type PhotoItem = {
   file: File;
   previewUrl: string;
   addedAt: string;
+};
+
+type IndexedLocation = PstLocation & {
+  searchIndex: string;
+};
+
+type LocationWithDistance = IndexedLocation & {
+  distanceKm: number;
 };
 
 const SEARCH_RADIUS_KM = 0.3;
@@ -106,6 +107,9 @@ const buildSearchIndex = (location: PstLocation) =>
     ].join(' ')
   );
 
+const chipClass =
+  'rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]';
+
 const PstPage = () => {
   const [locations, setLocations] = useState<PstLocation[]>([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState(true);
@@ -116,6 +120,7 @@ const PstPage = () => {
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -183,7 +188,7 @@ const PstPage = () => {
       (error) => {
         console.error('PST geolocation error:', error);
         setGeoState('denied');
-        setGeoError('Не удалось получить доступ к геолокации. Разрешите доступ к местоположению и повторите попытку.');
+        setGeoError('Доступ к геолокации ограничен. Пожалуйста, разрешите доступ для продолжения.');
       },
       {
         enableHighAccuracy: true,
@@ -197,7 +202,7 @@ const PstPage = () => {
     requestLocation();
   }, []);
 
-  const indexedLocations = useMemo(
+  const indexedLocations: IndexedLocation[] = useMemo(
     () =>
       locations.map((location) => ({
         ...location,
@@ -206,7 +211,7 @@ const PstPage = () => {
     [locations]
   );
 
-  const nearestLocations = useMemo(() => {
+  const nearestLocations: LocationWithDistance[] = useMemo(() => {
     if (!coords) return [];
 
     return indexedLocations
@@ -219,23 +224,11 @@ const PstPage = () => {
       .slice(0, 12);
   }, [coords, indexedLocations]);
 
-  const fallbackLocations = useMemo(() => {
-    if (!coords) return [];
-
-    return indexedLocations
-      .map((location) => ({
-        ...location,
-        distanceKm: getDistanceKm(coords, location),
-      }))
-      .sort((a, b) => a.distanceKm - b.distanceKm)
-      .slice(0, 10);
-  }, [coords, indexedLocations]);
-
-  const manualResults = useMemo(() => {
+  const manualResults: LocationWithDistance[] = useMemo(() => {
     const normalizedTerm = normalizeSearch(deferredSearchTerm);
 
     if (!normalizedTerm) {
-      return fallbackLocations;
+      return nearestLocations;
     }
 
     return indexedLocations
@@ -246,7 +239,9 @@ const PstPage = () => {
       }))
       .sort((a, b) => a.distanceKm - b.distanceKm)
       .slice(0, 30);
-  }, [coords, deferredSearchTerm, fallbackLocations, indexedLocations]);
+  }, [coords, deferredSearchTerm, indexedLocations, nearestLocations]);
+
+  const visibleLocations = searchTerm ? manualResults : nearestLocations;
 
   const selectedLocation =
     indexedLocations.find((location) => location.id === selectedLocationId) ?? null;
@@ -286,150 +281,142 @@ const PstPage = () => {
 
   const isReady = Boolean(selectedLocation && photos.length > 0);
 
+  const handleSubmit = () => {
+    if (!isReady) return;
+    setIsSubmitted(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-brand-light flex items-center justify-center p-6 pt-32">
+        <SeoHead
+          title="PST точки | IC Group"
+          description="Выбор ближайшей PST-точки по геолокации с фиксацией фото и времени."
+          path="/pst"
+        />
+        <div className="max-w-md w-full bg-white rounded-[40px] p-10 shadow-premium text-center">
+          <div className="w-20 h-20 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-8">
+            <CheckCircle2 className="text-brand-green" size={40} />
+          </div>
+          <h1 className="text-2xl font-black text-brand-dark mb-4 uppercase">Готово</h1>
+          <p className="text-sm leading-6 text-brand-dark/60">
+            Локация выбрана, фото зафиксированы. Можно переходить к следующему этапу.
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsSubmitted(false)}
+            className="btn-premium w-full mt-6"
+          >
+            Вернуться
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#f4f6ef] pb-16 pt-24 md:pt-32">
+    <div className="min-h-screen bg-brand-light pb-16 pt-24 md:pt-32">
       <SeoHead
         title="PST точки | IC Group"
         description="Выбор ближайшей PST-точки по геолокации с фиксацией фото и времени."
         path="/pst"
       />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <section className="overflow-hidden rounded-[36px] border border-black/6 bg-white shadow-[0_24px_80px_rgba(17,24,39,0.08)]">
-          <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="border-b border-black/6 bg-[linear-gradient(135deg,#18231a_0%,#243326_55%,#8fc640_180%)] px-6 py-8 text-white sm:px-8 sm:py-10 lg:border-b-0 lg:border-r">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-white/80">
-                <Compass size={14} />
-                PST маршрут
-              </div>
-              <h1 className="mt-5 max-w-xl text-4xl font-black uppercase leading-[0.9] tracking-tight sm:text-5xl">
-                Выберите ближайшую
-                <span className="block text-[#d7ff9f]">точку установки</span>
-              </h1>
-              <p className="mt-5 max-w-2xl text-sm leading-6 text-white/78 sm:text-base">
-                Страница работает отдельно от Bitrix: определяет точку по геолокации,
-                показывает ближайшие адреса в радиусе 300 метров и фиксирует фото с временем
-                добавления.
-              </p>
-
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[24px] border border-white/12 bg-white/8 p-4">
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/55">
-                    Радиус
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-white">300 м</div>
-                </div>
-                <div className="rounded-[24px] border border-white/12 bg-white/8 p-4">
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/55">
-                    База
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-white">
-                    {isLoadingLocations ? '...' : locations.length.toLocaleString('ru-RU')}
-                  </div>
-                </div>
-                <div className="rounded-[24px] border border-white/12 bg-white/8 p-4">
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/55">
-                    Фото
-                  </div>
-                  <div className="mt-2 text-2xl font-black text-white">{photos.length}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#f8faf4] px-6 py-8 sm:px-8 sm:py-10">
-              <div className="rounded-[28px] border border-black/6 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                      Геолокация
-                    </div>
-                    <div className="mt-2 text-xl font-black text-brand-dark">
-                      {geoState === 'ready' ? 'Точка определена' : 'Нужен доступ к местоположению'}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={requestLocation}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-brand-dark/10 bg-[#f7f8f4] px-4 py-3 text-[11px] font-black uppercase tracking-[0.16em] text-brand-dark transition hover:border-brand-green/30 hover:bg-white"
-                  >
-                    <RefreshCw size={15} />
-                    Обновить
-                  </button>
-                </div>
-
-                <div className="mt-5 rounded-[22px] border border-black/6 bg-[#f7f8f4] p-4">
-                  {geoState === 'loading' || geoState === 'idle' ? (
-                    <div className="flex items-center gap-3 text-sm font-semibold text-brand-dark/60">
-                      <div className="h-5 w-5 rounded-full border-2 border-brand-dark/15 border-t-brand-green animate-spin" />
-                      Запрашиваем координаты устройства...
-                    </div>
-                  ) : null}
-
-                  {geoState === 'ready' && coords ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-brand-dark">
-                        <LocateFixed size={16} className="text-brand-green" />
-                        {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-                      </div>
-                      <div className="text-xs text-brand-dark/50">
-                        Точность: {coords.accuracy ? `${Math.round(coords.accuracy)} м` : 'не указана'}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {(geoState === 'denied' || geoState === 'unsupported') && (
-                    <div className="flex items-start gap-3 text-sm font-semibold text-red-600">
-                      <TriangleAlert size={18} className="mt-0.5 shrink-0" />
-                      <span>{geoError}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+      <div className="mx-auto max-w-3xl px-6">
+        <div className="mb-12">
+          <div className="mb-10 flex justify-start">
+            <Link to="/" className="inline-flex">
+              <img
+                src="/logo_IC_group.png"
+                alt="IC Group"
+                className="h-14 w-auto object-contain sm:h-16"
+              />
+            </Link>
           </div>
-        </section>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-6">
-            <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                    Шаг 1
-                  </div>
-                  <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
-                    Ближайшие точки
-                  </h2>
-                </div>
-                <div className="text-sm font-semibold text-brand-dark/50">
-                  {coords
-                    ? `Показываем адреса рядом с вами`
-                    : 'Список появится после определения координат'}
+          <h1 className="mx-auto max-w-[540px] text-center font-black uppercase leading-[0.9] tracking-0 text-brand-dark text-[clamp(2.15rem,6.2vw,4.3rem)]">
+            Kaspi
+            <br />
+            <span className="text-brand-green">Postomat</span>
+          </h1>
+
+          <div className="mx-auto mt-8 max-w-[690px]">
+            {(geoState === 'denied' || geoState === 'unsupported') && (
+              <div className="rounded-[36px] border border-[#f5d7d6] bg-[#fff5f5] px-6 py-5 shadow-[0_18px_40px_rgba(242,107,104,0.08)] sm:px-8">
+                <div className="flex items-start gap-4">
+                  <span className="mt-[10px] h-3 w-1.5 shrink-0 rounded-full bg-[#f26b68]" />
+                  <span className="text-left text-[clamp(1rem,1.8vw,1.45rem)] font-black uppercase leading-[1.45] tracking-[0.01em] text-[#f26b68]">
+                    {geoError}
+                  </span>
                 </div>
               </div>
+            )}
 
-              <div className="mt-6 grid gap-3">
-                {geoState === 'ready' && nearestLocations.length > 0
-                  ? nearestLocations.map((location, index) => {
+            {geoState === 'ready' && coords && (
+              <div className="rounded-[28px] border border-brand-green/20 bg-brand-green/10 px-6 py-5">
+                <div className="flex items-center gap-2 text-base font-black uppercase tracking-[0.02em] text-brand-green">
+                  <LocateFixed size={18} />
+                  Геолокация определена
+                </div>
+                <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/60">
+                  GPS: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+                  {coords.accuracy ? `, точность ${Math.round(coords.accuracy)} м` : ''}
+                </div>
+              </div>
+            )}
+
+            {(geoState === 'loading' || geoState === 'idle') && (
+              <div className="rounded-[28px] border border-black/5 bg-white px-6 py-5 text-base font-bold leading-7 text-brand-dark/60 shadow-premium">
+                <div className="flex items-center gap-3">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark/15 border-t-brand-green" />
+                  Запрашиваем координаты устройства...
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <section className="bg-transparent px-0 py-0 shadow-none">
+            <div className="mx-auto max-w-[690px]">
+              {geoState === 'ready' && (
+                <>
+                  <div className="relative mt-8">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/25" size={18} />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Например: Jaqsy, Жарокова, 7162"
+                      className="w-full rounded-[26px] border border-brand-dark/10 bg-white py-5 pl-12 pr-4 text-base font-semibold text-brand-dark outline-none transition shadow-premium focus:border-brand-green focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="mt-6 max-h-[560px] space-y-3 overflow-y-auto pr-1">
+                    {visibleLocations.map((location, index) => {
                       const isSelected = location.id === selectedLocationId;
 
                       return (
                         <button
-                          key={location.id}
+                          key={`location-${location.id}`}
                           type="button"
                           onClick={() => setSelectedLocationId(location.id)}
-                          className={`rounded-[24px] border p-4 text-left transition-all sm:p-5 ${
+                          className={`w-full rounded-[24px] border p-4 text-left transition-all ${
                             isSelected
                               ? 'border-brand-green bg-[#f5fbe9] shadow-[0_20px_45px_rgba(143,198,64,0.18)]'
                               : 'border-black/6 bg-[#fbfcf8] hover:border-brand-green/25 hover:bg-white'
                           }`}
                         >
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark/55">
-                              #{index + 1}
+                            {!searchTerm && (
+                              <span className={`${chipClass} bg-white text-brand-dark/55`}>#{index + 1}</span>
+                            )}
+                            <span className={`${chipClass} bg-brand-dark/5 text-brand-dark/55`}>
+                              ID {location.id}
                             </span>
                             <span
-                              className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${
+                              className={`${chipClass} ${
                                 location.installPlace === 'Уличный'
                                   ? 'bg-[#e9f3ff] text-[#2b6cb0]'
                                   : 'bg-[#eef6e3] text-[#5a7d20]'
@@ -437,9 +424,11 @@ const PstPage = () => {
                             >
                               {location.installPlace}
                             </span>
-                            <span className="rounded-full bg-brand-dark/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark/55">
-                              {formatDistance(location.distanceKm)}
-                            </span>
+                            {Number.isFinite(location.distanceKm) && (
+                              <span className={`${chipClass} bg-white text-brand-dark/55`}>
+                                {formatDistance(location.distanceKm)}
+                              </span>
+                            )}
                           </div>
 
                           <div className="mt-3 text-lg font-black leading-tight text-brand-dark">
@@ -451,183 +440,95 @@ const PstPage = () => {
                           </div>
                         </button>
                       );
-                    })
-                  : null}
+                    })}
 
-                {geoState === 'ready' && nearestLocations.length === 0 && (
-                  <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-[#fbfcf8] p-5">
-                    <div className="text-lg font-black text-brand-dark">
-                      В радиусе 300 метров ничего не найдено
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-brand-dark/58">
-                      Ниже все равно доступен ручной поиск по полной базе и подбор ближайших
-                      адресов по расстоянию.
-                    </p>
+                    {!isLoadingLocations && searchTerm && manualResults.length === 0 && (
+                      <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
+                        Совпадений не найдено. Попробуйте адрес, магазин, комментарий или номер постамата.
+                      </div>
+                    )}
+
+                    {!isLoadingLocations && !searchTerm && nearestLocations.length === 0 && (
+                      <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
+                        В радиусе 300 метров ничего не найдено. Используйте поиск выше, чтобы выбрать нужную точку вручную.
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </section>
-
-            <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                    Шаг 2
-                  </div>
-                  <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
-                    Ручной поиск
-                  </h2>
-                </div>
-                <div className="text-sm font-semibold text-brand-dark/50">
-                  По адресу, городу, комментарию или ID
-                </div>
-              </div>
-
-              <div className="relative mt-6">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-dark/25" size={18} />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Например: Jaqsy, Жарокова, 7162"
-                  className="w-full rounded-[24px] border border-brand-dark/10 bg-[#f7f8f4] py-4 pl-12 pr-4 text-sm font-semibold text-brand-dark outline-none transition focus:border-brand-green focus:bg-white"
-                />
-              </div>
-
-              <div className="mt-5 max-h-[480px] space-y-3 overflow-y-auto pr-1">
-                {manualResults.map((location) => {
-                  const isSelected = location.id === selectedLocationId;
-
-                  return (
-                    <button
-                      key={`manual-${location.id}`}
-                      type="button"
-                      onClick={() => setSelectedLocationId(location.id)}
-                      className={`w-full rounded-[24px] border p-4 text-left transition-all ${
-                        isSelected
-                          ? 'border-brand-green bg-[#f5fbe9]'
-                          : 'border-black/6 bg-[#fbfcf8] hover:border-brand-green/25 hover:bg-white'
-                      }`}
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-brand-dark/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark/55">
-                          ID {location.id}
-                        </span>
-                        <span
-                          className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${
-                            location.installPlace === 'Уличный'
-                              ? 'bg-[#e9f3ff] text-[#2b6cb0]'
-                              : 'bg-[#eef6e3] text-[#5a7d20]'
-                          }`}
-                        >
-                          {location.installPlace}
-                        </span>
-                        {Number.isFinite(location.distanceKm) ? (
-                          <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark/55">
-                            {formatDistance(location.distanceKm)}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="mt-3 text-base font-black leading-tight text-brand-dark">
-                        {location.hint || location.comment || location.address}
-                      </div>
-                      <div className="mt-2 text-sm text-brand-dark/58">{location.address}</div>
-                    </button>
-                  );
-                })}
-
-                {!isLoadingLocations && manualResults.length === 0 && (
-                  <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-[#fbfcf8] p-5 text-sm font-semibold text-brand-dark/55">
-                    Совпадений не найдено. Попробуйте адрес, магазин, комментарий или номер
-                    постамата.
-                  </div>
-                )}
-              </div>
-            </section>
-          </div>
-
-          <div className="space-y-6">
-            <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
-              <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                Шаг 3
-              </div>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
-                Выбранная точка
-              </h2>
-
-              {selectedLocation ? (
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-[28px] bg-[linear-gradient(135deg,#1d2a1f_0%,#233826_45%,#8fc640_200%)] p-5 text-white shadow-[0_22px_55px_rgba(31,41,55,0.18)]">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white/80">
-                        ID {selectedLocation.id}
-                      </span>
-                      <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white/80">
-                        {selectedLocation.installPlace}
-                      </span>
-                      <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white/80">
-                        {selectedLocation.category}
-                      </span>
-                    </div>
-
-                    <div className="mt-4 text-2xl font-black leading-tight">
-                      {selectedLocation.hint || selectedLocation.comment || selectedLocation.address}
-                    </div>
-                    <div className="mt-3 flex items-start gap-2 text-sm leading-6 text-white/78">
-                      <Store size={16} className="mt-1 shrink-0" />
-                      <span>{selectedLocation.address}</span>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[24px] bg-[#f7f8f4] p-4">
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
-                        Город и филиал
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-brand-dark">
-                        {selectedLocation.city}, {selectedLocation.branch}
-                      </div>
-                    </div>
-                    <div className="rounded-[24px] bg-[#f7f8f4] p-4">
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
-                        До точки
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-brand-dark">
-                        {selectedDistance !== null ? formatDistance(selectedDistance) : '—'}
-                      </div>
-                    </div>
-                    <div className="rounded-[24px] bg-[#f7f8f4] p-4">
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
-                        Покрытие
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-brand-dark">
-                        {selectedLocation.surfaceType || 'Не указано'}
-                      </div>
-                    </div>
-                    <div className="rounded-[24px] bg-[#f7f8f4] p-4">
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
-                        Ячеек
-                      </div>
-                      <div className="mt-2 text-sm font-semibold text-brand-dark">
-                        {selectedLocation.cellsCount || 'Не указано'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-6 rounded-[24px] border border-dashed border-brand-dark/12 bg-[#fbfcf8] p-5 text-sm leading-6 text-brand-dark/55">
-                  Сначала выберите ближайшую или вручную найденную точку. Здесь появится карточка
-                  выбранного постамата.
-                </div>
+                </>
               )}
-            </section>
 
+              {selectedLocation && (
+                <div className="mt-8 space-y-4 border-t border-black/6 pt-8">
+                  <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
+                    Выбранная локация
+                  </div>
+                <div className="rounded-[28px] bg-brand-dark p-5 text-white shadow-premium">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
+                      ID {selectedLocation.id}
+                    </span>
+                    <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
+                      {selectedLocation.installPlace}
+                    </span>
+                    <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
+                      {selectedLocation.category}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 text-2xl font-black leading-tight">
+                    {selectedLocation.hint || selectedLocation.comment || selectedLocation.address}
+                  </div>
+                  <div className="mt-3 flex items-start gap-2 text-sm leading-6 text-white/78">
+                    <Store size={16} className="mt-1 shrink-0" />
+                    <span>{selectedLocation.address}</span>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[24px] bg-[#f7f8f4] p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
+                      Город и филиал
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-brand-dark">
+                      {selectedLocation.city}, {selectedLocation.branch}
+                    </div>
+                  </div>
+                  <div className="rounded-[24px] bg-[#f7f8f4] p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
+                      До точки
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-brand-dark">
+                      {selectedDistance !== null ? formatDistance(selectedDistance) : '—'}
+                    </div>
+                  </div>
+                  <div className="rounded-[24px] bg-[#f7f8f4] p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
+                      Покрытие
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-brand-dark">
+                      {selectedLocation.surfaceType || 'Не указано'}
+                    </div>
+                  </div>
+                  <div className="rounded-[24px] bg-[#f7f8f4] p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
+                      Ячеек
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-brand-dark">
+                      {selectedLocation.cellsCount || 'Не указано'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              )}
+            </div>
+          </section>
+
+          {selectedLocation && (
             <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                    Шаг 4
+                    Фото и отправка
                   </div>
                   <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
                     Фотофиксация
@@ -648,8 +549,7 @@ const PstPage = () => {
                       Добавить фото
                     </div>
                     <div className="mt-1 text-sm leading-6 text-brand-dark/52">
-                      Можно выбрать несколько изображений. На телефоне откроется камера или
-                      галерея.
+                      Можно выбрать несколько изображений. На телефоне откроется камера или галерея.
                     </div>
                   </div>
                 </div>
@@ -699,44 +599,32 @@ const PstPage = () => {
 
                 {photos.length === 0 && (
                   <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-[#fbfcf8] p-5 text-sm leading-6 text-brand-dark/55">
-                    Фото пока не добавлены. После загрузки здесь появится список с точным временем
-                    фиксации.
+                    Фото пока не добавлены. После загрузки здесь появится список с точным временем фиксации.
                   </div>
                 )}
               </div>
-            </section>
 
-            <section
-              className={`rounded-[32px] border p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7 ${
-                isReady
-                  ? 'border-brand-green/25 bg-[#f5fbe9]'
-                  : 'border-black/6 bg-white'
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] ${
-                    isReady ? 'bg-brand-green text-white' : 'bg-brand-dark/6 text-brand-dark/45'
+              <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm leading-6 text-brand-dark/58">
+                  {isReady
+                    ? 'Все готово: локация выбрана, фото приложены.'
+                    : 'Для отправки добавьте хотя бы одно фото.'}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={!isReady}
+                  className={`rounded-2xl px-6 py-4 text-sm font-black uppercase tracking-[0.2em] transition-all ${
+                    isReady
+                      ? 'bg-brand-green text-brand-dark hover:scale-[1.01] hover:shadow-[0_18px_40px_rgba(143,198,64,0.28)]'
+                      : 'bg-brand-dark/8 text-brand-dark/35 cursor-not-allowed'
                   }`}
                 >
-                  <CheckCircle2 size={24} />
-                </div>
-                <div>
-                  <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                    Статус
-                  </div>
-                  <div className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
-                    {isReady ? 'Карточка готова' : 'Нужно завершить выбор'}
-                  </div>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-brand-dark/58">
-                    {isReady
-                      ? 'Точка выбрана, фото приложены, время добавления зафиксировано. Можно переходить к следующему этапу.'
-                      : 'Для завершения этой части выберите PST-точку и добавьте хотя бы одно фото.'}
-                  </p>
-                </div>
+                  Отправить
+                </button>
               </div>
             </section>
-          </div>
+          )}
         </div>
 
         {locationsError && (
