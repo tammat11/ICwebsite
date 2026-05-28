@@ -21,6 +21,7 @@ const DailyReportPage = lazy(() => import('./pages/DailyReportPage'));
 const AdminMapPage = lazy(() => import('./pages/AdminMapPage'));
 const SeoLandingPage = lazy(() => import('./pages/SeoLandingPage'));
 const InterviewPage = lazy(() => import('./pages/InterviewPage'));
+const PstPage = lazy(() => import('./pages/PstPage'));
 const TendersPage = lazy(() => import('./pages/TendersPage'));
 
 import Footer from './components/Footer';
@@ -82,6 +83,7 @@ function App() {
           <Route path="/admin/map" element={<AdminMapPage />} />
           <Route path="/training/sanitary" element={<SanitaryQuizPage />} />
           <Route path="/reports/daily" element={<DailyReportPage />} />
+          <Route path="/pst" element={<PstPage />} />
           <Route path="/kliningovaya-kompaniya-almaty" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-almaty')!} onCalcOpen={() => setCalcOpen(true)} />} />
           <Route path="/kliningovaya-kompaniya-astana" element={<SeoLandingPage landing={getSeoLanding('/kliningovaya-kompaniya-astana')!} onCalcOpen={() => setCalcOpen(true)} />} />
           <Route path="/klining-ofisov" element={<SeoLandingPage landing={getSeoLanding('/klining-ofisov')!} onCalcOpen={() => setCalcOpen(true)} />} />
