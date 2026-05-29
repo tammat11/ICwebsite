@@ -1,12 +1,13 @@
 const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
-const SUBHEADER_ROW = 2;
-const DATA_START_ROW = 3;
+const DATA_START_ROW = 2;
 const MONTH_BLOCK_WIDTH = 2;
 const PHOTO_COLUMN_WIDTH = 180;
 const ROW_HEIGHT = 140;
 const PHOTO_WIDTH = 150;
 const PHOTO_HEIGHT = 112;
+const LEGACY_SUBHEADERS = ['дата уборки и время', 'фото'];
+const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'];
 
 function doGet() {
   return jsonResponse({ ok: true, service: 'pst-cleaning-webapp' });
@@ -18,7 +19,7 @@ function doPost(event) {
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = getObjectsSheet(spreadsheet);
 
-    ensureSubheaderRow(sheet);
+    cleanupLegacySheetLayout(sheet);
     writeCleaningToObjectRow(sheet, payload);
 
     return jsonResponse({ ok: true });
@@ -53,25 +54,38 @@ function writeCleaningToObjectRow(sheet, payload) {
   sheet.setColumnWidth(photoColumn, PHOTO_COLUMN_WIDTH);
   sheet.setRowHeight(objectRow, ROW_HEIGHT);
   insertPhotoIntoCell(sheet, objectRow, photoColumn, firstPhoto);
-
-  updateStatusColumns(sheet, objectRow, submittedAt);
 }
 
 function getObjectsSheet(spreadsheet) {
   return spreadsheet.getSheetByName(OBJECTS_SHEET_NAME) || spreadsheet.getSheets()[0];
 }
 
-function ensureSubheaderRow(sheet) {
-  const secondRowValues = sheet.getRange(SUBHEADER_ROW, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
-  const hasSubheaders = secondRowValues.some((value) => {
-    const normalized = String(value).trim().toLowerCase();
-    return normalized === 'дата уборки и время' || normalized === 'фото';
-  });
+function cleanupLegacySheetLayout(sheet) {
+  deleteLegacySubheaderRow(sheet);
+  deleteLegacyStatusColumns(sheet);
+  sheet.setFrozenRows(1);
+}
 
-  if (!hasSubheaders) {
-    sheet.insertRowAfter(1);
-    sheet.getRange(SUBHEADER_ROW, 1, 1, sheet.getLastColumn()).clearContent();
-    sheet.setFrozenRows(2);
+function deleteLegacySubheaderRow(sheet) {
+  if (sheet.getLastRow() < 2) return;
+
+  const secondRowValues = sheet.getRange(2, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+  const legacySubheaderCount = secondRowValues.filter((value) =>
+    LEGACY_SUBHEADERS.includes(String(value).trim().toLowerCase())
+  ).length;
+
+  if (legacySubheaderCount > 0) {
+    sheet.deleteRow(2);
+  }
+}
+
+function deleteLegacyStatusColumns(sheet) {
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+  for (let index = headers.length - 1; index >= 0; index--) {
+    if (LEGACY_STATUS_HEADERS.includes(String(headers[index]).trim())) {
+      sheet.deleteColumn(index + 1);
+    }
   }
 }
 
@@ -125,23 +139,10 @@ function getWritableMonthColumns(sheet, objectRow, monthTitle) {
 function setupMonthColumns(sheet, startColumn, monthTitle) {
   sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).merge();
   sheet.getRange(1, startColumn).setValue(monthTitle);
-  sheet.getRange(SUBHEADER_ROW, startColumn).setValue('дата уборки и время');
-  sheet.getRange(SUBHEADER_ROW, startColumn + 1).setValue('фото');
-  sheet.getRange(1, startColumn, SUBHEADER_ROW, MONTH_BLOCK_WIDTH).setFontWeight('bold');
-  sheet.getRange(1, startColumn, SUBHEADER_ROW, MONTH_BLOCK_WIDTH).setHorizontalAlignment('center');
+  sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).setFontWeight('bold');
+  sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).setHorizontalAlignment('center');
   sheet.setColumnWidth(startColumn, 150);
   sheet.setColumnWidth(startColumn + 1, PHOTO_COLUMN_WIDTH);
-}
-
-function updateStatusColumns(sheet, objectRow, submittedAt) {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const washedColumn = getOrCreateHeader(sheet, headers, 'Помыли');
-  const lastCleanedColumn = getOrCreateHeader(sheet, headers, 'Последняя уборка');
-  const washedCell = sheet.getRange(objectRow, washedColumn + 1);
-
-  washedCell.insertCheckboxes();
-  washedCell.setValue(true);
-  sheet.getRange(objectRow, lastCleanedColumn + 1).setValue(submittedAt);
 }
 
 function insertPhotoIntoCell(sheet, row, column, photo) {
@@ -170,16 +171,6 @@ function removeImagesFromCell(sheet, row, column) {
       image.remove();
     }
   });
-}
-
-function getOrCreateHeader(sheet, headerValues, header) {
-  const existingIndex = headerValues.indexOf(header);
-  if (existingIndex !== -1) return existingIndex;
-
-  const newIndex = sheet.getLastColumn();
-  sheet.getRange(1, newIndex + 1).setValue(header);
-  headerValues.push(header);
-  return newIndex;
 }
 
 function findHeaderIndex(headers, candidates) {
