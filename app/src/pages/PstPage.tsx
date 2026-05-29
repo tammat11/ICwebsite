@@ -487,10 +487,10 @@ const PstPage = () => {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-[24px] bg-[#f7f8f4] p-4">
                     <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/40">
-                      Город и филиал
+                      Категория точки
                     </div>
                     <div className="mt-2 text-sm font-semibold text-brand-dark">
-                      {selectedLocation.city}, {selectedLocation.branch}
+                      {selectedLocation.category || 'Не указано'}
                     </div>
                   </div>
                   <div className="rounded-[24px] bg-[#f7f8f4] p-4">
@@ -533,26 +533,39 @@ const PstPage = () => {
                   <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
                     Фотофиксация
                   </h2>
+                  <div className="mt-2 text-sm leading-6 text-brand-dark/55">
+                    Сначала нажмите на большую кнопку ниже, чтобы открыть камеру или галерею.
+                  </div>
                 </div>
                 <div className="text-sm font-semibold text-brand-dark/50">
                   Время фиксируется в момент добавления фото
                 </div>
               </div>
 
-              <label className="mt-6 flex cursor-pointer flex-col gap-4 rounded-[28px] border border-dashed border-brand-dark/14 bg-[#f7f8f4] p-5 transition hover:border-brand-green/35 hover:bg-white">
+              <label className="mt-6 flex cursor-pointer flex-col gap-5 rounded-[28px] border-2 border-dashed border-brand-green/28 bg-[#f7f8f4] p-5 transition hover:border-brand-green/45 hover:bg-white sm:p-6">
                 <div className="flex items-center gap-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-[22px] bg-white text-brand-green shadow-sm">
                     <ImagePlus size={22} />
                   </div>
-                  <div>
-                    <div className="text-sm font-black uppercase tracking-[0.18em] text-brand-dark">
-                      Добавить фото
+                  <div className="min-w-0">
+                    <div className="text-base font-black uppercase tracking-[0.14em] text-brand-dark">
+                      Загрузить фото точки
                     </div>
                     <div className="mt-1 text-sm leading-6 text-brand-dark/52">
                       Можно выбрать несколько изображений. На телефоне откроется камера или галерея.
                     </div>
                   </div>
                 </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="inline-flex min-h-14 items-center justify-center rounded-[22px] bg-brand-green px-5 text-center text-sm font-black uppercase tracking-[0.16em] text-brand-dark shadow-[0_18px_35px_rgba(143,198,64,0.24)]">
+                    Нажмите здесь, чтобы добавить фото
+                  </div>
+                  <div className="text-sm font-semibold leading-6 text-brand-dark/55">
+                    После выбора фото они сразу появятся ниже со временем загрузки.
+                  </div>
+                </div>
+
                 <input
                   type="file"
                   accept="image/*"
@@ -599,7 +612,7 @@ const PstPage = () => {
 
                 {photos.length === 0 && (
                   <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-[#fbfcf8] p-5 text-sm leading-6 text-brand-dark/55">
-                    Фото пока не добавлены. После загрузки здесь появится список с точным временем фиксации.
+                    Фото пока не добавлены. Нажмите на зеленую кнопку выше, чтобы выбрать снимки.
                   </div>
                 )}
               </div>
