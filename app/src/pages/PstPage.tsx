@@ -56,6 +56,7 @@ type CompressedPhoto = {
 type PhotoStamp = {
   submittedAt: string;
   address: string;
+  city: string;
 };
 
 type IndexedLocation = PstLocation & {
@@ -149,38 +150,27 @@ const canvasToJpegBlob = (canvas: HTMLCanvasElement, quality: number) =>
     );
   });
 
-const drawWrappedStampLine = (
+const drawFittedStampLine = (
   context: CanvasRenderingContext2D,
   text: string,
   x: number,
   y: number,
-  maxWidth: number,
-  lineHeight: number
+  maxWidth: number
 ) => {
-  const words = text.split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-  let currentLine = '';
+  const trimmedText = text.trim();
+  if (!trimmedText) return;
 
-  words.forEach((word) => {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    if (context.measureText(testLine).width <= maxWidth || !currentLine) {
-      currentLine = testLine;
-      return;
-    }
-
-    lines.push(currentLine);
-    currentLine = word;
-  });
-
-  if (currentLine) {
-    lines.push(currentLine);
+  if (context.measureText(trimmedText).width <= maxWidth) {
+    context.fillText(trimmedText, x, y);
+    return;
   }
 
-  lines.slice(0, 2).forEach((line, index) => {
-    context.fillText(line, x, y + index * lineHeight);
-  });
+  let fittedText = trimmedText;
+  while (fittedText.length > 4 && context.measureText(`${fittedText}...`).width > maxWidth) {
+    fittedText = fittedText.slice(0, -1);
+  }
 
-  return Math.min(lines.length, 2);
+  context.fillText(`${fittedText}...`, x, y);
 };
 
 const drawPhotoStamp = (
@@ -211,13 +201,19 @@ const drawPhotoStamp = (
   context.fillText(formatDateTime(stamp.submittedAt), padding, stampTop + padding);
 
   context.font = `600 ${addressFontSize}px Arial, sans-serif`;
-  drawWrappedStampLine(
+  drawFittedStampLine(
     context,
     stamp.address,
     padding,
     stampTop + padding + lineHeight,
-    maxTextWidth,
-    lineHeight
+    maxTextWidth
+  );
+  drawFittedStampLine(
+    context,
+    stamp.city,
+    padding,
+    stampTop + padding + lineHeight * 2,
+    maxTextWidth
   );
   context.shadowBlur = 0;
 };
@@ -632,6 +628,7 @@ const PstPage = () => {
       const stamp = {
         submittedAt,
         address: selectedLocation!.address,
+        city: selectedLocation!.city,
       };
       const compressedPhotos = await Promise.all(
         photos.map((photo) => compressPhotoForSheets(photo.file, stamp))

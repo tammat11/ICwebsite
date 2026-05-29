@@ -7,6 +7,11 @@ const PHOTO_COLUMN_WIDTH = 320;
 const ROW_HEIGHT = 280;
 const PHOTO_MAX_WIDTH = 260;
 const PHOTO_MAX_HEIGHT = 240;
+const MULTI_PHOTO_MAX_WIDTH = 220;
+const MULTI_PHOTO_MAX_HEIGHT = 220;
+const PHOTO_CELL_PADDING = 8;
+const PHOTO_GAP = 12;
+const PHOTOS_PER_ROW = 2;
 const LEGACY_SUBHEADERS = ['дата уборки и время', 'фото'];
 const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'];
 
@@ -45,7 +50,7 @@ function writeCleaningToObjectRow(sheet, payload) {
   const monthTitle = formatMonthTitle(submittedAt, timezone);
   const dateTime = Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy HH:mm');
   const photos = Array.isArray(payload.photos) ? payload.photos : [];
-  const firstPhoto = photos[0] || {};
+  const photoLayout = getPhotosLayout(photos);
   const monthColumns = getWritableMonthColumns(sheet, objectRow, monthTitle);
   const dateColumn = monthColumns.dateColumn;
   const photoColumn = monthColumns.photoColumn;
@@ -58,9 +63,9 @@ function writeCleaningToObjectRow(sheet, payload) {
     .setWrap(false);
   sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
   sheet.getRange(objectRow, photoColumn).clearContent();
-  sheet.setColumnWidth(photoColumn, PHOTO_COLUMN_WIDTH);
-  sheet.setRowHeight(objectRow, ROW_HEIGHT);
-  insertPhotoIntoCell(sheet, objectRow, photoColumn, firstPhoto);
+  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
+  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
+  insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
 }
 
 function getObjectsSheet(spreadsheet) {
@@ -152,24 +157,64 @@ function setupMonthColumns(sheet, startColumn, monthTitle) {
   sheet.setColumnWidth(startColumn + 1, PHOTO_COLUMN_WIDTH);
 }
 
-function insertPhotoIntoCell(sheet, row, column, photo) {
+function getPhotosLayout(photos) {
+  const validPhotos = photos.filter((photo) => photo && photo.dataUrl);
+  const photoCount = validPhotos.length;
+  const maxWidth = photoCount > 1 ? MULTI_PHOTO_MAX_WIDTH : PHOTO_MAX_WIDTH;
+  const maxHeight = photoCount > 1 ? MULTI_PHOTO_MAX_HEIGHT : PHOTO_MAX_HEIGHT;
+  const columns = Math.max(1, Math.min(PHOTOS_PER_ROW, photoCount || 1));
+  const items = validPhotos.map((photo, index) => {
+    const size = fitImageIntoBox(photo.width, photo.height, maxWidth, maxHeight);
+    const columnIndex = index % columns;
+    const rowIndex = Math.floor(index / columns);
+
+    return {
+      photo,
+      width: size.width,
+      height: size.height,
+      xOffset: PHOTO_CELL_PADDING + columnIndex * (maxWidth + PHOTO_GAP),
+      yOffset: PHOTO_CELL_PADDING + rowIndex * (maxHeight + PHOTO_GAP),
+    };
+  });
+  const rows = Math.max(1, Math.ceil(photoCount / columns));
+
+  return {
+    items,
+    columnWidth:
+      photoCount > 1
+        ? PHOTO_CELL_PADDING * 2 + columns * maxWidth + (columns - 1) * PHOTO_GAP
+        : PHOTO_COLUMN_WIDTH,
+    rowHeight:
+      photoCount > 1
+        ? PHOTO_CELL_PADDING * 2 + rows * maxHeight + (rows - 1) * PHOTO_GAP
+        : ROW_HEIGHT,
+  };
+}
+
+function insertPhotosIntoCell(sheet, row, column, photoLayout) {
+  removeImagesFromCell(sheet, row, column);
+
+  photoLayout.items.forEach((item) => {
+    insertPhotoIntoCell(sheet, row, column, item);
+  });
+}
+
+function insertPhotoIntoCell(sheet, row, column, item) {
+  const photo = item.photo;
   if (!photo || !photo.dataUrl) return;
 
   const base64 = String(photo.dataUrl).split(',')[1];
   if (!base64) return;
 
-  removeImagesFromCell(sheet, row, column);
-
   const bytes = Utilities.base64Decode(base64);
   const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
   const image = sheet.insertImage(blob, column, row);
-  const size = fitImageIntoBox(photo.width, photo.height, PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT);
 
   image.setAnchorCell(sheet.getRange(row, column));
-  image.setWidth(size.width);
-  image.setHeight(size.height);
-  image.setAnchorCellXOffset(8);
-  image.setAnchorCellYOffset(8);
+  image.setWidth(item.width);
+  image.setHeight(item.height);
+  image.setAnchorCellXOffset(item.xOffset);
+  image.setAnchorCellYOffset(item.yOffset);
 }
 
 function fitImageIntoBox(width, height, maxWidth, maxHeight) {
