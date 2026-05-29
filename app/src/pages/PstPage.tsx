@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Camera,
   CheckCircle2,
@@ -51,6 +51,12 @@ type LocationWithDistance = IndexedLocation & {
   distanceKm: number;
 };
 
+declare global {
+  interface Window {
+    L?: any;
+  }
+}
+
 const SEARCH_RADIUS_KM = 0.3;
 
 const formatDistance = (distanceKm: number) => {
@@ -76,6 +82,14 @@ const normalizeSearch = (value: string) =>
     .replace(/[.,/#!$%^&*;:{}=\-_`~()"'[\]\\+]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
 const toRadians = (value: number) => (value * Math.PI) / 180;
 
@@ -109,6 +123,147 @@ const buildSearchIndex = (location: PstLocation) =>
 
 const chipClass =
   'rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]';
+
+type PstMiniMapProps = {
+  coords: GeoCoords;
+  locations: LocationWithDistance[];
+  selectedLocationId: string;
+  onSelectLocation: (locationId: string) => void;
+};
+
+const getVisualMarkerCoords = (
+  location: LocationWithDistance,
+  locationIndex: number,
+  locations: LocationWithDistance[]
+) => {
+  const duplicateIndex = locations
+    .slice(0, locationIndex)
+    .filter((item) => item.lat === location.lat && item.lng === location.lng).length;
+  const duplicateCount = locations.filter(
+    (item) => item.lat === location.lat && item.lng === location.lng
+  ).length;
+
+  if (duplicateCount <= 1) {
+    return [location.lat, location.lng];
+  }
+
+  const angle = (duplicateIndex / duplicateCount) * Math.PI * 2;
+  const offset = 0.000035;
+
+  return [
+    location.lat + Math.sin(angle) * offset,
+    location.lng + Math.cos(angle) * offset,
+  ];
+};
+
+const PstMiniMap = ({
+  coords,
+  locations,
+  selectedLocationId,
+  onSelectLocation,
+}: PstMiniMapProps) => {
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstance = useRef<any>(null);
+  const markersGroup = useRef<any>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || !window.L) return;
+
+    const L = window.L;
+
+    if (!mapInstance.current) {
+      mapInstance.current = L.map(mapRef.current, {
+        zoomControl: false,
+        attributionControl: false,
+        dragging: true,
+        tap: true,
+      }).setView([coords.lat, coords.lng], 17);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'OpenStreetMap',
+      }).addTo(mapInstance.current);
+
+      L.control.zoom({ position: 'bottomright' }).addTo(mapInstance.current);
+      markersGroup.current = L.layerGroup().addTo(mapInstance.current);
+    }
+
+    setTimeout(() => {
+      mapInstance.current?.invalidateSize();
+    }, 100);
+
+    markersGroup.current?.clearLayers();
+
+    L.circle([coords.lat, coords.lng], {
+      radius: Math.min(coords.accuracy ?? 35, 90),
+      color: '#8fc640',
+      weight: 1,
+      fillColor: '#8fc640',
+      fillOpacity: 0.08,
+      opacity: 0.45,
+    }).addTo(markersGroup.current);
+
+    L.circleMarker([coords.lat, coords.lng], {
+      radius: 7,
+      color: '#ffffff',
+      weight: 3,
+      fillColor: '#8fc640',
+      fillOpacity: 1,
+    })
+      .bindTooltip('Вы здесь', { direction: 'top', offset: [0, -8] })
+      .addTo(markersGroup.current);
+
+    locations.forEach((location, index) => {
+      const isSelected = location.id === selectedLocationId;
+      const markerCoords = getVisualMarkerCoords(location, index, locations);
+      const marker = L.circleMarker(markerCoords, {
+        radius: isSelected ? 11 : 8,
+        color: isSelected ? '#8fc640' : '#ffffff',
+        weight: isSelected ? 4 : 3,
+        fillColor: location.installPlace === 'Уличный' ? '#2b6cb0' : '#1a2215',
+        fillOpacity: 0.95,
+      });
+
+      marker.on('click', () => {
+        onSelectLocation(location.id);
+      });
+
+      marker
+        .bindTooltip(
+          `<strong>${escapeHtml(location.hint || location.comment || location.address)}</strong><br>${formatDistance(location.distanceKm)}`,
+          { direction: 'top', offset: [0, -10] }
+        )
+        .addTo(markersGroup.current);
+    });
+
+    const boundsItems = [
+      [coords.lat, coords.lng],
+      ...locations.map((location, index) => getVisualMarkerCoords(location, index, locations)),
+    ];
+
+    if (boundsItems.length > 1) {
+      mapInstance.current.fitBounds(L.latLngBounds(boundsItems), {
+        padding: [28, 28],
+        maxZoom: 18,
+      });
+    } else {
+      mapInstance.current.setView([coords.lat, coords.lng], 17);
+    }
+  }, [coords, locations, onSelectLocation, selectedLocationId]);
+
+  return (
+    <div className="mt-5 overflow-hidden rounded-[28px] border border-black/6 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/45">
+          Карта поблизости
+        </div>
+        <div className="text-xs font-bold text-brand-dark/50">
+          {locations.length} точек
+        </div>
+      </div>
+      <div ref={mapRef} className="h-[260px] w-full bg-[#eef3e8] sm:h-[320px]" />
+    </div>
+  );
+};
 
 const PstPage = () => {
   const [locations, setLocations] = useState<PstLocation[]>([]);
@@ -392,6 +547,15 @@ const PstPage = () => {
                       className="w-full rounded-[26px] border border-brand-dark/10 bg-white py-5 pl-12 pr-4 text-base font-semibold text-brand-dark outline-none transition shadow-premium focus:border-brand-green focus:bg-white"
                     />
                   </div>
+
+                  {visibleLocations.length > 0 && coords && (
+                    <PstMiniMap
+                      coords={coords}
+                      locations={visibleLocations}
+                      selectedLocationId={selectedLocationId}
+                      onSelectLocation={setSelectedLocationId}
+                    />
+                  )}
 
                   <div className="mt-6 max-h-[560px] space-y-3 overflow-y-auto pr-1">
                     {visibleLocations.map((location, index) => {
