@@ -68,7 +68,7 @@ declare global {
 const SEARCH_RADIUS_KM = 0.3;
 const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbzXTLJ2Uc1TdmEUrI5LdCKukAMCDMHEwAUE8L8C6J0DLTjhCOjmMU2xKvLW5V0i8V9ZwQ/exec';
+  'https://script.google.com/macros/s/AKfycbxELj5_SPmjH8wKoajth3kB8jmt1K2XEWC8sZmz5TNZEWKGTLM8X9qBBdJxaBs1-JIw9g/exec';
 const SHEETS_PHOTO_PAYLOAD_LIMIT = 300000;
 
 const formatDistance = (distanceKm: number) => {
