@@ -533,9 +533,6 @@ const PstPage = () => {
                   <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark">
                     Фотофиксация
                   </h2>
-                  <div className="mt-2 text-sm leading-6 text-brand-dark/55">
-                    Сначала нажмите на большую кнопку ниже, чтобы открыть камеру или галерею.
-                  </div>
                 </div>
               </div>
 
