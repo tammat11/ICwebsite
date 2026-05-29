@@ -43,6 +43,14 @@ type PhotoItem = {
   addedAt: string;
 };
 
+type CompressedPhoto = {
+  fileName: string;
+  mimeType: string;
+  dataUrl: string;
+  sizeBytes: number;
+  originalSizeBytes: number;
+};
+
 type IndexedLocation = PstLocation & {
   searchIndex: string;
 };
@@ -58,6 +66,8 @@ declare global {
 }
 
 const SEARCH_RADIUS_KM = 0.3;
+const PST_SHEETS_WEB_APP_URL = import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined;
+const SHEETS_CELL_SAFE_LIMIT = 45000;
 
 const formatDistance = (distanceKm: number) => {
   if (distanceKm < 1) {
@@ -96,6 +106,87 @@ const capitalizeFirstLetter = (value: string) => {
   if (!trimmedValue) return trimmedValue;
 
   return trimmedValue.charAt(0).toLocaleUpperCase('ru-RU') + trimmedValue.slice(1);
+};
+
+const readFileAsDataUrl = (file: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+const loadImage = (dataUrl: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Failed to load selected image'));
+    image.src = dataUrl;
+  });
+
+const canvasToJpegBlob = (canvas: HTMLCanvasElement, quality: number) =>
+  new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error('Failed to compress image'));
+          return;
+        }
+
+        resolve(blob);
+      },
+      'image/jpeg',
+      quality
+    );
+  });
+
+const compressPhotoForSheets = async (file: File): Promise<CompressedPhoto> => {
+  const originalDataUrl = await readFileAsDataUrl(file);
+  const image = await loadImage(originalDataUrl);
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    throw new Error('Canvas is not available for image compression');
+  }
+
+  const attempts = [
+    { maxSide: 720, quality: 0.42 },
+    { maxSide: 640, quality: 0.36 },
+    { maxSide: 560, quality: 0.32 },
+    { maxSide: 480, quality: 0.28 },
+    { maxSide: 420, quality: 0.24 },
+  ];
+
+  let bestPhoto: CompressedPhoto | null = null;
+
+  for (const attempt of attempts) {
+    const scale = Math.min(1, attempt.maxSide / Math.max(image.width, image.height));
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const blob = await canvasToJpegBlob(canvas, attempt.quality);
+    const dataUrl = await readFileAsDataUrl(blob);
+    const compressedPhoto = {
+      fileName: file.name.replace(/\.[^.]+$/, '') + '.jpg',
+      mimeType: 'image/jpeg',
+      dataUrl,
+      sizeBytes: blob.size,
+      originalSizeBytes: file.size,
+    };
+
+    bestPhoto = compressedPhoto;
+
+    if (dataUrl.length <= SHEETS_CELL_SAFE_LIMIT) {
+      return compressedPhoto;
+    }
+  }
+
+  return bestPhoto!;
 };
 
 const toRadians = (value: number) => (value * Math.PI) / 180;
@@ -274,6 +365,8 @@ const PstPage = () => {
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -435,10 +528,78 @@ const PstPage = () => {
 
   const isReady = Boolean(selectedLocation && photos.length > 0);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isReady) return;
-    setIsSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (!PST_SHEETS_WEB_APP_URL) {
+      setSubmitError('Не настроен адрес Google Apps Script для отправки в таблицу.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const compressedPhotos = await Promise.all(
+        photos.map((photo) => compressPhotoForSheets(photo.file))
+      );
+      const oversizedPhoto = compressedPhotos.find(
+        (photo) => photo.dataUrl.length > SHEETS_CELL_SAFE_LIMIT
+      );
+
+      if (oversizedPhoto) {
+        throw new Error(
+          `Фото ${oversizedPhoto.fileName} не удалось сжать до лимита Google Sheets.`
+        );
+      }
+
+      const payload = {
+        submittedAt: new Date().toISOString(),
+        location: {
+          id: selectedLocation!.id,
+          title: capitalizeFirstLetter(
+            selectedLocation!.hint || selectedLocation!.comment || selectedLocation!.address
+          ),
+          city: selectedLocation!.city,
+          branch: selectedLocation!.branch,
+          address: selectedLocation!.address,
+          category: selectedLocation!.category,
+          installPlace: selectedLocation!.installPlace,
+          surfaceType: selectedLocation!.surfaceType,
+          cellsCount: selectedLocation!.cellsCount,
+          lat: selectedLocation!.lat,
+          lng: selectedLocation!.lng,
+          distanceMeters:
+            selectedDistance !== null ? Math.round(selectedDistance * 1000) : null,
+        },
+        userLocation: coords
+          ? {
+              lat: coords.lat,
+              lng: coords.lng,
+              accuracy: coords.accuracy ?? null,
+            }
+          : null,
+        photos: compressedPhotos,
+      };
+
+      await fetch(PST_SHEETS_WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(payload),
+      });
+
+      setIsSubmitted(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error('Failed to submit PST cleaning report:', error);
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось отправить отчет в Google Sheets.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -749,18 +910,24 @@ const PstPage = () => {
 
               </div>
 
+              {submitError && (
+                <div className="mt-5 rounded-[24px] border border-red-100 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600">
+                  {submitError}
+                </div>
+              )}
+
               <div className="mt-6">
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={!isReady}
+                  disabled={!isReady || isSubmitting}
                   className={`w-full rounded-2xl px-6 py-4 text-sm font-black uppercase tracking-[0.2em] transition-all ${
-                    isReady
+                    isReady && !isSubmitting
                       ? 'bg-brand-green text-brand-dark hover:scale-[1.01] hover:shadow-[0_18px_40px_rgba(143,198,64,0.28)]'
                       : 'bg-brand-dark/8 text-brand-dark/35 cursor-not-allowed'
                   }`}
                 >
-                  Отправить
+                  {isSubmitting ? 'Отправляем...' : 'Отправить'}
                 </button>
               </div>
             </section>
