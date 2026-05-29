@@ -1,6 +1,9 @@
 const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const HISTORY_SHEET_NAME = 'История уборок';
 const OBJECTS_SHEET_NAME = 'Объекты';
+const PHOTO_COLUMN = 14;
+const ROW_HEIGHT = 140;
+const PHOTO_COLUMN_WIDTH = 180;
 
 const HISTORY_HEADERS = [
   'Дата отправки',
@@ -16,11 +19,10 @@ const HISTORY_HEADERS = [
   'Дистанция, м',
   'Координаты отправки',
   'Точность GPS, м',
+  'Фото',
   'Имя фото',
-  'Тип фото',
   'Размер после сжатия, КБ',
   'Исходный размер, КБ',
-  'Фото base64',
 ];
 
 function doGet() {
@@ -57,6 +59,7 @@ function appendHistoryRows(sheet, payload) {
     photos.push({});
   }
 
+  const startRow = sheet.getLastRow() + 1;
   const rows = photos.map((photo) => [
     submittedAt,
     date,
@@ -71,14 +74,37 @@ function appendHistoryRows(sheet, payload) {
     location.distanceMeters || '',
     gps,
     userLocation.accuracy || '',
+    '',
     photo.fileName || '',
-    photo.mimeType || '',
     bytesToKb(photo.sizeBytes),
     bytesToKb(photo.originalSizeBytes),
-    photo.dataUrl || '',
   ]);
 
-  sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, HISTORY_HEADERS.length).setValues(rows);
+  sheet.getRange(startRow, 1, rows.length, HISTORY_HEADERS.length).setValues(rows);
+  sheet.setColumnWidth(PHOTO_COLUMN, PHOTO_COLUMN_WIDTH);
+
+  photos.forEach((photo, index) => {
+    const row = startRow + index;
+    sheet.setRowHeight(row, ROW_HEIGHT);
+    insertPhotoIntoCell(sheet, row, PHOTO_COLUMN, photo);
+  });
+}
+
+function insertPhotoIntoCell(sheet, row, column, photo) {
+  if (!photo || !photo.dataUrl) return;
+
+  const base64 = String(photo.dataUrl).split(',')[1];
+  if (!base64) return;
+
+  const bytes = Utilities.base64Decode(base64);
+  const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
+  const image = sheet.insertImage(blob, column, row);
+
+  image.setAnchorCell(sheet.getRange(row, column));
+  image.setWidth(150);
+  image.setHeight(112);
+  image.setAnchorCellXOffset(8);
+  image.setAnchorCellYOffset(8);
 }
 
 function updateObjectStatus(spreadsheet, payload) {
@@ -94,6 +120,7 @@ function updateObjectStatus(spreadsheet, payload) {
 
   const washedColumn = getOrCreateHeader(sheet, headerValues, 'Помыли');
   const lastCleanedColumn = getOrCreateHeader(sheet, headerValues, 'Последняя уборка');
+  const historyColumn = getOrCreateHeader(sheet, headerValues, 'История уборок');
   const data = sheet.getRange(2, idColumn + 1, Math.max(sheet.getLastRow() - 1, 1), 1).getValues();
   const rowOffset = data.findIndex((row) => String(row[0]) === String(location.id));
 
@@ -104,6 +131,7 @@ function updateObjectStatus(spreadsheet, payload) {
   washedCell.insertCheckboxes();
   washedCell.setValue(true);
   sheet.getRange(rowNumber, lastCleanedColumn + 1).setValue(new Date());
+  setHistoryLink(sheet.getParent(), sheet.getRange(rowNumber, historyColumn + 1));
 }
 
 function getOrCreateSheet(spreadsheet, name) {
@@ -120,6 +148,9 @@ function ensureHeaders(sheet, headers) {
       sheet.getRange(1, index + 1).setValue(header);
     }
   });
+
+  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  sheet.setFrozenRows(1);
 }
 
 function getOrCreateHeader(sheet, headerValues, header) {
@@ -134,6 +165,23 @@ function getOrCreateHeader(sheet, headerValues, header) {
 
 function findHeaderIndex(headers, candidates) {
   return headers.findIndex((header) => candidates.includes(String(header).trim()));
+}
+
+function getSheetIdByName(spreadsheet, sheetName) {
+  const sheet = spreadsheet.getSheetByName(sheetName);
+  return sheet ? sheet.getSheetId() : '';
+}
+
+function setHistoryLink(spreadsheet, range) {
+  const sheetId = getSheetIdByName(spreadsheet, HISTORY_SHEET_NAME);
+  if (!sheetId) return;
+
+  const richText = SpreadsheetApp.newRichTextValue()
+    .setText('Открыть историю')
+    .setLinkUrl(`${spreadsheet.getUrl()}#gid=${sheetId}`)
+    .build();
+
+  range.setRichTextValue(richText);
 }
 
 function bytesToKb(value) {
