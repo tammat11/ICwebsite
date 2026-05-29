@@ -66,7 +66,9 @@ declare global {
 }
 
 const SEARCH_RADIUS_KM = 0.3;
-const PST_SHEETS_WEB_APP_URL = import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined;
+const PST_SHEETS_WEB_APP_URL =
+  (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
+  'https://script.google.com/macros/s/AKfycbwIMOch_Tr17AKIBGCaKp3DB40p_WHWSjLkUTczgQUFc3-LXAam38pbiZkmGVNTvbHg-g/exec';
 const SHEETS_CELL_SAFE_LIMIT = 45000;
 
 const formatDistance = (distanceKm: number) => {
