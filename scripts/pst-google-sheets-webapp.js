@@ -2,9 +2,11 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const DATA_START_ROW = 2;
 const MONTH_BLOCK_WIDTH = 2;
-const PHOTO_COLUMN_WIDTH = 280;
-const ROW_HEIGHT = 240;
-const PHOTO_WIDTH = 230;
+const DATE_COLUMN_WIDTH = 170;
+const PHOTO_COLUMN_WIDTH = 320;
+const ROW_HEIGHT = 280;
+const PHOTO_MAX_WIDTH = 260;
+const PHOTO_MAX_HEIGHT = 240;
 const LEGACY_SUBHEADERS = ['дата уборки и время', 'фото'];
 const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'];
 
@@ -48,7 +50,13 @@ function writeCleaningToObjectRow(sheet, payload) {
   const dateColumn = monthColumns.dateColumn;
   const photoColumn = monthColumns.photoColumn;
 
-  sheet.getRange(objectRow, dateColumn).setValue(dateTime);
+  sheet
+    .getRange(objectRow, dateColumn)
+    .setValue(dateTime)
+    .setVerticalAlignment('top')
+    .setHorizontalAlignment('left')
+    .setWrap(false);
+  sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
   sheet.getRange(objectRow, photoColumn).clearContent();
   sheet.setColumnWidth(photoColumn, PHOTO_COLUMN_WIDTH);
   sheet.setRowHeight(objectRow, ROW_HEIGHT);
@@ -140,7 +148,7 @@ function setupMonthColumns(sheet, startColumn, monthTitle) {
   sheet.getRange(1, startColumn).setValue(monthTitle);
   sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).setFontWeight('bold');
   sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).setHorizontalAlignment('center');
-  sheet.setColumnWidth(startColumn, 150);
+  sheet.setColumnWidth(startColumn, DATE_COLUMN_WIDTH);
   sheet.setColumnWidth(startColumn + 1, PHOTO_COLUMN_WIDTH);
 }
 
@@ -155,11 +163,24 @@ function insertPhotoIntoCell(sheet, row, column, photo) {
   const bytes = Utilities.base64Decode(base64);
   const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
   const image = sheet.insertImage(blob, column, row);
+  const size = fitImageIntoBox(photo.width, photo.height, PHOTO_MAX_WIDTH, PHOTO_MAX_HEIGHT);
 
   image.setAnchorCell(sheet.getRange(row, column));
-  image.setWidth(PHOTO_WIDTH);
+  image.setWidth(size.width);
+  image.setHeight(size.height);
   image.setAnchorCellXOffset(8);
   image.setAnchorCellYOffset(8);
+}
+
+function fitImageIntoBox(width, height, maxWidth, maxHeight) {
+  const sourceWidth = Number(width) || maxWidth;
+  const sourceHeight = Number(height) || Math.round(maxWidth * 0.75);
+  const scale = Math.min(maxWidth / sourceWidth, maxHeight / sourceHeight, 1);
+
+  return {
+    width: Math.max(1, Math.round(sourceWidth * scale)),
+    height: Math.max(1, Math.round(sourceHeight * scale)),
+  };
 }
 
 function removeImagesFromCell(sheet, row, column) {

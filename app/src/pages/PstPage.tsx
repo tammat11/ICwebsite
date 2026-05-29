@@ -49,6 +49,13 @@ type CompressedPhoto = {
   dataUrl: string;
   sizeBytes: number;
   originalSizeBytes: number;
+  width: number;
+  height: number;
+};
+
+type PhotoStamp = {
+  submittedAt: string;
+  address: string;
 };
 
 type IndexedLocation = PstLocation & {
@@ -142,7 +149,83 @@ const canvasToJpegBlob = (canvas: HTMLCanvasElement, quality: number) =>
     );
   });
 
-const compressPhotoForSheets = async (file: File): Promise<CompressedPhoto> => {
+const drawWrappedStampLine = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number
+) => {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let currentLine = '';
+
+  words.forEach((word) => {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (context.measureText(testLine).width <= maxWidth || !currentLine) {
+      currentLine = testLine;
+      return;
+    }
+
+    lines.push(currentLine);
+    currentLine = word;
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  lines.slice(0, 2).forEach((line, index) => {
+    context.fillText(line, x, y + index * lineHeight);
+  });
+
+  return Math.min(lines.length, 2);
+};
+
+const drawPhotoStamp = (
+  context: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  stamp: PhotoStamp
+) => {
+  const padding = Math.max(18, Math.round(canvas.width * 0.035));
+  const lineHeight = Math.max(28, Math.round(canvas.width * 0.038));
+  const titleFontSize = Math.max(24, Math.round(canvas.width * 0.036));
+  const addressFontSize = Math.max(20, Math.round(canvas.width * 0.03));
+  const maxTextWidth = canvas.width - padding * 2;
+  const stampHeight = padding * 2 + lineHeight * 3;
+  const stampTop = canvas.height - stampHeight;
+
+  const gradient = context.createLinearGradient(0, stampTop, 0, canvas.height);
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  gradient.addColorStop(0.24, 'rgba(0, 0, 0, 0.64)');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.88)');
+  context.fillStyle = gradient;
+  context.fillRect(0, stampTop, canvas.width, stampHeight);
+
+  context.textBaseline = 'top';
+  context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  context.shadowBlur = 8;
+  context.fillStyle = '#ffffff';
+  context.font = `800 ${titleFontSize}px Arial, sans-serif`;
+  context.fillText(formatDateTime(stamp.submittedAt), padding, stampTop + padding);
+
+  context.font = `600 ${addressFontSize}px Arial, sans-serif`;
+  drawWrappedStampLine(
+    context,
+    stamp.address,
+    padding,
+    stampTop + padding + lineHeight,
+    maxTextWidth,
+    lineHeight
+  );
+  context.shadowBlur = 0;
+};
+
+const compressPhotoForSheets = async (
+  file: File,
+  stamp: PhotoStamp
+): Promise<CompressedPhoto> => {
   const originalDataUrl = await readFileAsDataUrl(file);
   const image = await loadImage(originalDataUrl);
   const canvas = document.createElement('canvas');
@@ -170,6 +253,7 @@ const compressPhotoForSheets = async (file: File): Promise<CompressedPhoto> => {
     context.fillStyle = '#ffffff';
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    drawPhotoStamp(context, canvas, stamp);
 
     const blob = await canvasToJpegBlob(canvas, attempt.quality);
     const dataUrl = await readFileAsDataUrl(blob);
@@ -179,6 +263,8 @@ const compressPhotoForSheets = async (file: File): Promise<CompressedPhoto> => {
       dataUrl,
       sizeBytes: blob.size,
       originalSizeBytes: file.size,
+      width: canvas.width,
+      height: canvas.height,
     };
 
     bestPhoto = compressedPhoto;
@@ -542,8 +628,13 @@ const PstPage = () => {
     setSubmitError('');
 
     try {
+      const submittedAt = new Date().toISOString();
+      const stamp = {
+        submittedAt,
+        address: selectedLocation!.address,
+      };
       const compressedPhotos = await Promise.all(
-        photos.map((photo) => compressPhotoForSheets(photo.file))
+        photos.map((photo) => compressPhotoForSheets(photo.file, stamp))
       );
       const oversizedPhoto = compressedPhotos.find(
         (photo) => photo.dataUrl.length > SHEETS_PHOTO_PAYLOAD_LIMIT
@@ -556,7 +647,7 @@ const PstPage = () => {
       }
 
       const payload = {
-        submittedAt: new Date().toISOString(),
+        submittedAt,
         location: {
           id: selectedLocation!.id,
           title: capitalizeFirstLetter(
