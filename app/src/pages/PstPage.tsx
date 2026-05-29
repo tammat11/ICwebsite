@@ -69,7 +69,7 @@ const SEARCH_RADIUS_KM = 0.3;
 const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
   'https://script.google.com/macros/s/AKfycbzXTLJ2Uc1TdmEUrI5LdCKukAMCDMHEwAUE8L8C6J0DLTjhCOjmMU2xKvLW5V0i8V9ZwQ/exec';
-const SHEETS_CELL_SAFE_LIMIT = 45000;
+const SHEETS_PHOTO_PAYLOAD_LIMIT = 300000;
 
 const formatDistance = (distanceKm: number) => {
   if (distanceKm < 1) {
@@ -153,11 +153,11 @@ const compressPhotoForSheets = async (file: File): Promise<CompressedPhoto> => {
   }
 
   const attempts = [
-    { maxSide: 720, quality: 0.42 },
-    { maxSide: 640, quality: 0.36 },
-    { maxSide: 560, quality: 0.32 },
-    { maxSide: 480, quality: 0.28 },
-    { maxSide: 420, quality: 0.24 },
+    { maxSide: 1400, quality: 0.86 },
+    { maxSide: 1280, quality: 0.82 },
+    { maxSide: 1100, quality: 0.78 },
+    { maxSide: 960, quality: 0.72 },
+    { maxSide: 820, quality: 0.68 },
   ];
 
   let bestPhoto: CompressedPhoto | null = null;
@@ -183,7 +183,7 @@ const compressPhotoForSheets = async (file: File): Promise<CompressedPhoto> => {
 
     bestPhoto = compressedPhoto;
 
-    if (dataUrl.length <= SHEETS_CELL_SAFE_LIMIT) {
+    if (dataUrl.length <= SHEETS_PHOTO_PAYLOAD_LIMIT) {
       return compressedPhoto;
     }
   }
@@ -546,7 +546,7 @@ const PstPage = () => {
         photos.map((photo) => compressPhotoForSheets(photo.file))
       );
       const oversizedPhoto = compressedPhotos.find(
-        (photo) => photo.dataUrl.length > SHEETS_CELL_SAFE_LIMIT
+        (photo) => photo.dataUrl.length > SHEETS_PHOTO_PAYLOAD_LIMIT
       );
 
       if (oversizedPhoto) {

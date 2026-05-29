@@ -2,10 +2,9 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const DATA_START_ROW = 2;
 const MONTH_BLOCK_WIDTH = 2;
-const PHOTO_COLUMN_WIDTH = 180;
-const ROW_HEIGHT = 140;
-const PHOTO_WIDTH = 150;
-const PHOTO_HEIGHT = 112;
+const PHOTO_COLUMN_WIDTH = 280;
+const ROW_HEIGHT = 240;
+const PHOTO_WIDTH = 230;
 const LEGACY_SUBHEADERS = ['дата уборки и время', 'фото'];
 const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'];
 
@@ -159,7 +158,6 @@ function insertPhotoIntoCell(sheet, row, column, photo) {
 
   image.setAnchorCell(sheet.getRange(row, column));
   image.setWidth(PHOTO_WIDTH);
-  image.setHeight(PHOTO_HEIGHT);
   image.setAnchorCellXOffset(8);
   image.setAnchorCellYOffset(8);
 }
