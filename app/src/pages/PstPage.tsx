@@ -607,7 +607,7 @@ const PstPage = () => {
                               </div>
 
                               <div className="mt-2 text-base font-black leading-tight text-brand-dark">
-                                {location.hint || location.comment || location.address}
+                                {capitalizeFirstLetter(location.hint || location.comment || location.address)}
                               </div>
                               <div className="mt-2 flex items-start gap-2 text-sm text-brand-dark/55">
                                 <MapPin size={16} className="mt-0.5 shrink-0 text-brand-green" />
