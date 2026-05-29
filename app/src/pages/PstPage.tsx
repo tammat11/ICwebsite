@@ -537,9 +537,6 @@ const PstPage = () => {
                     Сначала нажмите на большую кнопку ниже, чтобы открыть камеру или галерею.
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-brand-dark/50">
-                  Время фиксируется в момент добавления фото
-                </div>
               </div>
 
               <label className="mt-6 flex cursor-pointer flex-col gap-5 rounded-[28px] border-2 border-dashed border-brand-green/28 bg-[#f7f8f4] p-5 transition hover:border-brand-green/45 hover:bg-white sm:p-6">
@@ -560,9 +557,6 @@ const PstPage = () => {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="inline-flex min-h-14 items-center justify-center rounded-[22px] bg-brand-green px-5 text-center text-sm font-black uppercase tracking-[0.16em] text-brand-dark shadow-[0_18px_35px_rgba(143,198,64,0.24)]">
                     Нажмите здесь, чтобы добавить фото
-                  </div>
-                  <div className="text-sm font-semibold leading-6 text-brand-dark/55">
-                    После выбора фото они сразу появятся ниже со временем загрузки.
                   </div>
                 </div>
 
