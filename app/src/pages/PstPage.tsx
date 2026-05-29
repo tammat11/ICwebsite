@@ -91,6 +91,13 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
+const capitalizeFirstLetter = (value: string) => {
+  const trimmedValue = value.trim();
+  if (!trimmedValue) return trimmedValue;
+
+  return trimmedValue.charAt(0).toLocaleUpperCase('ru-RU') + trimmedValue.slice(1);
+};
+
 const toRadians = (value: number) => (value * Math.PI) / 180;
 
 const getDistanceKm = (from: GeoCoords, to: Pick<PstLocation, 'lat' | 'lng'>) => {
@@ -483,7 +490,7 @@ const PstPage = () => {
           </div>
 
           <h1 className="mx-auto max-w-[620px] text-center font-black uppercase leading-[0.9] tracking-0 text-brand-dark text-[clamp(2.1rem,5.8vw,4.1rem)]">
-            Уборка \
+            Уборка
             <br />
             <span className="text-brand-green">Kaspi Postomat</span>
           </h1>
@@ -668,7 +675,7 @@ const PstPage = () => {
                   </div>
 
                   <div className="mt-4 text-2xl font-black leading-tight">
-                    {selectedLocation.hint || selectedLocation.comment || selectedLocation.address}
+                    {capitalizeFirstLetter(selectedLocation.hint || selectedLocation.comment || selectedLocation.address)}
                   </div>
                   <div className="mt-3 flex items-start gap-2 text-sm leading-6 text-white/78">
                     <Store size={16} className="mt-1 shrink-0" />
