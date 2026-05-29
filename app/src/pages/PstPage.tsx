@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Camera,
+  ChevronRight,
   CheckCircle2,
   ImagePlus,
   LocateFixed,
@@ -557,54 +558,86 @@ const PstPage = () => {
                     />
                   )}
 
-                  <div className="mt-6 max-h-[560px] space-y-3 overflow-y-auto pr-1">
-                    {visibleLocations.map((location, index) => {
-                      const isSelected = location.id === selectedLocationId;
+                  <div className="mt-6 overflow-hidden rounded-[28px] border border-black/6 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+                    {visibleLocations.length > 0 && (
+                      <div className="flex items-center justify-between gap-3 border-b border-black/6 px-4 py-3">
+                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/45">
+                          Список точек
+                        </div>
+                        <div className="text-xs font-bold text-brand-dark/45">
+                          Нажмите строку для выбора
+                        </div>
+                      </div>
+                    )}
 
-                      return (
-                        <button
-                          key={`location-${location.id}`}
-                          type="button"
-                          onClick={() => setSelectedLocationId(location.id)}
-                          className={`w-full rounded-[24px] border p-4 text-left transition-all ${
-                            isSelected
-                              ? 'border-brand-green bg-[#f5fbe9] shadow-[0_20px_45px_rgba(143,198,64,0.18)]'
-                              : 'border-black/6 bg-[#fbfcf8] hover:border-brand-green/25 hover:bg-white'
-                          }`}
-                        >
-                          <div className="flex flex-wrap items-center gap-2">
-                            {!searchTerm && (
-                              <span className={`${chipClass} bg-white text-brand-dark/55`}>#{index + 1}</span>
-                            )}
-                            <span className={`${chipClass} bg-brand-dark/5 text-brand-dark/55`}>
-                              ID {location.id}
-                            </span>
-                            <span
-                              className={`${chipClass} ${
-                                location.installPlace === 'Уличный'
-                                  ? 'bg-[#e9f3ff] text-[#2b6cb0]'
-                                  : 'bg-[#eef6e3] text-[#5a7d20]'
+                    <div className="max-h-[560px] divide-y divide-black/6 overflow-y-auto">
+                      {visibleLocations.map((location, index) => {
+                        const isSelected = location.id === selectedLocationId;
+
+                        return (
+                          <button
+                            key={`location-${location.id}`}
+                            type="button"
+                            onClick={() => setSelectedLocationId(location.id)}
+                            className={`group grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-4 text-left transition-all ${
+                              isSelected
+                                ? 'bg-[#f5fbe9] shadow-[inset_4px_0_0_#8fc640]'
+                                : 'bg-white hover:bg-[#fbfcf8]'
+                            }`}
+                          >
+                            <div
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-xs font-black ${
+                                isSelected
+                                  ? 'bg-brand-green text-brand-dark'
+                                  : 'bg-brand-dark/5 text-brand-dark/45'
                               }`}
                             >
-                              {location.installPlace}
-                            </span>
-                            {Number.isFinite(location.distanceKm) && (
-                              <span className={`${chipClass} bg-white text-brand-dark/55`}>
-                                {formatDistance(location.distanceKm)}
-                              </span>
-                            )}
-                          </div>
+                              {index + 1}
+                            </div>
 
-                          <div className="mt-3 text-lg font-black leading-tight text-brand-dark">
-                            {location.hint || location.comment || location.address}
-                          </div>
-                          <div className="mt-2 flex items-start gap-2 text-sm text-brand-dark/60">
-                            <MapPin size={16} className="mt-0.5 shrink-0 text-brand-green" />
-                            <span>{location.address}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`${chipClass} bg-brand-dark/5 text-brand-dark/55`}>
+                                  ID {location.id}
+                                </span>
+                                <span
+                                  className={`${chipClass} ${
+                                    location.installPlace === 'Уличный'
+                                      ? 'bg-[#e9f3ff] text-[#2b6cb0]'
+                                      : 'bg-[#eef6e3] text-[#5a7d20]'
+                                  }`}
+                                >
+                                  {location.installPlace}
+                                </span>
+                              </div>
+
+                              <div className="mt-2 text-base font-black leading-tight text-brand-dark">
+                                {location.hint || location.comment || location.address}
+                              </div>
+                              <div className="mt-2 flex items-start gap-2 text-sm text-brand-dark/55">
+                                <MapPin size={16} className="mt-0.5 shrink-0 text-brand-green" />
+                                <span>{location.address}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-2">
+                              {Number.isFinite(location.distanceKm) && (
+                                <span className="rounded-full bg-brand-dark/5 px-3 py-1 text-xs font-black text-brand-dark/55">
+                                  {formatDistance(location.distanceKm)}
+                                </span>
+                              )}
+                              <ChevronRight
+                                size={18}
+                                className={`transition ${
+                                  isSelected
+                                    ? 'text-brand-green'
+                                    : 'text-brand-dark/22 group-hover:text-brand-dark/45'
+                                }`}
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
 
                     {!isLoadingLocations && searchTerm && manualResults.length === 0 && (
                       <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
@@ -617,6 +650,7 @@ const PstPage = () => {
                         В радиусе 300 метров ничего не найдено. Используйте поиск выше, чтобы выбрать нужную точку вручную.
                       </div>
                     )}
+                    </div>
                   </div>
                 </>
               )}
