@@ -12,7 +12,8 @@ const PHOTO_MAX_WIDTH = 260;
 const PHOTO_MAX_HEIGHT = 240;
 const MULTI_PHOTO_MAX_WIDTH = 220;
 const MULTI_PHOTO_MAX_HEIGHT = 220;
-const PHOTO_DATE_LABEL_HEIGHT = 28;
+const PHOTO_DATE_LABEL_HEIGHT = 22;
+const PHOTO_PREVIEW_TOP_GAP = 4;
 const PHOTO_CELL_PADDING = 8;
 const PHOTO_GAP = 12;
 const PHOTOS_PER_ROW = 2;
@@ -204,6 +205,8 @@ function getPhotosLayout(photos) {
   const maxWidth = photoCount > 1 ? MULTI_PHOTO_MAX_WIDTH : PHOTO_MAX_WIDTH;
   const maxHeight = photoCount > 1 ? MULTI_PHOTO_MAX_HEIGHT : PHOTO_MAX_HEIGHT;
   const columns = Math.max(1, Math.min(PHOTOS_PER_ROW, photoCount || 1));
+  const rows = Math.max(1, Math.ceil(photoCount / columns));
+  const contentHeight = rows * maxHeight + (rows - 1) * PHOTO_GAP;
   const items = validPhotos.map((photo, index) => {
     const size = fitImageIntoBox(photo.width, photo.height, maxWidth, maxHeight);
     const columnIndex = index % columns;
@@ -215,10 +218,11 @@ function getPhotosLayout(photos) {
       height: size.height,
       xOffset: PHOTO_CELL_PADDING + columnIndex * (maxWidth + PHOTO_GAP),
       yOffset:
-        PHOTO_DATE_LABEL_HEIGHT + PHOTO_CELL_PADDING + rowIndex * (maxHeight + PHOTO_GAP),
+        PHOTO_DATE_LABEL_HEIGHT +
+        PHOTO_PREVIEW_TOP_GAP +
+        rowIndex * (maxHeight + PHOTO_GAP),
     };
   });
-  const rows = Math.max(1, Math.ceil(photoCount / columns));
 
   return {
     items,
@@ -227,12 +231,10 @@ function getPhotosLayout(photos) {
         ? PHOTO_CELL_PADDING * 2 + columns * maxWidth + (columns - 1) * PHOTO_GAP
         : PHOTO_COLUMN_WIDTH,
     rowHeight:
-      photoCount > 1
-        ? PHOTO_DATE_LABEL_HEIGHT +
-          PHOTO_CELL_PADDING * 2 +
-          rows * maxHeight +
-          (rows - 1) * PHOTO_GAP
-        : ROW_HEIGHT + PHOTO_DATE_LABEL_HEIGHT,
+      PHOTO_DATE_LABEL_HEIGHT +
+      PHOTO_PREVIEW_TOP_GAP +
+      contentHeight +
+      PHOTO_CELL_PADDING,
   };
 }
 
