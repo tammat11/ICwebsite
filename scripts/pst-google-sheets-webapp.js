@@ -55,17 +55,21 @@ function writeCleaningToObjectRow(sheet, payload) {
   const dateColumn = monthColumns.dateColumn;
   const photoColumn = monthColumns.photoColumn;
 
+  if (photoLayout.items.length === 0) {
+    throw new Error('At least one photo is required');
+  }
+
+  sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
+  sheet.getRange(objectRow, photoColumn).clearContent();
+  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
+  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
+  insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
   sheet
     .getRange(objectRow, dateColumn)
     .setValue(dateTime)
     .setVerticalAlignment('top')
     .setHorizontalAlignment('left')
     .setWrap(false);
-  sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
-  sheet.getRange(objectRow, photoColumn).clearContent();
-  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
-  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
-  insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
 }
 
 function getObjectsSheet(spreadsheet) {
@@ -194,9 +198,14 @@ function getPhotosLayout(photos) {
 function insertPhotosIntoCell(sheet, row, column, photoLayout) {
   removeImagesFromCell(sheet, row, column);
 
-  photoLayout.items.forEach((item) => {
-    insertPhotoIntoCell(sheet, row, column, item);
-  });
+  try {
+    photoLayout.items.forEach((item) => {
+      insertPhotoIntoCell(sheet, row, column, item);
+    });
+  } catch (error) {
+    removeImagesFromCell(sheet, row, column);
+    throw error;
+  }
 }
 
 function insertPhotoIntoCell(sheet, row, column, item) {
@@ -208,13 +217,13 @@ function insertPhotoIntoCell(sheet, row, column, item) {
 
   const bytes = Utilities.base64Decode(base64);
   const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
-  const image = sheet.insertImage(blob, column, row);
+  if (blob.getBytes().length > 2 * 1024 * 1024) {
+    throw new Error(`Photo ${photo.fileName || 'photo.jpg'} exceeds the 2MB Google Sheets limit`);
+  }
 
-  image.setAnchorCell(sheet.getRange(row, column));
+  const image = sheet.insertImage(blob, column, row, item.xOffset, item.yOffset);
   image.setWidth(item.width);
   image.setHeight(item.height);
-  image.setAnchorCellXOffset(item.xOffset);
-  image.setAnchorCellYOffset(item.yOffset);
 }
 
 function fitImageIntoBox(width, height, maxWidth, maxHeight) {
