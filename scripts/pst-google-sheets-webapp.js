@@ -1,7 +1,7 @@
 const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-01-drive-archive-v3';
+const SCRIPT_VERSION = '2026-06-01-drive-archive-v4';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const MONTH_BLOCK_WIDTH = 2;
@@ -20,6 +20,13 @@ const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'
 
 function doGet() {
   return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION });
+}
+
+function authorizeDriveAccess() {
+  const rootFolder = DriveApp.getRootFolder();
+  const archiveFolder = getOrCreateFolder(rootFolder, DRIVE_ROOT_FOLDER_NAME);
+
+  return archiveFolder.getUrl();
 }
 
 function doPost(event) {
@@ -75,30 +82,28 @@ function writeCleaningToObjectRow(sheet, payload) {
   const dateColumn = monthColumns.dateColumn;
   const photoColumn = monthColumns.photoColumn;
 
+  sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
+  sheet
+    .getRange(objectRow, photoColumn)
+    .clearContent()
+    .setNote(buildDriveLinksNote(storedPhotos));
+  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
+  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
+  sheet
+    .getRange(objectRow, dateColumn)
+    .setValue(dateTime)
+    .setVerticalAlignment('top')
+    .setHorizontalAlignment('left')
+    .setWrap(false);
+
   try {
-    sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
-    sheet
-      .getRange(objectRow, photoColumn)
-      .clearContent()
-      .setNote(buildDriveLinksNote(storedPhotos));
-    sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
-    sheet.setRowHeight(objectRow, photoLayout.rowHeight);
     insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
-    sheet
-      .getRange(objectRow, dateColumn)
-      .setValue(dateTime)
-      .setVerticalAlignment('top')
-      .setHorizontalAlignment('left')
-      .setWrap(false);
   } catch (error) {
     removeImagesFromCell(sheet, objectRow, photoColumn);
-    sheet.getRange(objectRow, dateColumn).clearContent();
-
-    if (monthColumns.createdBlock) {
-      sheet.deleteColumns(dateColumn, MONTH_BLOCK_WIDTH);
-    }
-
-    throw error;
+    sheet
+      .getRange(objectRow, photoColumn)
+      .setNote(`${buildDriveLinksNote(storedPhotos)}\n\nПревью не вставлено: ${String(error)}`);
+    console.error(error && error.stack ? error.stack : error);
   }
 }
 
