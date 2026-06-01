@@ -1,5 +1,8 @@
 const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
+const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
+const SCRIPT_VERSION = '2026-06-01-drive-archive-v3';
+const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const MONTH_BLOCK_WIDTH = 2;
 const DATE_COLUMN_WIDTH = 170;
@@ -16,11 +19,14 @@ const LEGACY_SUBHEADERS = ['дата уборки и время', 'фото'];
 const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'];
 
 function doGet() {
-  return jsonResponse({ ok: true, service: 'pst-cleaning-webapp' });
+  return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION });
 }
 
 function doPost(event) {
+  const lock = LockService.getScriptLock();
+
   try {
+    lock.waitLock(30000);
     const payload = JSON.parse(event.postData.contents || '{}');
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheet = getObjectsSheet(spreadsheet);
@@ -28,9 +34,18 @@ function doPost(event) {
     cleanupLegacySheetLayout(sheet);
     writeCleaningToObjectRow(sheet, payload);
 
-    return jsonResponse({ ok: true });
+    return jsonResponse({ ok: true, version: SCRIPT_VERSION });
   } catch (error) {
-    return jsonResponse({ ok: false, error: String(error && error.message ? error.message : error) });
+    console.error(error && error.stack ? error.stack : error);
+    return jsonResponse({
+      ok: false,
+      version: SCRIPT_VERSION,
+      error: String(error && error.message ? error.message : error),
+    });
+  } finally {
+    if (lock.hasLock()) {
+      lock.releaseLock();
+    }
   }
 }
 
@@ -50,26 +65,41 @@ function writeCleaningToObjectRow(sheet, payload) {
   const monthTitle = formatMonthTitle(submittedAt, timezone);
   const dateTime = Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy HH:mm');
   const photos = Array.isArray(payload.photos) ? payload.photos : [];
-  const photoLayout = getPhotosLayout(photos);
+  if (photos.length === 0) {
+    throw new Error('At least one photo is required');
+  }
+
+  const storedPhotos = savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone);
+  const photoLayout = getPhotosLayout(storedPhotos);
   const monthColumns = getWritableMonthColumns(sheet, objectRow, monthTitle);
   const dateColumn = monthColumns.dateColumn;
   const photoColumn = monthColumns.photoColumn;
 
-  if (photoLayout.items.length === 0) {
-    throw new Error('At least one photo is required');
-  }
+  try {
+    sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
+    sheet
+      .getRange(objectRow, photoColumn)
+      .clearContent()
+      .setNote(buildDriveLinksNote(storedPhotos));
+    sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
+    sheet.setRowHeight(objectRow, photoLayout.rowHeight);
+    insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
+    sheet
+      .getRange(objectRow, dateColumn)
+      .setValue(dateTime)
+      .setVerticalAlignment('top')
+      .setHorizontalAlignment('left')
+      .setWrap(false);
+  } catch (error) {
+    removeImagesFromCell(sheet, objectRow, photoColumn);
+    sheet.getRange(objectRow, dateColumn).clearContent();
 
-  sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
-  sheet.getRange(objectRow, photoColumn).clearContent();
-  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
-  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
-  insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
-  sheet
-    .getRange(objectRow, dateColumn)
-    .setValue(dateTime)
-    .setVerticalAlignment('top')
-    .setHorizontalAlignment('left')
-    .setWrap(false);
+    if (monthColumns.createdBlock) {
+      sheet.deleteColumns(dateColumn, MONTH_BLOCK_WIDTH);
+    }
+
+    throw error;
+  }
 }
 
 function getObjectsSheet(spreadsheet) {
@@ -143,13 +173,13 @@ function getWritableMonthColumns(sheet, objectRow, monthTitle) {
     });
 
     if (!dateValue && images.length === 0) {
-      return { dateColumn, photoColumn };
+      return { dateColumn, photoColumn, createdBlock: false };
     }
   }
 
   const nextColumn = sheet.getLastColumn() + 1;
   setupMonthColumns(sheet, nextColumn, monthTitle);
-  return { dateColumn: nextColumn, photoColumn: nextColumn + 1 };
+  return { dateColumn: nextColumn, photoColumn: nextColumn + 1, createdBlock: true };
 }
 
 function setupMonthColumns(sheet, startColumn, monthTitle) {
@@ -162,7 +192,7 @@ function setupMonthColumns(sheet, startColumn, monthTitle) {
 }
 
 function getPhotosLayout(photos) {
-  const validPhotos = photos.filter((photo) => photo && photo.dataUrl);
+  const validPhotos = photos.filter((photo) => photo && photo.driveFileId);
   const photoCount = validPhotos.length;
   const maxWidth = photoCount > 1 ? MULTI_PHOTO_MAX_WIDTH : PHOTO_MAX_WIDTH;
   const maxHeight = photoCount > 1 ? MULTI_PHOTO_MAX_HEIGHT : PHOTO_MAX_HEIGHT;
@@ -210,13 +240,9 @@ function insertPhotosIntoCell(sheet, row, column, photoLayout) {
 
 function insertPhotoIntoCell(sheet, row, column, item) {
   const photo = item.photo;
-  if (!photo || !photo.dataUrl) return;
+  if (!photo || !photo.driveFileId) return;
 
-  const base64 = String(photo.dataUrl).split(',')[1];
-  if (!base64) return;
-
-  const bytes = Utilities.base64Decode(base64);
-  const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
+  const blob = DriveApp.getFileById(photo.driveFileId).getBlob();
   if (blob.getBytes().length > 2 * 1024 * 1024) {
     throw new Error(`Photo ${photo.fileName || 'photo.jpg'} exceeds the 2MB Google Sheets limit`);
   }
@@ -224,6 +250,58 @@ function insertPhotoIntoCell(sheet, row, column, item) {
   const image = sheet.insertImage(blob, column, row, item.xOffset, item.yOffset);
   image.setWidth(item.width);
   image.setHeight(item.height);
+}
+
+function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) {
+  const rootFolder = getOrCreateFolder(DriveApp.getRootFolder(), DRIVE_ROOT_FOLDER_NAME);
+  const monthFolder = getOrCreateFolder(rootFolder, monthTitle);
+  const timestamp = Utilities.formatDate(submittedAt, timezone, 'yyyy-MM-dd_HH-mm-ss');
+  const createdFiles = [];
+
+  try {
+    return photos.map((photo, index) => {
+      const base64 = String(photo.dataUrl || '').split(',')[1];
+      if (!base64) {
+        throw new Error(`Photo ${index + 1} has no image data`);
+      }
+
+      const extension = photo.mimeType === 'image/png' ? 'png' : 'jpg';
+      const fileName = `${timestamp}_PST-${sanitizeFileName(location.id)}_${index + 1}.${extension}`;
+      const bytes = Utilities.base64Decode(base64);
+      if (bytes.length > DRIVE_PHOTO_SIZE_LIMIT_BYTES) {
+        throw new Error(`Photo ${fileName} exceeds the 250KB Drive archive limit`);
+      }
+
+      const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', fileName);
+      const driveFile = monthFolder.createFile(blob);
+      createdFiles.push(driveFile);
+
+      return {
+        ...photo,
+        fileName,
+        driveFileId: driveFile.getId(),
+        driveUrl: driveFile.getUrl(),
+      };
+    });
+  } catch (error) {
+    createdFiles.forEach((file) => file.setTrashed(true));
+    throw error;
+  }
+}
+
+function getOrCreateFolder(parentFolder, folderName) {
+  const folders = parentFolder.getFoldersByName(folderName);
+  return folders.hasNext() ? folders.next() : parentFolder.createFolder(folderName);
+}
+
+function sanitizeFileName(value) {
+  return String(value || 'unknown').replace(/[\\/:*?"<>|]/g, '_');
+}
+
+function buildDriveLinksNote(photos) {
+  return photos
+    .map((photo, index) => `Фото ${index + 1}: ${photo.driveUrl}`)
+    .join('\n');
 }
 
 function fitImageIntoBox(width, height, maxWidth, maxHeight) {

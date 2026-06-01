@@ -76,8 +76,8 @@ declare global {
 const SEARCH_RADIUS_KM = 0.3;
 const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbxYwGH0wRT4aWiWAJiIfQURg74vHUmi0Pn-OtfFnQTygzLkjpmcFiCWQat9OJvkkJ8vuw/exec';
-const SHEETS_PHOTO_PAYLOAD_LIMIT = 300000;
+  'https://script.google.com/macros/s/AKfycbw7vvHZlYBrB0QAMBBGWCRPg8Tq2FyYQBISQrL12sNNel4hbqZfzF65e3ouuAjHXA39/exec';
+const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 
 const formatDistance = (distanceKm: number) => {
   if (distanceKm < 1) {
@@ -265,7 +265,7 @@ const compressPhotoForSheets = async (
 
     bestPhoto = compressedPhoto;
 
-    if (dataUrl.length <= SHEETS_PHOTO_PAYLOAD_LIMIT) {
+    if (blob.size <= DRIVE_PHOTO_SIZE_LIMIT_BYTES) {
       return compressedPhoto;
     }
   }
@@ -452,6 +452,7 @@ const PstPage = () => {
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -613,13 +614,14 @@ const PstPage = () => {
   const isReady = Boolean(selectedLocation && photos.length > 0);
 
   const handleSubmit = async () => {
-    if (!isReady) return;
+    if (!isReady || isSubmittingRef.current) return;
 
     if (!PST_SHEETS_WEB_APP_URL) {
       setSubmitError('Не настроен адрес Google Apps Script для отправки в таблицу.');
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     setSubmitError('');
 
@@ -634,7 +636,7 @@ const PstPage = () => {
         photos.map((photo) => compressPhotoForSheets(photo.file, stamp))
       );
       const oversizedPhoto = compressedPhotos.find(
-        (photo) => photo.dataUrl.length > SHEETS_PHOTO_PAYLOAD_LIMIT
+        (photo) => photo.sizeBytes > DRIVE_PHOTO_SIZE_LIMIT_BYTES
       );
 
       if (oversizedPhoto) {
@@ -688,6 +690,7 @@ const PstPage = () => {
           : 'Не удалось отправить отчет в Google Sheets.'
       );
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
