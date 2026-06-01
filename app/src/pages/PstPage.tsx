@@ -43,6 +43,23 @@ type PhotoItem = {
   addedAt: string;
 };
 
+type StoredDraftPhoto = {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  addedAt: string;
+  lastModified: number;
+  dataUrl: string;
+};
+
+type StoredDraft = {
+  id: string;
+  selectedLocationId: string;
+  photos: StoredDraftPhoto[];
+  updatedAt: string;
+};
+
 type CompressedPhoto = {
   fileName: string;
   mimeType: string;
@@ -78,6 +95,9 @@ const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
   'https://script.google.com/macros/s/AKfycbzhrzWmJkLFxFlrT37cMVHh9-i2SFHQj91n2-T6gy9wESIDHVwohNbcRwcRf1zPTlT7vQ/exec';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
+const PST_DRAFT_DB_NAME = 'pst-cleaning-draft-db';
+const PST_DRAFT_STORE_NAME = 'drafts';
+const PST_DRAFT_KEY = 'pst-cleaning-form';
 
 const formatDistance = (distanceKm: number) => {
   if (distanceKm < 1) {
@@ -125,6 +145,120 @@ const readFileAsDataUrl = (file: Blob) =>
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
+
+const dataUrlToFile = async (dataUrl: string, fileName: string, mimeType: string, lastModified: number) => {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+
+  return new File([blob], fileName, {
+    type: mimeType || blob.type,
+    lastModified,
+  });
+};
+
+const openDraftDatabase = () =>
+  new Promise<IDBDatabase>((resolve, reject) => {
+    if (typeof window === 'undefined' || !('indexedDB' in window)) {
+      reject(new Error('IndexedDB is not available'));
+      return;
+    }
+
+    const request = window.indexedDB.open(PST_DRAFT_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      if (!database.objectStoreNames.contains(PST_DRAFT_STORE_NAME)) {
+        database.createObjectStore(PST_DRAFT_STORE_NAME, { keyPath: 'id' });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () =>
+      reject(request.error ?? new Error('Failed to open draft database'));
+  });
+
+const loadDraft = async (): Promise<StoredDraft | null> => {
+  const database = await openDraftDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(PST_DRAFT_STORE_NAME, 'readonly');
+    const store = transaction.objectStore(PST_DRAFT_STORE_NAME);
+    const request = store.get(PST_DRAFT_KEY);
+
+    request.onsuccess = () => {
+      database.close();
+      resolve((request.result as StoredDraft | undefined) ?? null);
+    };
+    request.onerror = () => {
+      database.close();
+      reject(request.error ?? new Error('Failed to load draft'));
+    };
+  });
+};
+
+const saveDraft = async (draft: StoredDraft) => {
+  const database = await openDraftDatabase();
+
+  return new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(PST_DRAFT_STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(PST_DRAFT_STORE_NAME);
+    store.put(draft);
+
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Failed to save draft'));
+    };
+  });
+};
+
+const clearDraft = async () => {
+  const database = await openDraftDatabase();
+
+  return new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(PST_DRAFT_STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(PST_DRAFT_STORE_NAME);
+    store.delete(PST_DRAFT_KEY);
+
+    transaction.oncomplete = () => {
+      database.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error ?? new Error('Failed to clear draft'));
+    };
+  });
+};
+
+const draftPhotoToPhotoItem = async (draftPhoto: StoredDraftPhoto): Promise<PhotoItem> => {
+  const file = await dataUrlToFile(
+    draftPhoto.dataUrl,
+    draftPhoto.name,
+    draftPhoto.type,
+    draftPhoto.lastModified
+  );
+
+  return {
+    id: draftPhoto.id,
+    file,
+    previewUrl: draftPhoto.dataUrl,
+    addedAt: draftPhoto.addedAt,
+  };
+};
+
+const photoItemToDraftPhoto = async (photo: PhotoItem): Promise<StoredDraftPhoto> => ({
+  id: photo.id,
+  name: photo.file.name,
+  type: photo.file.type,
+  size: photo.file.size,
+  addedAt: photo.addedAt,
+  lastModified: photo.file.lastModified,
+  dataUrl: await readFileAsDataUrl(photo.file),
+});
 
 const loadImage = (dataUrl: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -452,7 +586,11 @@ const PstPage = () => {
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isRestoringDraft, setIsRestoringDraft] = useState(true);
+  const [draftNotice, setDraftNotice] = useState('');
   const isSubmittingRef = useRef(false);
+  const hasHydratedDraftRef = useRef(false);
+  const draftSaveTimeoutRef = useRef<number | null>(null);
 
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -494,9 +632,100 @@ const PstPage = () => {
 
   useEffect(() => {
     return () => {
-      photos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+      photos.forEach((photo) => {
+        if (photo.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(photo.previewUrl);
+        }
+      });
     };
   }, [photos]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const restoreDraft = async () => {
+      try {
+        const draft = await loadDraft();
+
+        if (!isMounted || !draft) {
+          return;
+        }
+
+        const restoredPhotos = await Promise.all(draft.photos.map(draftPhotoToPhotoItem));
+
+        if (!isMounted) {
+          restoredPhotos.forEach((photo) => {
+            if (photo.previewUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(photo.previewUrl);
+            }
+          });
+          return;
+        }
+
+        setSelectedLocationId(draft.selectedLocationId);
+        setPhotos(restoredPhotos);
+
+        if (draft.selectedLocationId || restoredPhotos.length > 0) {
+          setDraftNotice('Черновик восстановлен. Можно продолжать и добавить фото "после".');
+        }
+      } catch (error) {
+        console.error('Failed to restore PST draft:', error);
+      } finally {
+        if (isMounted) {
+          hasHydratedDraftRef.current = true;
+          setIsRestoringDraft(false);
+        }
+      }
+    };
+
+    restoreDraft();
+
+    return () => {
+      isMounted = false;
+      if (draftSaveTimeoutRef.current !== null) {
+        window.clearTimeout(draftSaveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedDraftRef.current) {
+      return;
+    }
+
+    if (draftSaveTimeoutRef.current !== null) {
+      window.clearTimeout(draftSaveTimeoutRef.current);
+    }
+
+    draftSaveTimeoutRef.current = window.setTimeout(() => {
+      const persistDraft = async () => {
+        try {
+          if (!selectedLocationId && photos.length === 0) {
+            await clearDraft();
+            return;
+          }
+
+          const storedPhotos = await Promise.all(photos.map(photoItemToDraftPhoto));
+          await saveDraft({
+            id: PST_DRAFT_KEY,
+            selectedLocationId,
+            photos: storedPhotos,
+            updatedAt: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.error('Failed to persist PST draft:', error);
+        }
+      };
+
+      void persistDraft();
+    }, 250);
+
+    return () => {
+      if (draftSaveTimeoutRef.current !== null) {
+        window.clearTimeout(draftSaveTimeoutRef.current);
+      }
+    };
+  }, [photos, selectedLocationId]);
 
   const requestLocation = () => {
     if (!('geolocation' in navigator)) {
@@ -603,7 +832,7 @@ const PstPage = () => {
   const removePhoto = (photoId: string) => {
     setPhotos((current) => {
       const photoToRemove = current.find((photo) => photo.id === photoId);
-      if (photoToRemove) {
+      if (photoToRemove?.previewUrl.startsWith('blob:')) {
         URL.revokeObjectURL(photoToRemove.previewUrl);
       }
 
@@ -680,6 +909,16 @@ const PstPage = () => {
         body: JSON.stringify(payload),
       });
 
+      await clearDraft();
+      photos.forEach((photo) => {
+        if (photo.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(photo.previewUrl);
+        }
+      });
+      setPhotos([]);
+      setSelectedLocationId('');
+      setSearchTerm('');
+      setDraftNotice('');
       setIsSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
@@ -941,8 +1180,20 @@ const PstPage = () => {
             </div>
           </section>
 
-          {selectedLocation && (
+              {selectedLocation && (
             <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-7">
+              {draftNotice && (
+                <div className="mb-5 rounded-[24px] border border-brand-green/20 bg-brand-green/10 px-5 py-4 text-sm font-semibold leading-6 text-brand-dark/72">
+                  {draftNotice}
+                </div>
+              )}
+
+              {isRestoringDraft && (
+                <div className="mb-5 rounded-[24px] border border-black/6 bg-[#fbfcf8] px-5 py-4 text-sm font-semibold leading-6 text-brand-dark/55">
+                  Восстанавливаем неотправленные фото из черновика...
+                </div>
+              )}
+
               <label className="flex cursor-pointer flex-col gap-5 rounded-[28px] border-2 border-dashed border-brand-green/28 bg-[#f7f8f4] p-5 transition hover:border-brand-green/45 hover:bg-white sm:p-6">
                 <div className="flex items-center gap-4">
                   <div className="flex h-14 w-14 items-center justify-center rounded-[22px] bg-white text-brand-green shadow-sm">
