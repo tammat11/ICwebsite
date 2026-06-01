@@ -129,7 +129,9 @@ function appendCleaningHistory(sheet, location, submittedDate, submittedTime, st
   ]);
 
   const row = sheet.getLastRow();
-  sheet.getRange(row, 10).setWrap(true).setVerticalAlignment('top');
+  const linksCell = sheet.getRange(row, 10);
+  linksCell.setWrap(true).setVerticalAlignment('top');
+  linksCell.setRichTextValue(buildPhotoLinksRichText(storedPhotos));
 }
 
 function updateObjectCleaningStatus(sheet, objectRow, submittedDate) {
@@ -240,6 +242,25 @@ function sanitizeFileName(value) {
 
 function stringifyCell(value) {
   return value === undefined || value === null ? '' : String(value);
+}
+
+function buildPhotoLinksRichText(storedPhotos) {
+  const labels = storedPhotos.map((photo, index) => ({
+    text: `Фото ${index + 1}`,
+    url: photo.driveUrl,
+  }));
+  const fullText = labels.map((item) => item.text).join('\n');
+  const builder = SpreadsheetApp.newRichTextValue().setText(fullText);
+
+  let cursor = 0;
+  labels.forEach((item, index) => {
+    const start = cursor;
+    const end = start + item.text.length;
+    builder.setLinkUrl(start, end, item.url);
+    cursor = end + (index < labels.length - 1 ? 1 : 0);
+  });
+
+  return builder.build();
 }
 
 function findHeaderIndex(headers, candidates) {
