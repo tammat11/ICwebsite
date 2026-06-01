@@ -1,17 +1,18 @@
 const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-01-drive-archive-v4';
+const SCRIPT_VERSION = '2026-06-01-drive-archive-v5';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const MONTH_BLOCK_WIDTH = 2;
-const DATE_COLUMN_WIDTH = 170;
+const DATE_COLUMN_WIDTH = 24;
 const PHOTO_COLUMN_WIDTH = 320;
 const ROW_HEIGHT = 280;
 const PHOTO_MAX_WIDTH = 260;
 const PHOTO_MAX_HEIGHT = 240;
 const MULTI_PHOTO_MAX_WIDTH = 220;
 const MULTI_PHOTO_MAX_HEIGHT = 220;
+const PHOTO_DATE_LABEL_HEIGHT = 28;
 const PHOTO_CELL_PADDING = 8;
 const PHOTO_GAP = 12;
 const PHOTOS_PER_ROW = 2;
@@ -86,15 +87,14 @@ function writeCleaningToObjectRow(sheet, payload) {
   sheet
     .getRange(objectRow, photoColumn)
     .clearContent()
-    .setNote(buildDriveLinksNote(storedPhotos));
-  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
-  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
-  sheet
-    .getRange(objectRow, dateColumn)
     .setValue(dateTime)
     .setVerticalAlignment('top')
     .setHorizontalAlignment('left')
-    .setWrap(false);
+    .setWrap(false)
+    .setNote(buildDriveLinksNote(storedPhotos));
+  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
+  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
+  sheet.getRange(objectRow, dateColumn).clearContent();
 
   try {
     insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
@@ -172,12 +172,14 @@ function getWritableMonthColumns(sheet, objectRow, monthTitle) {
     const dateColumn = startColumn;
     const photoColumn = startColumn + 1;
     const dateValue = sheet.getRange(objectRow, dateColumn).getValue();
+    const photoValue = sheet.getRange(objectRow, photoColumn).getValue();
+    const photoNote = sheet.getRange(objectRow, photoColumn).getNote();
     const images = sheet.getImages().filter((image) => {
       const anchor = image.getAnchorCell();
       return anchor.getRow() === objectRow && anchor.getColumn() === photoColumn;
     });
 
-    if (!dateValue && images.length === 0) {
+    if (!dateValue && !photoValue && !photoNote && images.length === 0) {
       return { dateColumn, photoColumn, createdBlock: false };
     }
   }
@@ -197,7 +199,7 @@ function setupMonthColumns(sheet, startColumn, monthTitle) {
 }
 
 function getPhotosLayout(photos) {
-  const validPhotos = photos.filter((photo) => photo && photo.driveFileId);
+  const validPhotos = photos.filter((photo) => photo && photo.dataUrl);
   const photoCount = validPhotos.length;
   const maxWidth = photoCount > 1 ? MULTI_PHOTO_MAX_WIDTH : PHOTO_MAX_WIDTH;
   const maxHeight = photoCount > 1 ? MULTI_PHOTO_MAX_HEIGHT : PHOTO_MAX_HEIGHT;
@@ -212,7 +214,8 @@ function getPhotosLayout(photos) {
       width: size.width,
       height: size.height,
       xOffset: PHOTO_CELL_PADDING + columnIndex * (maxWidth + PHOTO_GAP),
-      yOffset: PHOTO_CELL_PADDING + rowIndex * (maxHeight + PHOTO_GAP),
+      yOffset:
+        PHOTO_DATE_LABEL_HEIGHT + PHOTO_CELL_PADDING + rowIndex * (maxHeight + PHOTO_GAP),
     };
   });
   const rows = Math.max(1, Math.ceil(photoCount / columns));
@@ -225,8 +228,11 @@ function getPhotosLayout(photos) {
         : PHOTO_COLUMN_WIDTH,
     rowHeight:
       photoCount > 1
-        ? PHOTO_CELL_PADDING * 2 + rows * maxHeight + (rows - 1) * PHOTO_GAP
-        : ROW_HEIGHT,
+        ? PHOTO_DATE_LABEL_HEIGHT +
+          PHOTO_CELL_PADDING * 2 +
+          rows * maxHeight +
+          (rows - 1) * PHOTO_GAP
+        : ROW_HEIGHT + PHOTO_DATE_LABEL_HEIGHT,
   };
 }
 
@@ -245,9 +251,13 @@ function insertPhotosIntoCell(sheet, row, column, photoLayout) {
 
 function insertPhotoIntoCell(sheet, row, column, item) {
   const photo = item.photo;
-  if (!photo || !photo.driveFileId) return;
+  if (!photo || !photo.dataUrl) return;
 
-  const blob = DriveApp.getFileById(photo.driveFileId).getBlob();
+  const base64 = String(photo.dataUrl).split(',')[1];
+  if (!base64) return;
+
+  const bytes = Utilities.base64Decode(base64);
+  const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
   if (blob.getBytes().length > 2 * 1024 * 1024) {
     throw new Error(`Photo ${photo.fileName || 'photo.jpg'} exceeds the 2MB Google Sheets limit`);
   }
@@ -260,6 +270,14 @@ function insertPhotoIntoCell(sheet, row, column, item) {
 function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) {
   const rootFolder = getOrCreateFolder(DriveApp.getRootFolder(), DRIVE_ROOT_FOLDER_NAME);
   const monthFolder = getOrCreateFolder(rootFolder, monthTitle);
+  const branchFolder = getOrCreateFolder(
+    monthFolder,
+    sanitizeFolderName(location.branch || 'Без филиала')
+  );
+  const dateFolder = getOrCreateFolder(
+    branchFolder,
+    Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy')
+  );
   const timestamp = Utilities.formatDate(submittedAt, timezone, 'yyyy-MM-dd_HH-mm-ss');
   const createdFiles = [];
 
@@ -278,7 +296,7 @@ function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) 
       }
 
       const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', fileName);
-      const driveFile = monthFolder.createFile(blob);
+      const driveFile = dateFolder.createFile(blob);
       createdFiles.push(driveFile);
 
       return {
@@ -297,6 +315,10 @@ function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) 
 function getOrCreateFolder(parentFolder, folderName) {
   const folders = parentFolder.getFoldersByName(folderName);
   return folders.hasNext() ? folders.next() : parentFolder.createFolder(folderName);
+}
+
+function sanitizeFolderName(value) {
+  return String(value || 'Без филиала').replace(/[\\/:*?"<>|]/g, '_').trim() || 'Без филиала';
 }
 
 function sanitizeFileName(value) {
