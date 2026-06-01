@@ -1,24 +1,24 @@
 const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
+const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-01-drive-archive-v5';
+const SCRIPT_VERSION = '2026-06-01-history-sheet-v6';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
-const MONTH_BLOCK_WIDTH = 2;
-const DATE_COLUMN_WIDTH = 24;
-const PHOTO_COLUMN_WIDTH = 320;
-const ROW_HEIGHT = 280;
-const PHOTO_MAX_WIDTH = 260;
-const PHOTO_MAX_HEIGHT = 240;
-const MULTI_PHOTO_MAX_WIDTH = 220;
-const MULTI_PHOTO_MAX_HEIGHT = 220;
-const PHOTO_DATE_LABEL_HEIGHT = 22;
-const PHOTO_PREVIEW_TOP_GAP = 4;
-const PHOTO_CELL_PADDING = 8;
-const PHOTO_GAP = 12;
-const PHOTOS_PER_ROW = 2;
-const LEGACY_SUBHEADERS = ['дата уборки и время', 'фото'];
-const LEGACY_STATUS_HEADERS = ['Помыли', 'Последняя уборка'];
+const STATUS_HEADER = 'Помыли?';
+const LAST_CLEANING_DATE_HEADER = 'Последняя дата уборки';
+const HISTORY_HEADERS = [
+  'POSTOMAT_ID',
+  'Город',
+  'Филиал',
+  'Адрес',
+  'Широта',
+  'Долгота',
+  'Категория точки',
+  'Дата отправки',
+  'Время',
+  'Ссылки на фотографии в Google Drive',
+];
 
 function doGet() {
   return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION });
@@ -36,12 +36,37 @@ function doPost(event) {
 
   try {
     lock.waitLock(30000);
-    const payload = JSON.parse(event.postData.contents || '{}');
-    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = getObjectsSheet(spreadsheet);
 
-    cleanupLegacySheetLayout(sheet);
-    writeCleaningToObjectRow(sheet, payload);
+    const payload = JSON.parse((event.postData && event.postData.contents) || '{}');
+    const location = payload.location || {};
+    const photos = Array.isArray(payload.photos) ? payload.photos : [];
+
+    if (!location.id) {
+      throw new Error('POSTOMAT_ID is missing');
+    }
+
+    if (photos.length === 0) {
+      throw new Error('At least one photo is required');
+    }
+
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const objectsSheet = getObjectsSheet(spreadsheet);
+    const historySheet = getOrCreateHistorySheet(spreadsheet);
+    const objectRow = findObjectRow(objectsSheet, location.id);
+
+    if (!objectRow) {
+      throw new Error(`POSTOMAT_ID ${location.id} not found`);
+    }
+
+    const submittedAt = payload.submittedAt ? new Date(payload.submittedAt) : new Date();
+    const timezone = Session.getScriptTimeZone();
+    const monthTitle = formatMonthTitle(submittedAt, timezone);
+    const submittedDate = Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy');
+    const submittedTime = Utilities.formatDate(submittedAt, timezone, 'HH:mm');
+    const storedPhotos = savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone);
+
+    appendCleaningHistory(historySheet, location, submittedDate, submittedTime, storedPhotos);
+    updateObjectCleaningStatus(objectsSheet, objectRow, submittedDate);
 
     return jsonResponse({ ok: true, version: SCRIPT_VERSION });
   } catch (error) {
@@ -58,91 +83,91 @@ function doPost(event) {
   }
 }
 
-function writeCleaningToObjectRow(sheet, payload) {
-  const location = payload.location || {};
-  if (!location.id) {
-    throw new Error('POSTOMAT_ID is missing');
-  }
-
-  const objectRow = findObjectRow(sheet, location.id);
-  if (!objectRow) {
-    throw new Error(`POSTOMAT_ID ${location.id} not found`);
-  }
-
-  const submittedAt = payload.submittedAt ? new Date(payload.submittedAt) : new Date();
-  const timezone = Session.getScriptTimeZone();
-  const monthTitle = formatMonthTitle(submittedAt, timezone);
-  const dateTime = Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy HH:mm');
-  const photos = Array.isArray(payload.photos) ? payload.photos : [];
-  if (photos.length === 0) {
-    throw new Error('At least one photo is required');
-  }
-
-  const storedPhotos = savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone);
-  const photoLayout = getPhotosLayout(storedPhotos);
-  const monthColumns = getWritableMonthColumns(sheet, objectRow, monthTitle);
-  const dateColumn = monthColumns.dateColumn;
-  const photoColumn = monthColumns.photoColumn;
-
-  sheet.setColumnWidth(dateColumn, DATE_COLUMN_WIDTH);
-  sheet
-    .getRange(objectRow, photoColumn)
-    .clearContent()
-    .setValue(dateTime)
-    .setVerticalAlignment('top')
-    .setHorizontalAlignment('left')
-    .setWrap(false)
-    .setNote(buildDriveLinksNote(storedPhotos));
-  sheet.setColumnWidth(photoColumn, photoLayout.columnWidth);
-  sheet.setRowHeight(objectRow, photoLayout.rowHeight);
-  sheet.getRange(objectRow, dateColumn).clearContent();
-
-  try {
-    insertPhotosIntoCell(sheet, objectRow, photoColumn, photoLayout);
-  } catch (error) {
-    removeImagesFromCell(sheet, objectRow, photoColumn);
-    sheet
-      .getRange(objectRow, photoColumn)
-      .setNote(`${buildDriveLinksNote(storedPhotos)}\n\nПревью не вставлено: ${String(error)}`);
-    console.error(error && error.stack ? error.stack : error);
-  }
-}
-
 function getObjectsSheet(spreadsheet) {
-  return spreadsheet.getSheetByName(OBJECTS_SHEET_NAME) || spreadsheet.getSheets()[0];
+  const directMatch = spreadsheet.getSheetByName(OBJECTS_SHEET_NAME);
+  if (directMatch) return directMatch;
+
+  const nonHistorySheet = spreadsheet
+    .getSheets()
+    .find((sheet) => sheet.getName().trim() !== HISTORY_SHEET_NAME);
+  return nonHistorySheet || spreadsheet.getSheets()[0];
 }
 
-function cleanupLegacySheetLayout(sheet) {
-  deleteLegacySubheaderRow(sheet);
-  deleteLegacyStatusColumns(sheet);
+function getOrCreateHistorySheet(spreadsheet) {
+  const existingSheet = spreadsheet.getSheetByName(HISTORY_SHEET_NAME);
+  const historySheet = existingSheet || spreadsheet.insertSheet(HISTORY_SHEET_NAME);
+
+  ensureHistoryHeaders(historySheet);
+  return historySheet;
+}
+
+function ensureHistoryHeaders(sheet) {
+  const requiredWidth = HISTORY_HEADERS.length;
+  if (sheet.getMaxColumns() < requiredWidth) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), requiredWidth - sheet.getMaxColumns());
+  }
+
+  sheet.getRange(1, 1, 1, requiredWidth).setValues([HISTORY_HEADERS]);
+  sheet.getRange(1, 1, 1, requiredWidth).setFontWeight('bold');
   sheet.setFrozenRows(1);
 }
 
-function deleteLegacySubheaderRow(sheet) {
-  if (sheet.getLastRow() < 2) return;
+function appendCleaningHistory(sheet, location, submittedDate, submittedTime, storedPhotos) {
+  const photoLinks = storedPhotos.map((photo) => photo.driveUrl).join('\n');
 
-  const secondRowValues = sheet.getRange(2, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
-  const legacySubheaderCount = secondRowValues.filter((value) =>
-    LEGACY_SUBHEADERS.includes(String(value).trim().toLowerCase())
-  ).length;
+  sheet.appendRow([
+    stringifyCell(location.id),
+    stringifyCell(location.city),
+    stringifyCell(location.branch),
+    stringifyCell(location.address),
+    stringifyCell(location.lat),
+    stringifyCell(location.lng),
+    stringifyCell(location.category),
+    submittedDate,
+    submittedTime,
+    photoLinks,
+  ]);
 
-  if (legacySubheaderCount > 0) {
-    sheet.deleteRow(2);
-  }
+  const row = sheet.getLastRow();
+  sheet.getRange(row, 10).setWrap(true).setVerticalAlignment('top');
 }
 
-function deleteLegacyStatusColumns(sheet) {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+function updateObjectCleaningStatus(sheet, objectRow, submittedDate) {
+  const lastColumn = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  const statusColumn = ensureColumn(sheet, headers, STATUS_HEADER);
+  const lastCleaningDateColumn = ensureColumn(sheet, headers, LAST_CLEANING_DATE_HEADER);
 
-  for (let index = headers.length - 1; index >= 0; index--) {
-    if (LEGACY_STATUS_HEADERS.includes(String(headers[index]).trim())) {
-      sheet.deleteColumn(index + 1);
+  const dataRowCount = Math.max(sheet.getLastRow() - DATA_START_ROW + 1, 1);
+  const statusRange = sheet.getRange(DATA_START_ROW, statusColumn, dataRowCount, 1);
+  statusRange.insertCheckboxes();
+
+  const statusValues = statusRange.getValues().map((row) => {
+    if (row[0] === '' || row[0] === null) {
+      return [false];
     }
+
+    return row;
+  });
+
+  statusRange.setValues(statusValues);
+  sheet.getRange(objectRow, statusColumn).setValue(true);
+  sheet.getRange(objectRow, lastCleaningDateColumn).setValue(submittedDate);
+}
+
+function ensureColumn(sheet, headers, headerName) {
+  let columnIndex = findHeaderIndex(headers, [headerName]);
+  if (columnIndex !== -1) {
+    return columnIndex + 1;
   }
+
+  const newColumn = sheet.getLastColumn() + 1;
+  sheet.getRange(1, newColumn).setValue(headerName).setFontWeight('bold');
+  return newColumn;
 }
 
 function findObjectRow(sheet, postomatId) {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
   const idColumn = findHeaderIndex(headers, ['POSTOMAT_ID', 'ID', 'Postomat ID']);
   if (idColumn === -1) {
     throw new Error('POSTOMAT_ID column not found');
@@ -151,131 +176,18 @@ function findObjectRow(sheet, postomatId) {
   const lastRow = sheet.getLastRow();
   if (lastRow < DATA_START_ROW) return null;
 
-  const data = sheet
+  const values = sheet
     .getRange(DATA_START_ROW, idColumn + 1, lastRow - DATA_START_ROW + 1, 1)
-    .getValues();
-  const rowOffset = data.findIndex((row) => String(row[0]) === String(postomatId));
+    .getDisplayValues();
+  const rowOffset = values.findIndex((row) => String(row[0]).trim() === String(postomatId).trim());
 
   return rowOffset === -1 ? null : DATA_START_ROW + rowOffset;
-}
-
-function getWritableMonthColumns(sheet, objectRow, monthTitle) {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const monthStarts = [];
-
-  headers.forEach((header, index) => {
-    if (String(header).trim() === monthTitle) {
-      monthStarts.push(index + 1);
-    }
-  });
-
-  for (const startColumn of monthStarts) {
-    const dateColumn = startColumn;
-    const photoColumn = startColumn + 1;
-    const dateValue = sheet.getRange(objectRow, dateColumn).getValue();
-    const photoValue = sheet.getRange(objectRow, photoColumn).getValue();
-    const photoNote = sheet.getRange(objectRow, photoColumn).getNote();
-    const images = sheet.getImages().filter((image) => {
-      const anchor = image.getAnchorCell();
-      return anchor.getRow() === objectRow && anchor.getColumn() === photoColumn;
-    });
-
-    if (!dateValue && !photoValue && !photoNote && images.length === 0) {
-      return { dateColumn, photoColumn, createdBlock: false };
-    }
-  }
-
-  const nextColumn = sheet.getLastColumn() + 1;
-  setupMonthColumns(sheet, nextColumn, monthTitle);
-  return { dateColumn: nextColumn, photoColumn: nextColumn + 1, createdBlock: true };
-}
-
-function setupMonthColumns(sheet, startColumn, monthTitle) {
-  sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).merge();
-  sheet.getRange(1, startColumn).setValue(monthTitle);
-  sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).setFontWeight('bold');
-  sheet.getRange(1, startColumn, 1, MONTH_BLOCK_WIDTH).setHorizontalAlignment('center');
-  sheet.setColumnWidth(startColumn, DATE_COLUMN_WIDTH);
-  sheet.setColumnWidth(startColumn + 1, PHOTO_COLUMN_WIDTH);
-}
-
-function getPhotosLayout(photos) {
-  const validPhotos = photos.filter((photo) => photo && photo.dataUrl);
-  const photoCount = validPhotos.length;
-  const maxWidth = photoCount > 1 ? MULTI_PHOTO_MAX_WIDTH : PHOTO_MAX_WIDTH;
-  const maxHeight = photoCount > 1 ? MULTI_PHOTO_MAX_HEIGHT : PHOTO_MAX_HEIGHT;
-  const columns = Math.max(1, Math.min(PHOTOS_PER_ROW, photoCount || 1));
-  const rows = Math.max(1, Math.ceil(photoCount / columns));
-  const contentHeight = rows * maxHeight + (rows - 1) * PHOTO_GAP;
-  const items = validPhotos.map((photo, index) => {
-    const size = fitImageIntoBox(photo.width, photo.height, maxWidth, maxHeight);
-    const columnIndex = index % columns;
-    const rowIndex = Math.floor(index / columns);
-
-    return {
-      photo,
-      width: size.width,
-      height: size.height,
-      xOffset: PHOTO_CELL_PADDING + columnIndex * (maxWidth + PHOTO_GAP),
-      yOffset:
-        PHOTO_DATE_LABEL_HEIGHT +
-        PHOTO_PREVIEW_TOP_GAP +
-        rowIndex * (maxHeight + PHOTO_GAP),
-    };
-  });
-
-  return {
-    items,
-    columnWidth:
-      photoCount > 1
-        ? PHOTO_CELL_PADDING * 2 + columns * maxWidth + (columns - 1) * PHOTO_GAP
-        : PHOTO_COLUMN_WIDTH,
-    rowHeight:
-      PHOTO_DATE_LABEL_HEIGHT +
-      PHOTO_PREVIEW_TOP_GAP +
-      contentHeight +
-      PHOTO_CELL_PADDING,
-  };
-}
-
-function insertPhotosIntoCell(sheet, row, column, photoLayout) {
-  removeImagesFromCell(sheet, row, column);
-
-  try {
-    photoLayout.items.forEach((item) => {
-      insertPhotoIntoCell(sheet, row, column, item);
-    });
-  } catch (error) {
-    removeImagesFromCell(sheet, row, column);
-    throw error;
-  }
-}
-
-function insertPhotoIntoCell(sheet, row, column, item) {
-  const photo = item.photo;
-  if (!photo || !photo.dataUrl) return;
-
-  const base64 = String(photo.dataUrl).split(',')[1];
-  if (!base64) return;
-
-  const bytes = Utilities.base64Decode(base64);
-  const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', photo.fileName || 'photo.jpg');
-  if (blob.getBytes().length > 2 * 1024 * 1024) {
-    throw new Error(`Photo ${photo.fileName || 'photo.jpg'} exceeds the 2MB Google Sheets limit`);
-  }
-
-  const image = sheet.insertImage(blob, column, row, item.xOffset, item.yOffset);
-  image.setWidth(item.width);
-  image.setHeight(item.height);
 }
 
 function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) {
   const rootFolder = getOrCreateFolder(DriveApp.getRootFolder(), DRIVE_ROOT_FOLDER_NAME);
   const monthFolder = getOrCreateFolder(rootFolder, monthTitle);
-  const branchFolder = getOrCreateFolder(
-    monthFolder,
-    sanitizeFolderName(location.branch || 'Без филиала')
-  );
+  const branchFolder = getOrCreateFolder(monthFolder, sanitizeFolderName(location.branch || 'Без филиала'));
   const dateFolder = getOrCreateFolder(
     branchFolder,
     Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy')
@@ -302,7 +214,6 @@ function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) 
       createdFiles.push(driveFile);
 
       return {
-        ...photo,
         fileName,
         driveFileId: driveFile.getId(),
         driveUrl: driveFile.getUrl(),
@@ -327,30 +238,8 @@ function sanitizeFileName(value) {
   return String(value || 'unknown').replace(/[\\/:*?"<>|]/g, '_');
 }
 
-function buildDriveLinksNote(photos) {
-  return photos
-    .map((photo, index) => `Фото ${index + 1}: ${photo.driveUrl}`)
-    .join('\n');
-}
-
-function fitImageIntoBox(width, height, maxWidth, maxHeight) {
-  const sourceWidth = Number(width) || maxWidth;
-  const sourceHeight = Number(height) || Math.round(maxWidth * 0.75);
-  const scale = Math.min(maxWidth / sourceWidth, maxHeight / sourceHeight, 1);
-
-  return {
-    width: Math.max(1, Math.round(sourceWidth * scale)),
-    height: Math.max(1, Math.round(sourceHeight * scale)),
-  };
-}
-
-function removeImagesFromCell(sheet, row, column) {
-  sheet.getImages().forEach((image) => {
-    const anchor = image.getAnchorCell();
-    if (anchor.getRow() === row && anchor.getColumn() === column) {
-      image.remove();
-    }
-  });
+function stringifyCell(value) {
+  return value === undefined || value === null ? '' : String(value);
 }
 
 function findHeaderIndex(headers, candidates) {
@@ -379,7 +268,7 @@ function formatMonthTitle(date, timezone) {
 }
 
 function jsonResponse(payload) {
-  return ContentService
-    .createTextOutput(JSON.stringify(payload))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
+    ContentService.MimeType.JSON
+  );
 }
