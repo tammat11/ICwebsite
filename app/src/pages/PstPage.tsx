@@ -76,7 +76,7 @@ declare global {
 const SEARCH_RADIUS_KM = 0.3;
 const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbx6xiV79pOMoeSmGFv6anf1TBTEcrX0BcAEE0d7BZq8YZAGFH_3d1RwI4ckzLKJm2TrXw/exec';
+  'https://script.google.com/macros/s/AKfycbxauO70eYyJpo6xLabaqDO0hvkQ-AceFSM4ChfSt5u4i6sKREUaYSLwjvPqIIkAVmZlrw/exec';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 
 const formatDistance = (distanceKm: number) => {
