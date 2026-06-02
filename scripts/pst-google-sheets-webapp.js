@@ -2,11 +2,12 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-02-history-sheet-v7';
+const SCRIPT_VERSION = '2026-06-02-history-sheet-v8';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const STATUS_HEADER = 'Помыли?';
 const LAST_CLEANING_DATE_HEADER = 'Последняя дата уборки';
+const HISTORY_LINKS_COLUMN = 10;
 const HISTORY_HEADERS = [
   'POSTOMAT_ID',
   'Город',
@@ -27,7 +28,6 @@ function doGet() {
 function authorizeDriveAccess() {
   const rootFolder = DriveApp.getRootFolder();
   const archiveFolder = getOrCreateFolder(rootFolder, DRIVE_ROOT_FOLDER_NAME);
-
   return archiveFolder.getUrl();
 }
 
@@ -119,7 +119,7 @@ function ensureHistoryHeaders(sheet) {
 }
 
 function appendCleaningHistory(sheet, location, submittedDate, submittedTime, storedPhotos) {
-  const photoLinks = buildPhotoLinksPlainText(storedPhotos);
+  const fallbackText = buildPhotoLinksPlainText(storedPhotos);
 
   sheet.appendRow([
     stringifyCell(location.id),
@@ -131,13 +131,107 @@ function appendCleaningHistory(sheet, location, submittedDate, submittedTime, st
     stringifyCell(location.category),
     submittedDate,
     submittedTime,
-    photoLinks,
+    fallbackText,
   ]);
 
   const row = sheet.getLastRow();
-  const linksCell = sheet.getRange(row, 10);
+  const linksCell = sheet.getRange(row, HISTORY_LINKS_COLUMN);
   linksCell.setWrap(true).setVerticalAlignment('top');
-  linksCell.setRichTextValue(buildPhotoLinksRichText(storedPhotos));
+
+  if (!tryApplyPhotoFileChips(sheet, row, HISTORY_LINKS_COLUMN, storedPhotos)) {
+    linksCell.setRichTextValue(buildPhotoLinksRichText(storedPhotos));
+  }
+}
+
+function tryApplyPhotoFileChips(sheet, row, column, storedPhotos) {
+  if (typeof Sheets === 'undefined' || !Sheets.Spreadsheets || !Sheets.Spreadsheets.batchUpdate) {
+    console.warn('Advanced Sheets service is not enabled; falling back to rich text links.');
+    return false;
+  }
+
+  try {
+    const cellData = buildPhotoChipCellData(storedPhotos);
+
+    Sheets.Spreadsheets.batchUpdate(
+      {
+        requests: [
+          {
+            updateCells: {
+              range: {
+                sheetId: sheet.getSheetId(),
+                startRowIndex: row - 1,
+                endRowIndex: row,
+                startColumnIndex: column - 1,
+                endColumnIndex: column,
+              },
+              rows: [
+                {
+                  values: [cellData],
+                },
+              ],
+              fields: 'userEnteredValue,chipRuns',
+            },
+          },
+        ],
+      },
+      SPREADSHEET_ID
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Failed to apply file chips to Google Sheets cell:', error);
+    return false;
+  }
+}
+
+function buildPhotoChipCellData(storedPhotos) {
+  let text = '';
+  const chipRuns = [];
+
+  function appendText(value) {
+    text += value;
+  }
+
+  function appendChip(url) {
+    const startIndex = text.length;
+    text += '@';
+    chipRuns.push({
+      startIndex,
+      chip: {
+        richLinkProperties: {
+          uri: url,
+        },
+      },
+    });
+  }
+
+  function appendSection(title, photos) {
+    if (!photos || photos.length === 0) {
+      return;
+    }
+
+    if (text.length > 0) {
+      appendText('\n');
+    }
+
+    appendText(`${title} `);
+    photos.forEach((photo, index) => {
+      if (index > 0) {
+        appendText(' ');
+      }
+      appendChip(photo.driveUrl);
+    });
+  }
+
+  appendSection('ДО:', storedPhotos.before);
+  appendSection('ПОСЛЕ:', storedPhotos.after);
+
+  return {
+    userEnteredValue: {
+      stringValue: text,
+    },
+    chipRuns,
+  };
 }
 
 function updateObjectCleaningStatus(sheet, objectRow, submittedDate) {
