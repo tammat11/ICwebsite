@@ -2,7 +2,7 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-01-history-sheet-v6';
+const SCRIPT_VERSION = '2026-06-02-history-sheet-v7';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const STATUS_HEADER = 'Помыли?';
@@ -39,13 +39,18 @@ function doPost(event) {
 
     const payload = JSON.parse((event.postData && event.postData.contents) || '{}');
     const location = payload.location || {};
-    const photos = Array.isArray(payload.photos) ? payload.photos : [];
+    const beforePhotos = Array.isArray(payload.beforePhotos) ? payload.beforePhotos : [];
+    const afterPhotos = Array.isArray(payload.afterPhotos) ? payload.afterPhotos : [];
+    const groupedPhotos =
+      beforePhotos.length > 0 || afterPhotos.length > 0
+        ? { before: beforePhotos, after: afterPhotos }
+        : { before: Array.isArray(payload.photos) ? payload.photos : [], after: [] };
 
     if (!location.id) {
       throw new Error('POSTOMAT_ID is missing');
     }
 
-    if (photos.length === 0) {
+    if (groupedPhotos.before.length === 0 && groupedPhotos.after.length === 0) {
       throw new Error('At least one photo is required');
     }
 
@@ -63,16 +68,17 @@ function doPost(event) {
     const monthTitle = formatMonthTitle(submittedAt, timezone);
     const submittedDate = Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy');
     const submittedTime = Utilities.formatDate(submittedAt, timezone, 'HH:mm');
-    const storedPhotos = savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone);
+    const storedPhotos = savePhotosToDrive(groupedPhotos, location, submittedAt, monthTitle, timezone);
 
     appendCleaningHistory(historySheet, location, submittedDate, submittedTime, storedPhotos);
     updateObjectCleaningStatus(objectsSheet, objectRow, submittedDate);
 
-    return jsonResponse({ ok: true, version: SCRIPT_VERSION });
+    return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION });
   } catch (error) {
     console.error(error && error.stack ? error.stack : error);
     return jsonResponse({
       ok: false,
+      service: 'pst-cleaning-webapp',
       version: SCRIPT_VERSION,
       error: String(error && error.message ? error.message : error),
     });
@@ -113,7 +119,7 @@ function ensureHistoryHeaders(sheet) {
 }
 
 function appendCleaningHistory(sheet, location, submittedDate, submittedTime, storedPhotos) {
-  const photoLinks = storedPhotos.map((photo) => photo.driveUrl).join('\n');
+  const photoLinks = buildPhotoLinksPlainText(storedPhotos);
 
   sheet.appendRow([
     stringifyCell(location.id),
@@ -186,10 +192,13 @@ function findObjectRow(sheet, postomatId) {
   return rowOffset === -1 ? null : DATA_START_ROW + rowOffset;
 }
 
-function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) {
+function savePhotosToDrive(groupedPhotos, location, submittedAt, monthTitle, timezone) {
   const rootFolder = getOrCreateFolder(DriveApp.getRootFolder(), DRIVE_ROOT_FOLDER_NAME);
   const monthFolder = getOrCreateFolder(rootFolder, monthTitle);
-  const branchFolder = getOrCreateFolder(monthFolder, sanitizeFolderName(location.branch || 'Без филиала'));
+  const branchFolder = getOrCreateFolder(
+    monthFolder,
+    sanitizeFolderName(location.branch || 'Без филиала')
+  );
   const dateFolder = getOrCreateFolder(
     branchFolder,
     Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy')
@@ -198,33 +207,55 @@ function savePhotosToDrive(photos, location, submittedAt, monthTitle, timezone) 
   const createdFiles = [];
 
   try {
-    return photos.map((photo, index) => {
-      const base64 = String(photo.dataUrl || '').split(',')[1];
-      if (!base64) {
-        throw new Error(`Photo ${index + 1} has no image data`);
-      }
-
-      const extension = photo.mimeType === 'image/png' ? 'png' : 'jpg';
-      const fileName = `${timestamp}_PST-${sanitizeFileName(location.id)}_${index + 1}.${extension}`;
-      const bytes = Utilities.base64Decode(base64);
-      if (bytes.length > DRIVE_PHOTO_SIZE_LIMIT_BYTES) {
-        throw new Error(`Photo ${fileName} exceeds the 250KB Drive archive limit`);
-      }
-
-      const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', fileName);
-      const driveFile = dateFolder.createFile(blob);
-      createdFiles.push(driveFile);
-
-      return {
-        fileName,
-        driveFileId: driveFile.getId(),
-        driveUrl: driveFile.getUrl(),
-      };
-    });
+    return {
+      before: savePhotoGroupToDrive(
+        groupedPhotos.before || [],
+        'before',
+        dateFolder,
+        location,
+        timestamp,
+        createdFiles
+      ),
+      after: savePhotoGroupToDrive(
+        groupedPhotos.after || [],
+        'after',
+        dateFolder,
+        location,
+        timestamp,
+        createdFiles
+      ),
+    };
   } catch (error) {
     createdFiles.forEach((file) => file.setTrashed(true));
     throw error;
   }
+}
+
+function savePhotoGroupToDrive(photos, section, dateFolder, location, timestamp, createdFiles) {
+  return photos.map((photo, index) => {
+    const base64 = String(photo.dataUrl || '').split(',')[1];
+    if (!base64) {
+      throw new Error(`Photo ${index + 1} has no image data`);
+    }
+
+    const extension = photo.mimeType === 'image/png' ? 'png' : 'jpg';
+    const fileName = `${timestamp}_PST-${sanitizeFileName(location.id)}_${section}_${index + 1}.${extension}`;
+    const bytes = Utilities.base64Decode(base64);
+    if (bytes.length > DRIVE_PHOTO_SIZE_LIMIT_BYTES) {
+      throw new Error(`Photo ${fileName} exceeds the 250KB Drive archive limit`);
+    }
+
+    const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', fileName);
+    const driveFile = dateFolder.createFile(blob);
+    createdFiles.push(driveFile);
+
+    return {
+      fileName,
+      driveFileId: driveFile.getId(),
+      driveUrl: driveFile.getUrl(),
+      section,
+    };
+  });
 }
 
 function getOrCreateFolder(parentFolder, folderName) {
@@ -244,11 +275,40 @@ function stringifyCell(value) {
   return value === undefined || value === null ? '' : String(value);
 }
 
+function buildPhotoLinksPlainText(storedPhotos) {
+  const sections = [];
+
+  if (storedPhotos.before && storedPhotos.before.length > 0) {
+    sections.push(['ДО:', ...storedPhotos.before.map((photo) => photo.driveUrl)].join('\n'));
+  }
+
+  if (storedPhotos.after && storedPhotos.after.length > 0) {
+    sections.push(['ПОСЛЕ:', ...storedPhotos.after.map((photo) => photo.driveUrl)].join('\n'));
+  }
+
+  return sections.join('\n\n');
+}
+
 function buildPhotoLinksRichText(storedPhotos) {
-  const labels = storedPhotos.map((photo, index) => ({
-    text: `Фото ${index + 1}`,
-    url: photo.driveUrl,
-  }));
+  const labels = [];
+
+  if (storedPhotos.before && storedPhotos.before.length > 0) {
+    labels.push({ text: 'ДО:', url: null });
+    storedPhotos.before.forEach((photo, index) => {
+      labels.push({ text: `Фото ${index + 1}`, url: photo.driveUrl });
+    });
+  }
+
+  if (storedPhotos.after && storedPhotos.after.length > 0) {
+    if (labels.length > 0) {
+      labels.push({ text: '', url: null });
+    }
+    labels.push({ text: 'ПОСЛЕ:', url: null });
+    storedPhotos.after.forEach((photo, index) => {
+      labels.push({ text: `Фото ${index + 1}`, url: photo.driveUrl });
+    });
+  }
+
   const fullText = labels.map((item) => item.text).join('\n');
   const builder = SpreadsheetApp.newRichTextValue().setText(fullText);
 
@@ -256,7 +316,9 @@ function buildPhotoLinksRichText(storedPhotos) {
   labels.forEach((item, index) => {
     const start = cursor;
     const end = start + item.text.length;
-    builder.setLinkUrl(start, end, item.url);
+    if (item.url) {
+      builder.setLinkUrl(start, end, item.url);
+    }
     cursor = end + (index < labels.length - 1 ? 1 : 0);
   });
 

@@ -43,6 +43,8 @@ type PhotoItem = {
   addedAt: string;
 };
 
+type PhotoSection = 'before' | 'after';
+
 type StoredDraftPhoto = {
   id: string;
   name: string;
@@ -56,7 +58,9 @@ type StoredDraftPhoto = {
 type StoredDraft = {
   id: string;
   selectedLocationId: string;
-  photos: StoredDraftPhoto[];
+  photos?: StoredDraftPhoto[];
+  beforePhotos: StoredDraftPhoto[];
+  afterPhotos: StoredDraftPhoto[];
   updatedAt: string;
 };
 
@@ -440,6 +444,16 @@ const buildSearchIndex = (location: PstLocation) =>
 const chipClass =
   'rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]';
 
+const PHOTO_SECTION_LABELS: Record<PhotoSection, string> = {
+  before: 'До',
+  after: 'После',
+};
+
+const PHOTO_SECTION_DESCRIPTIONS: Record<PhotoSection, string> = {
+  before: 'Снимки состояния до уборки',
+  after: 'Снимки состояния после уборки',
+};
+
 type PstMiniMapProps = {
   coords: GeoCoords;
   locations: LocationWithDistance[];
@@ -573,6 +587,98 @@ const PstMiniMap = ({
   );
 };
 
+type PhotoUploadSectionProps = {
+  section: PhotoSection;
+  photos: PhotoItem[];
+  onSelect: (event: React.ChangeEvent<HTMLInputElement>, section: PhotoSection) => void;
+  onRemove: (photoId: string, section: PhotoSection) => void;
+};
+
+const PhotoUploadSection = ({
+  section,
+  photos,
+  onSelect,
+  onRemove,
+}: PhotoUploadSectionProps) => (
+  <div className="rounded-[28px] border border-black/6 bg-[#fbfcf8] p-4 sm:p-5">
+    <div className="mb-4 flex items-start justify-between gap-4">
+      <div>
+        <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
+          {PHOTO_SECTION_LABELS[section]}
+        </div>
+        <div className="mt-2 text-base font-black text-brand-dark">
+          {section === 'before' ? 'Фото до уборки' : 'Фото после уборки'}
+        </div>
+        <div className="mt-1 text-sm font-semibold text-brand-dark/55">
+          {PHOTO_SECTION_DESCRIPTIONS[section]}
+        </div>
+      </div>
+      <div className="rounded-full bg-white px-3 py-1 text-xs font-black text-brand-dark/45 shadow-sm">
+        {photos.length} шт.
+      </div>
+    </div>
+
+    <label className="flex cursor-pointer flex-col gap-5 rounded-[24px] border-2 border-dashed border-brand-green/28 bg-white p-5 transition hover:border-brand-green/45 hover:bg-[#fdfffa]">
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-[22px] bg-[#f7f8f4] text-brand-green shadow-sm">
+          <Camera size={22} />
+        </div>
+        <div className="text-base font-black uppercase tracking-[0.12em] text-brand-dark">
+          {section === 'before' ? 'Загрузить фото до уборки' : 'Загрузить фото после уборки'}
+        </div>
+      </div>
+
+      <div className="inline-flex min-h-14 items-center justify-center rounded-[22px] bg-brand-green px-5 text-center text-sm font-black uppercase tracking-[0.16em] text-brand-dark shadow-[0_18px_35px_rgba(143,198,64,0.24)]">
+        {section === 'before' ? 'Добавить фото до' : 'Добавить фото после'}
+      </div>
+
+      <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        multiple
+        className="hidden"
+        onChange={(event) => onSelect(event, section)}
+      />
+    </label>
+
+    {photos.length > 0 && (
+      <div className="mt-4 space-y-3">
+        {photos.map((photo) => (
+          <div
+            key={photo.id}
+            className="flex items-center gap-4 rounded-[24px] border border-black/6 bg-white p-3"
+          >
+            <img
+              src={photo.previewUrl}
+              alt={photo.file.name}
+              className="h-20 w-20 rounded-[18px] object-cover"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-black text-brand-dark">{photo.file.name}</div>
+              <div className="mt-1 flex items-center gap-2 text-xs text-brand-dark/55">
+                <Camera size={13} />
+                <span>{formatDateTime(photo.addedAt)}</span>
+              </div>
+              <div className="mt-1 text-xs text-brand-dark/45">
+                {(photo.file.size / (1024 * 1024)).toFixed(2)} МБ
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onRemove(photo.id, section)}
+              className="rounded-2xl border border-red-100 bg-red-50 p-3 text-red-500 transition hover:bg-red-100"
+              aria-label="Удалить фото"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 const PstPage = () => {
   const [locations, setLocations] = useState<PstLocation[]>([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState(true);
@@ -582,7 +688,8 @@ const PstPage = () => {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [beforePhotos, setBeforePhotos] = useState<PhotoItem[]>([]);
+  const [afterPhotos, setAfterPhotos] = useState<PhotoItem[]>([]);
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -632,13 +739,13 @@ const PstPage = () => {
 
   useEffect(() => {
     return () => {
-      photos.forEach((photo) => {
+      [...beforePhotos, ...afterPhotos].forEach((photo) => {
         if (photo.previewUrl.startsWith('blob:')) {
           URL.revokeObjectURL(photo.previewUrl);
         }
       });
     };
-  }, [photos]);
+  }, [afterPhotos, beforePhotos]);
 
   useEffect(() => {
     let isMounted = true;
@@ -651,10 +758,15 @@ const PstPage = () => {
           return;
         }
 
-        const restoredPhotos = await Promise.all(draft.photos.map(draftPhotoToPhotoItem));
+        const restoredBeforePhotos = await Promise.all(
+          (draft.beforePhotos ?? draft.photos ?? []).map(draftPhotoToPhotoItem)
+        );
+        const restoredAfterPhotos = await Promise.all(
+          (draft.afterPhotos ?? []).map(draftPhotoToPhotoItem)
+        );
 
         if (!isMounted) {
-          restoredPhotos.forEach((photo) => {
+          [...restoredBeforePhotos, ...restoredAfterPhotos].forEach((photo) => {
             if (photo.previewUrl.startsWith('blob:')) {
               URL.revokeObjectURL(photo.previewUrl);
             }
@@ -663,10 +775,15 @@ const PstPage = () => {
         }
 
         setSelectedLocationId(draft.selectedLocationId);
-        setPhotos(restoredPhotos);
+        setBeforePhotos(restoredBeforePhotos);
+        setAfterPhotos(restoredAfterPhotos);
 
-        if (draft.selectedLocationId || restoredPhotos.length > 0) {
-          setDraftNotice('Черновик восстановлен. Можно продолжать и добавить фото "после".');
+        if (
+          draft.selectedLocationId ||
+          restoredBeforePhotos.length > 0 ||
+          restoredAfterPhotos.length > 0
+        ) {
+          setDraftNotice('Черновик восстановлен. Можно продолжать и собрать фото до и после в одну отправку.');
         }
       } catch (error) {
         console.error('Failed to restore PST draft:', error);
@@ -700,16 +817,18 @@ const PstPage = () => {
     draftSaveTimeoutRef.current = window.setTimeout(() => {
       const persistDraft = async () => {
         try {
-          if (!selectedLocationId && photos.length === 0) {
+          if (!selectedLocationId && beforePhotos.length === 0 && afterPhotos.length === 0) {
             await clearDraft();
             return;
           }
 
-          const storedPhotos = await Promise.all(photos.map(photoItemToDraftPhoto));
+          const storedBeforePhotos = await Promise.all(beforePhotos.map(photoItemToDraftPhoto));
+          const storedAfterPhotos = await Promise.all(afterPhotos.map(photoItemToDraftPhoto));
           await saveDraft({
             id: PST_DRAFT_KEY,
             selectedLocationId,
-            photos: storedPhotos,
+            beforePhotos: storedBeforePhotos,
+            afterPhotos: storedAfterPhotos,
             updatedAt: new Date().toISOString(),
           });
         } catch (error) {
@@ -725,7 +844,7 @@ const PstPage = () => {
         window.clearTimeout(draftSaveTimeoutRef.current);
       }
     };
-  }, [photos, selectedLocationId]);
+  }, [afterPhotos, beforePhotos, selectedLocationId]);
 
   const requestLocation = () => {
     if (!('geolocation' in navigator)) {
@@ -810,7 +929,10 @@ const PstPage = () => {
   const selectedDistance =
     coords && selectedLocation ? getDistanceKm(coords, selectedLocation) : null;
 
-  const handlePhotosSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotosSelected = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    section: PhotoSection
+  ) => {
     const nextFiles = Array.from(event.target.files ?? []).filter((file) =>
       file.type.startsWith('image/')
     );
@@ -825,12 +947,18 @@ const PstPage = () => {
       addedAt: createdAt,
     }));
 
-    setPhotos((current) => [...current, ...nextItems]);
+    if (section === 'before') {
+      setBeforePhotos((current) => [...current, ...nextItems]);
+    } else {
+      setAfterPhotos((current) => [...current, ...nextItems]);
+    }
     event.target.value = '';
   };
 
-  const removePhoto = (photoId: string) => {
-    setPhotos((current) => {
+  const removePhoto = (photoId: string, section: PhotoSection) => {
+    const updatePhotos = section === 'before' ? setBeforePhotos : setAfterPhotos;
+
+    updatePhotos((current) => {
       const photoToRemove = current.find((photo) => photo.id === photoId);
       if (photoToRemove?.previewUrl.startsWith('blob:')) {
         URL.revokeObjectURL(photoToRemove.previewUrl);
@@ -840,7 +968,8 @@ const PstPage = () => {
     });
   };
 
-  const isReady = Boolean(selectedLocation && photos.length > 0);
+  const totalPhotosCount = beforePhotos.length + afterPhotos.length;
+  const isReady = Boolean(selectedLocation && totalPhotosCount > 0);
 
   const handleSubmit = async () => {
     if (!isReady || isSubmittingRef.current) return;
@@ -861,9 +990,13 @@ const PstPage = () => {
         address: selectedLocation!.address,
         city: selectedLocation!.city,
       };
-      const compressedPhotos = await Promise.all(
-        photos.map((photo) => compressPhotoForSheets(photo.file, stamp))
+      const compressedBeforePhotos = await Promise.all(
+        beforePhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
       );
+      const compressedAfterPhotos = await Promise.all(
+        afterPhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
+      );
+      const compressedPhotos = [...compressedBeforePhotos, ...compressedAfterPhotos];
       const oversizedPhoto = compressedPhotos.find(
         (photo) => photo.sizeBytes > DRIVE_PHOTO_SIZE_LIMIT_BYTES
       );
@@ -900,7 +1033,8 @@ const PstPage = () => {
               accuracy: coords.accuracy ?? null,
             }
           : null,
-        photos: compressedPhotos,
+        beforePhotos: compressedBeforePhotos,
+        afterPhotos: compressedAfterPhotos,
       };
 
       await fetch(PST_SHEETS_WEB_APP_URL, {
@@ -910,12 +1044,13 @@ const PstPage = () => {
       });
 
       await clearDraft();
-      photos.forEach((photo) => {
+      [...beforePhotos, ...afterPhotos].forEach((photo) => {
         if (photo.previewUrl.startsWith('blob:')) {
           URL.revokeObjectURL(photo.previewUrl);
         }
       });
-      setPhotos([]);
+      setBeforePhotos([]);
+      setAfterPhotos([]);
       setSelectedLocationId('');
       setSearchTerm('');
       setDraftNotice('');
@@ -1194,64 +1329,20 @@ const PstPage = () => {
                 </div>
               )}
 
-              <label className="flex cursor-pointer flex-col gap-5 rounded-[28px] border-2 border-dashed border-brand-green/28 bg-[#f7f8f4] p-5 transition hover:border-brand-green/45 hover:bg-white sm:p-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-[22px] bg-white text-brand-green shadow-sm">
-                    <Camera size={22} />
-                  </div>
-                  <div className="text-base font-black uppercase tracking-[0.14em] text-brand-dark">
-                    Загрузить фото уборки
-                  </div>
-                </div>
-
-                <div className="inline-flex min-h-14 items-center justify-center rounded-[22px] bg-brand-green px-5 text-center text-sm font-black uppercase tracking-[0.16em] text-brand-dark shadow-[0_18px_35px_rgba(143,198,64,0.24)]">
-                  Добавить фото
-                </div>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  multiple
-                  className="hidden"
-                  onChange={handlePhotosSelected}
+              <div className="space-y-5">
+                <PhotoUploadSection
+                  section="before"
+                  photos={beforePhotos}
+                  onSelect={handlePhotosSelected}
+                  onRemove={removePhoto}
                 />
-              </label>
 
-              <div className="mt-5 space-y-3">
-                {photos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    className="flex items-center gap-4 rounded-[24px] border border-black/6 bg-[#fbfcf8] p-3"
-                  >
-                    <img
-                      src={photo.previewUrl}
-                      alt={photo.file.name}
-                      className="h-20 w-20 rounded-[18px] object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-black text-brand-dark">
-                        {photo.file.name}
-                      </div>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-brand-dark/55">
-                        <Camera size={13} />
-                        <span>{formatDateTime(photo.addedAt)}</span>
-                      </div>
-                      <div className="mt-1 text-xs text-brand-dark/45">
-                        {(photo.file.size / (1024 * 1024)).toFixed(2)} МБ
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removePhoto(photo.id)}
-                      className="rounded-2xl border border-red-100 bg-red-50 p-3 text-red-500 transition hover:bg-red-100"
-                      aria-label="Удалить фото"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-
+                <PhotoUploadSection
+                  section="after"
+                  photos={afterPhotos}
+                  onSelect={handlePhotosSelected}
+                  onRemove={removePhoto}
+                />
               </div>
 
               {submitError && (
