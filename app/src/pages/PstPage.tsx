@@ -97,7 +97,7 @@ declare global {
 const SEARCH_RADIUS_KM = 0.3;
 const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbzhrzWmJkLFxFlrT37cMVHh9-i2SFHQj91n2-T6gy9wESIDHVwohNbcRwcRf1zPTlT7vQ/exec';
+  'https://script.google.com/macros/s/AKfycbwnaN4cv1VnZxKWnYt5fNuYovIfQtIE89zIgVFxq1yoYjoi5oNkzCT3PzgeifCOfBmR8g/exec';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const PST_DRAFT_DB_NAME = 'pst-cleaning-draft-db';
 const PST_DRAFT_STORE_NAME = 'drafts';
