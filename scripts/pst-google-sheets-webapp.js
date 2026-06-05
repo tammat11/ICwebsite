@@ -2,7 +2,7 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-02-history-sheet-v8';
+const SCRIPT_VERSION = '2026-06-05-history-sheet-v9';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const STATUS_HEADER = 'Помыли?';
@@ -297,27 +297,16 @@ function savePhotosToDrive(groupedPhotos, location, submittedAt, monthTitle, tim
     branchFolder,
     Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy')
   );
-  const timestamp = Utilities.formatDate(submittedAt, timezone, 'yyyy-MM-dd_HH-mm-ss');
+  const addressFolder = getOrCreateFolder(
+    dateFolder,
+    sanitizeFolderName(location.address || 'Без адреса')
+  );
   const createdFiles = [];
 
   try {
     return {
-      before: savePhotoGroupToDrive(
-        groupedPhotos.before || [],
-        'before',
-        dateFolder,
-        location,
-        timestamp,
-        createdFiles
-      ),
-      after: savePhotoGroupToDrive(
-        groupedPhotos.after || [],
-        'after',
-        dateFolder,
-        location,
-        timestamp,
-        createdFiles
-      ),
+      before: savePhotoGroupToDrive(groupedPhotos.before || [], 'before', addressFolder, location, createdFiles),
+      after: savePhotoGroupToDrive(groupedPhotos.after || [], 'after', addressFolder, location, createdFiles),
     };
   } catch (error) {
     createdFiles.forEach((file) => file.setTrashed(true));
@@ -325,7 +314,7 @@ function savePhotosToDrive(groupedPhotos, location, submittedAt, monthTitle, tim
   }
 }
 
-function savePhotoGroupToDrive(photos, section, dateFolder, location, timestamp, createdFiles) {
+function savePhotoGroupToDrive(photos, section, addressFolder, location, createdFiles) {
   return photos.map((photo, index) => {
     const base64 = String(photo.dataUrl || '').split(',')[1];
     if (!base64) {
@@ -333,14 +322,14 @@ function savePhotoGroupToDrive(photos, section, dateFolder, location, timestamp,
     }
 
     const extension = photo.mimeType === 'image/png' ? 'png' : 'jpg';
-    const fileName = `${timestamp}_PST-${sanitizeFileName(location.id)}_${section}_${index + 1}.${extension}`;
+    const fileName = buildPhotoFileName(location, section, index + 1, extension);
     const bytes = Utilities.base64Decode(base64);
     if (bytes.length > DRIVE_PHOTO_SIZE_LIMIT_BYTES) {
       throw new Error(`Photo ${fileName} exceeds the 250KB Drive archive limit`);
     }
 
     const blob = Utilities.newBlob(bytes, photo.mimeType || 'image/jpeg', fileName);
-    const driveFile = dateFolder.createFile(blob);
+    const driveFile = addressFolder.createFile(blob);
     createdFiles.push(driveFile);
 
     return {
@@ -352,17 +341,68 @@ function savePhotoGroupToDrive(photos, section, dateFolder, location, timestamp,
   });
 }
 
+function buildPhotoFileName(location, section, index, extension) {
+  const postomatId = toAsciiSlug(location.id || 'unknown-id');
+  const category = toAsciiSlug(location.category || 'bez-kategorii');
+  const order = String(index).padStart(2, '0');
+  return `${postomatId}__${category}__${section}__${order}.${extension}`;
+}
+
 function getOrCreateFolder(parentFolder, folderName) {
   const folders = parentFolder.getFoldersByName(folderName);
   return folders.hasNext() ? folders.next() : parentFolder.createFolder(folderName);
 }
 
 function sanitizeFolderName(value) {
-  return String(value || 'Без филиала').replace(/[\\/:*?"<>|]/g, '_').trim() || 'Без филиала';
+  return String(value || 'Без адреса').replace(/[\\/:*?"<>|]/g, '_').trim() || 'Без адреса';
 }
 
-function sanitizeFileName(value) {
-  return String(value || 'unknown').replace(/[\\/:*?"<>|]/g, '_');
+function toAsciiSlug(value) {
+  const transliterationMap = {
+    'а': 'a',
+    'б': 'b',
+    'в': 'v',
+    'г': 'g',
+    'д': 'd',
+    'е': 'e',
+    'ё': 'e',
+    'ж': 'zh',
+    'з': 'z',
+    'и': 'i',
+    'й': 'y',
+    'к': 'k',
+    'л': 'l',
+    'м': 'm',
+    'н': 'n',
+    'о': 'o',
+    'п': 'p',
+    'р': 'r',
+    'с': 's',
+    'т': 't',
+    'у': 'u',
+    'ф': 'f',
+    'х': 'h',
+    'ц': 'ts',
+    'ч': 'ch',
+    'ш': 'sh',
+    'щ': 'sch',
+    'ъ': '',
+    'ы': 'y',
+    'ь': '',
+    'э': 'e',
+    'ю': 'yu',
+    'я': 'ya',
+  };
+
+  return String(value || '')
+    .toLowerCase()
+    .split('')
+    .map((symbol) => transliterationMap[symbol] ?? symbol)
+    .join('')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+    .slice(0, 80) || 'unknown';
 }
 
 function stringifyCell(value) {
