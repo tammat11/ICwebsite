@@ -2,7 +2,7 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-05-history-sheet-v9';
+const SCRIPT_VERSION = '2026-06-05-history-sheet-v10';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const STATUS_HEADER = 'Помыли?';
@@ -18,7 +18,7 @@ const HISTORY_HEADERS = [
   'Категория точки',
   'Дата отправки',
   'Время',
-  'Ссылки на фотографии в Google Drive',
+  'Ссылка на папку с фотографиями в Google Drive',
 ];
 
 function doGet() {
@@ -119,7 +119,7 @@ function ensureHistoryHeaders(sheet) {
 }
 
 function appendCleaningHistory(sheet, location, submittedDate, submittedTime, storedPhotos) {
-  const fallbackText = buildPhotoLinksPlainText(storedPhotos);
+  const fallbackText = storedPhotos.folderUrl;
 
   sheet.appendRow([
     stringifyCell(location.id),
@@ -138,20 +138,18 @@ function appendCleaningHistory(sheet, location, submittedDate, submittedTime, st
   const linksCell = sheet.getRange(row, HISTORY_LINKS_COLUMN);
   linksCell.setWrap(true).setVerticalAlignment('top');
 
-  if (!tryApplyPhotoFileChips(sheet, row, HISTORY_LINKS_COLUMN, storedPhotos)) {
-    linksCell.setRichTextValue(buildPhotoLinksRichText(storedPhotos));
+  if (!tryApplyFolderChip(sheet, row, HISTORY_LINKS_COLUMN, storedPhotos.folderUrl)) {
+    linksCell.setRichTextValue(buildFolderRichText(storedPhotos.folderUrl));
   }
 }
 
-function tryApplyPhotoFileChips(sheet, row, column, storedPhotos) {
+function tryApplyFolderChip(sheet, row, column, folderUrl) {
   if (typeof Sheets === 'undefined' || !Sheets.Spreadsheets || !Sheets.Spreadsheets.batchUpdate) {
-    console.warn('Advanced Sheets service is not enabled; falling back to rich text links.');
+    console.warn('Advanced Sheets service is not enabled; falling back to rich text link.');
     return false;
   }
 
   try {
-    const cellData = buildPhotoChipCellData(storedPhotos);
-
     Sheets.Spreadsheets.batchUpdate(
       {
         requests: [
@@ -166,7 +164,23 @@ function tryApplyPhotoFileChips(sheet, row, column, storedPhotos) {
               },
               rows: [
                 {
-                  values: [cellData],
+                  values: [
+                    {
+                      userEnteredValue: {
+                        stringValue: '@',
+                      },
+                      chipRuns: [
+                        {
+                          startIndex: 0,
+                          chip: {
+                            richLinkProperties: {
+                              uri: folderUrl,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
               fields: 'userEnteredValue,chipRuns',
@@ -179,59 +193,13 @@ function tryApplyPhotoFileChips(sheet, row, column, storedPhotos) {
 
     return true;
   } catch (error) {
-    console.error('Failed to apply file chips to Google Sheets cell:', error);
+    console.error('Failed to apply folder chip to Google Sheets cell:', error);
     return false;
   }
 }
 
-function buildPhotoChipCellData(storedPhotos) {
-  let text = '';
-  const chipRuns = [];
-
-  function appendText(value) {
-    text += value;
-  }
-
-  function appendChip(url) {
-    const startIndex = text.length;
-    text += '@';
-    chipRuns.push({
-      startIndex,
-      chip: {
-        richLinkProperties: {
-          uri: url,
-        },
-      },
-    });
-  }
-
-  function appendSection(title, photos) {
-    if (!photos || photos.length === 0) {
-      return;
-    }
-
-    if (text.length > 0) {
-      appendText('\n');
-    }
-
-    appendText(`${title} `);
-    photos.forEach((photo, index) => {
-      if (index > 0) {
-        appendText(' ');
-      }
-      appendChip(photo.driveUrl);
-    });
-  }
-
-  appendSection('ДО:', storedPhotos.before);
-  appendSection('ПОСЛЕ:', storedPhotos.after);
-
-  return {
-    userEnteredValue: {
-      stringValue: text,
-    },
-    chipRuns,
-  };
+function buildFolderRichText(folderUrl) {
+  return SpreadsheetApp.newRichTextValue().setText('Папка с фото').setLinkUrl(folderUrl).build();
 }
 
 function updateObjectCleaningStatus(sheet, objectRow, submittedDate) {
@@ -304,10 +272,13 @@ function savePhotosToDrive(groupedPhotos, location, submittedAt, monthTitle, tim
   const createdFiles = [];
 
   try {
-    return {
+    const result = {
+      folderUrl: addressFolder.getUrl(),
       before: savePhotoGroupToDrive(groupedPhotos.before || [], 'before', addressFolder, location, createdFiles),
       after: savePhotoGroupToDrive(groupedPhotos.after || [], 'after', addressFolder, location, createdFiles),
     };
+
+    return result;
   } catch (error) {
     createdFiles.forEach((file) => file.setTrashed(true));
     throw error;
@@ -407,56 +378,6 @@ function toAsciiSlug(value) {
 
 function stringifyCell(value) {
   return value === undefined || value === null ? '' : String(value);
-}
-
-function buildPhotoLinksPlainText(storedPhotos) {
-  const sections = [];
-
-  if (storedPhotos.before && storedPhotos.before.length > 0) {
-    sections.push(['ДО:', ...storedPhotos.before.map((photo) => photo.driveUrl)].join('\n'));
-  }
-
-  if (storedPhotos.after && storedPhotos.after.length > 0) {
-    sections.push(['ПОСЛЕ:', ...storedPhotos.after.map((photo) => photo.driveUrl)].join('\n'));
-  }
-
-  return sections.join('\n\n');
-}
-
-function buildPhotoLinksRichText(storedPhotos) {
-  const labels = [];
-
-  if (storedPhotos.before && storedPhotos.before.length > 0) {
-    labels.push({ text: 'ДО:', url: null });
-    storedPhotos.before.forEach((photo, index) => {
-      labels.push({ text: `Фото ${index + 1}`, url: photo.driveUrl });
-    });
-  }
-
-  if (storedPhotos.after && storedPhotos.after.length > 0) {
-    if (labels.length > 0) {
-      labels.push({ text: '', url: null });
-    }
-    labels.push({ text: 'ПОСЛЕ:', url: null });
-    storedPhotos.after.forEach((photo, index) => {
-      labels.push({ text: `Фото ${index + 1}`, url: photo.driveUrl });
-    });
-  }
-
-  const fullText = labels.map((item) => item.text).join('\n');
-  const builder = SpreadsheetApp.newRichTextValue().setText(fullText);
-
-  let cursor = 0;
-  labels.forEach((item, index) => {
-    const start = cursor;
-    const end = start + item.text.length;
-    if (item.url) {
-      builder.setLinkUrl(start, end, item.url);
-    }
-    cursor = end + (index < labels.length - 1 ? 1 : 0);
-  });
-
-  return builder.build();
 }
 
 function findHeaderIndex(headers, candidates) {
