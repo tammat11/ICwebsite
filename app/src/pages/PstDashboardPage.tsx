@@ -750,7 +750,7 @@ const PstDashboardPage = () => {
                     {weeklyPlan.map((item) => (
                       <div
                         key={item.startIso}
-                        className={`relative overflow-hidden rounded-[26px] border p-4 text-left transition ${
+                        className={`relative flex min-h-[230px] flex-col overflow-hidden rounded-[26px] border p-4 text-left transition ${
                           item.isCurrent
                             ? 'border-brand-green bg-[#f5fbe9] shadow-[0_18px_35px_rgba(143,198,64,0.18)]'
                             : 'border-black/6 bg-[#fbfcf8]'
@@ -765,14 +765,9 @@ const PstDashboardPage = () => {
                               {item.startLabel} - {item.endLabel}
                             </div>
                           </div>
-                          {item.isCurrent && (
-                            <div className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
-                              Текущая
-                            </div>
-                          )}
                         </div>
 
-                        <div className="mt-5">
+                        <div className="mt-6">
                           <div className="text-[clamp(1.5rem,2vw,2rem)] font-black leading-none text-brand-dark">
                             {item.value.toLocaleString('ru-RU')}
                           </div>
@@ -781,13 +776,17 @@ const PstDashboardPage = () => {
                           </div>
                         </div>
 
-                        <div className="mt-5 h-2 rounded-full bg-brand-dark/6">
-                          <div
-                            className="h-2 rounded-full bg-brand-green transition-all"
-                            style={{
-                              width: `${Math.max((item.value / weeklyPeak) * 100, item.value > 0 ? 12 : 0)}%`,
-                            }}
-                          />
+                        <div className="mt-auto pt-8">
+                          <div className="h-2 rounded-full bg-brand-dark/6">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                item.isCurrent ? 'bg-brand-green' : 'bg-brand-green/85'
+                              }`}
+                              style={{
+                                width: `${Math.max((item.value / weeklyPeak) * 100, item.value > 0 ? 12 : 0)}%`,
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
