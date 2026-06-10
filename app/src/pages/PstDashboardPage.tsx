@@ -945,18 +945,23 @@ const PstDashboardPage = () => {
                   )}
 
                   <div className="mt-5 overflow-hidden rounded-[28px] border border-black/6">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full border-collapse">
+                    <div>
+                      <table className="w-full border-collapse table-fixed">
+                        <colgroup>
+                          <col className="w-[120px]" />
+                          <col className="w-[180px]" />
+                          <col />
+                          <col className="w-[160px]" />
+                          <col className="w-[160px]" />
+                          <col className="w-[150px]" />
+                        </colgroup>
                         <thead className="bg-[#f7f8f4]">
                           <tr className="text-left">
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
                               POSTOMAT_ID
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Город
-                            </th>
-                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Филиал
+                              Локация
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
                               Адрес
@@ -965,10 +970,7 @@ const PstDashboardPage = () => {
                               Категория точки
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Дата отправки
-                            </th>
-                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Время
+                              Дата и время
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
                               Фото
@@ -1000,28 +1002,26 @@ const PstDashboardPage = () => {
                               <td className="px-4 py-4 text-sm font-black text-brand-dark">
                                 {row.postomatId}
                               </td>
-                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/72">
-                                {row.city}
-                              </td>
                               <td className="px-4 py-4">
-                                <span className="inline-flex rounded-full bg-brand-green/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">
-                                  {row.branch}
-                                </span>
+                                <div className="space-y-2">
+                                  <div className="text-sm font-semibold text-brand-dark/72">{row.city}</div>
+                                  <span className="inline-flex rounded-full bg-brand-green/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">
+                                    {row.branch}
+                                  </span>
+                                </div>
                               </td>
-                              <td className="px-4 py-4 text-sm font-black leading-6 text-brand-dark min-w-[280px]">
+                              <td className="px-4 py-4 text-sm font-black leading-6 text-brand-dark break-words">
                                 {row.address}
                               </td>
                               <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62">
                                 {row.category}
                               </td>
-                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62 whitespace-nowrap">
-                                {formatIsoDate(row.date)}
-                              </td>
-                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62 whitespace-nowrap">
-                                {row.time || '—'}
+                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62">
+                                <div>{formatIsoDate(row.date)}</div>
+                                <div className="mt-1 text-brand-dark/45">{row.time || '—'}</div>
                               </td>
                               <td className="px-4 py-4">
-                                <span className="inline-flex min-w-[132px] justify-center whitespace-nowrap rounded-full border border-black/8 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
+                                <span className="inline-flex w-full justify-center whitespace-nowrap rounded-full border border-black/8 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark">
                                   {row.folderLinkText || 'Папка с фото'}
                                 </span>
                               </td>
