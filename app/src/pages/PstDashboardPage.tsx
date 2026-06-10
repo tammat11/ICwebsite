@@ -675,19 +675,6 @@ const PstDashboardPage = () => {
                 <br />
                 <span className="text-brand-green">Kaspi Postomat</span>
               </h1>
-              <p className="mt-5 max-w-3xl text-sm leading-7 text-brand-dark/62 sm:text-base">
-                Здесь мы тянем план и факт из Google Sheets, показываем текущую загрузку по
-                точкам и даем отдельный управленческий контур без вмешательства в рабочий маршрут
-                <span className="font-bold text-brand-dark"> /pst</span>.
-              </p>
-
-              {isDemoMode && (
-                <div className="mt-6 rounded-[24px] border border-brand-green/20 bg-brand-green/10 px-5 py-4 text-sm font-semibold leading-6 text-brand-dark/74">
-                  Сейчас открыт демо-режим предпросмотра. Он нужен только чтобы посмотреть MVP без
-                  подключения dashboard API. Рабочие данные подключим отдельно, не ломая
-                  существующий <span className="font-black text-brand-dark">/pst</span>.
-                </div>
-              )}
 
               {!isDemoMode && !accessCode && (
                 <div className="mt-8 max-w-xl rounded-[28px] border border-black/6 bg-[#f7f8f4] p-5 shadow-premium">
@@ -1051,32 +1038,6 @@ const PstDashboardPage = () => {
           </section>
 
           <aside className="space-y-6">
-            <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <div className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
-                MVP логика
-              </div>
-              <div className="mt-4 space-y-3 text-sm font-semibold leading-6 text-brand-dark/62">
-                <p>
-                  План и факт тянутся из Google Sheets. Сайт здесь выступает как отдельный
-                  интерфейс поверх таблицы, а не как новая база данных.
-                </p>
-                <p>
-                  Для нагрузки мы держим пагинацию, фильтры по дате и филиалу, а историю точки
-                  подгружаем отдельно по клику.
-                </p>
-                <p>
-                  На этом MVP руководитель уже может смотреть факт и сразу формировать план на
-                  выбранную дату.
-                </p>
-                {isDemoMode && (
-                  <p>
-                    Сейчас это предпросмотр на демо-данных. Когда будешь готов, просто подключим
-                    отдельный dashboard web app и таблица станет источником живых данных.
-                  </p>
-                )}
-              </div>
-            </section>
-
             <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
               <div className="flex items-center justify-between gap-3">
                 <div>
