@@ -52,6 +52,8 @@ type RecentHistoryItem = {
   folderLinkText: string;
 };
 
+type HistoryTableRow = RecentHistoryItem;
+
 type OverviewResponse = {
   ok: boolean;
   version: string;
@@ -284,6 +286,72 @@ const createDemoHistory = (postomatId: string): ObjectHistoryResponse => ({
     },
   ],
 });
+
+const createDemoHistoryTableRows = (selectedDate: string, selectedBranch: string, searchQuery: string) => {
+  const baseRows: HistoryTableRow[] = [
+    {
+      postomatId: '2314',
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'ул. Жарокова, д. 205',
+      category: 'Категория C***',
+      date: selectedDate,
+      time: '09:40',
+      folderLinkText: 'Папка с фото',
+    },
+    {
+      postomatId: '5374',
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'пр. Абылай Хана, д. 153',
+      category: 'Уличный***',
+      date: selectedDate,
+      time: '15:22',
+      folderLinkText: 'Папка с фото',
+    },
+    {
+      postomatId: '7689',
+      city: 'Арысь',
+      branch: 'Шымкент',
+      address: 'ул. Ергобек, д. 126',
+      category: 'Категория B***',
+      date: selectedDate,
+      time: '13:18',
+      folderLinkText: 'Папка с фото',
+    },
+    {
+      postomatId: '1140',
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'мкр. Жулдыз-1, д. 5/3',
+      category: 'Категория B+***',
+      date: selectedDate,
+      time: '08:28',
+      folderLinkText: 'Папка с фото',
+    },
+    {
+      postomatId: '8928',
+      city: 'Уральск',
+      branch: 'Уральск',
+      address: 'ул. Брусиловского, д. 48/1',
+      category: 'Уличный***',
+      date: selectedDate,
+      time: '08:14',
+      folderLinkText: 'Папка с фото',
+    },
+  ];
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  return baseRows.filter((row) => {
+    if (selectedBranch && row.branch !== selectedBranch) return false;
+    if (!normalizedQuery) return true;
+
+    return [row.postomatId, row.city, row.branch, row.address, row.category, row.time]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedQuery);
+  });
+};
 
 const todayIso = () => {
   const now = new Date();
@@ -604,6 +672,13 @@ const PstDashboardPage = () => {
   const pagination = overview?.pagination;
   const summary = overview?.summary;
   const branches = overview?.branches ?? [];
+  const tableHistoryRows = useMemo(
+    () =>
+      isDemoMode
+        ? createDemoHistoryTableRows(selectedDate, selectedBranch, deferredQuery)
+        : overview?.recentHistory ?? [],
+    [deferredQuery, isDemoMode, overview?.recentHistory, selectedBranch, selectedDate]
+  );
   const weeklyPlan = useMemo(() => getWeekPlanSlots(selectedDate), [selectedDate]);
   const weeklyTotal = weeklyPlan.reduce((sum, item) => sum + item.value, 0);
   const weeklyPeak = Math.max(...weeklyPlan.map((item) => item.value), 1);
@@ -671,7 +746,7 @@ const PstDashboardPage = () => {
             <div className="rounded-[34px] border border-black/6 bg-white px-6 py-8 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:px-8">
               <div className="section-tag">PST dashboard</div>
               <h1 className="max-w-4xl font-black uppercase leading-[0.88] tracking-tighter text-brand-dark text-[clamp(2.2rem,5vw,4.8rem)]">
-                Руководство
+                Dashboard
                 <br />
                 <span className="text-brand-green">Kaspi Postomat</span>
               </h1>
@@ -875,23 +950,35 @@ const PstDashboardPage = () => {
                         <thead className="bg-[#f7f8f4]">
                           <tr className="text-left">
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Объект
+                              POSTOMAT_ID
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Статус
+                              Город
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Факт
+                              Филиал
                             </th>
                             <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
-                              Действия
+                              Адрес
+                            </th>
+                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                              Категория точки
+                            </th>
+                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                              Дата отправки
+                            </th>
+                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                              Время
+                            </th>
+                            <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                              Фото
                             </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-black/6 bg-white">
                           {isLoadingOverview && !overview && (
                             <tr>
-                              <td colSpan={4} className="px-4 py-10 text-center text-sm font-semibold text-brand-dark/55">
+                              <td colSpan={8} className="px-4 py-10 text-center text-sm font-semibold text-brand-dark/55">
                                 <span className="inline-flex items-center gap-2">
                                   <LoaderCircle size={18} className="animate-spin text-brand-green" />
                                   Загружаем данные из таблицы...
@@ -900,91 +987,43 @@ const PstDashboardPage = () => {
                             </tr>
                           )}
 
-                          {!isLoadingOverview && rows.length === 0 && (
+                          {!isLoadingOverview && tableHistoryRows.length === 0 && (
                             <tr>
-                              <td colSpan={4} className="px-4 py-10 text-center text-sm font-semibold text-brand-dark/55">
+                              <td colSpan={8} className="px-4 py-10 text-center text-sm font-semibold text-brand-dark/55">
                                 По текущим фильтрам ничего не найдено.
                               </td>
                             </tr>
                           )}
 
-                          {rows.map((row) => (
-                            <tr key={`${row.postomatId}-${row.address}`} className="align-top">
-                              <td className="px-4 py-4">
-                                <div className="min-w-[240px]">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="rounded-full bg-brand-dark/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark/55">
-                                      ID {row.postomatId}
-                                    </span>
-                                    <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">
-                                      {row.branch || 'Без филиала'}
-                                    </span>
-                                  </div>
-                                  <div className="mt-3 text-sm font-black leading-6 text-brand-dark sm:text-base">
-                                    {row.address}
-                                  </div>
-                                  <div className="mt-2 text-sm text-brand-dark/55">
-                                    {row.city} • {row.category || 'Категория не указана'}
-                                  </div>
-                                  {row.planComment && (
-                                    <div className="mt-2 text-xs font-semibold leading-5 text-brand-dark/48">
-                                      Комментарий к плану: {row.planComment}
-                                    </div>
-                                  )}
-                                </div>
+                          {tableHistoryRows.map((row, index) => (
+                            <tr key={`${row.postomatId}-${row.date}-${row.time}-${index}`} className="align-top">
+                              <td className="px-4 py-4 text-sm font-black text-brand-dark">
+                                {row.postomatId}
+                              </td>
+                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/72">
+                                {row.city}
                               </td>
                               <td className="px-4 py-4">
-                                <span
-                                  className={`inline-flex rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] ${
-                                    statusTone[row.status] || statusTone['Без статуса']
-                                  }`}
-                                >
-                                  {row.status}
+                                <span className="inline-flex rounded-full bg-brand-green/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">
+                                  {row.branch}
                                 </span>
                               </td>
+                              <td className="px-4 py-4 text-sm font-black leading-6 text-brand-dark min-w-[280px]">
+                                {row.address}
+                              </td>
                               <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62">
-                                {row.completed ? (
-                                  <div>
-                                    <div>{formatIsoDate(row.factDate)}</div>
-                                    <div className="mt-1 text-brand-dark/45">{row.factTime || '—'}</div>
-                                    <div className="mt-1 text-brand-dark/45">
-                                      Фото: {row.factCount || 0}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <span className="text-brand-dark/38">Нет факта</span>
-                                )}
+                                {row.category}
+                              </td>
+                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62 whitespace-nowrap">
+                                {formatIsoDate(row.date)}
+                              </td>
+                              <td className="px-4 py-4 text-sm font-semibold text-brand-dark/62 whitespace-nowrap">
+                                {row.time || '—'}
                               </td>
                               <td className="px-4 py-4">
-                                <div className="flex min-w-[220px] flex-col gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => handlePlanMutation(row, !row.planned)}
-                                    disabled={mutationTargetId === row.postomatId}
-                                    className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition ${
-                                      row.planned
-                                        ? 'border border-red-100 bg-red-50 text-[#d35d59] hover:bg-red-100'
-                                        : 'bg-brand-green text-brand-dark hover:shadow-[0_16px_32px_rgba(143,198,64,0.24)]'
-                                    } ${mutationTargetId === row.postomatId ? 'cursor-wait opacity-70' : ''}`}
-                                  >
-                                    {mutationTargetId === row.postomatId ? (
-                                      <LoaderCircle size={15} className="animate-spin" />
-                                    ) : row.planned ? (
-                                      <XCircle size={15} />
-                                    ) : (
-                                      <CalendarDays size={15} />
-                                    )}
-                                    {row.planned ? 'Убрать из плана' : 'Добавить в план'}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => openHistory(row)}
-                                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/8 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark transition hover:border-brand-green/30 hover:text-brand-green"
-                                  >
-                                    <History size={15} />
-                                    История точки
-                                  </button>
-                                </div>
+                                <span className="inline-flex rounded-full border border-black/8 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
+                                  {row.folderLinkText || 'Папка с фото'}
+                                </span>
                               </td>
                             </tr>
                           ))}
@@ -992,39 +1031,6 @@ const PstDashboardPage = () => {
                       </table>
                     </div>
                   </div>
-
-                  {pagination && pagination.totalPages > 1 && (
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <div className="text-sm font-semibold text-brand-dark/55">
-                        Показано {rows.length} из {pagination.total}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setPage((current) => Math.max(current - 1, 1))}
-                          disabled={pagination.page <= 1}
-                          className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark transition disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <ChevronLeft size={14} />
-                          Назад
-                        </button>
-                        <div className="rounded-full bg-[#f7f8f4] px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark/55">
-                          {pagination.page} / {pagination.totalPages}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setPage((current) => Math.min(current + 1, pagination.totalPages))
-                          }
-                          disabled={pagination.page >= pagination.totalPages}
-                          className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-dark transition disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          Далее
-                          <ChevronRight size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </>
             )}
