@@ -95,6 +95,195 @@ const DASHBOARD_WEB_APP_URL =
 const ACCESS_CODE_STORAGE_KEY = 'pst-dashboard-access-code';
 const PAGE_SIZE = 25;
 
+const DEMO_BRANCHES = ['Южная Столица', 'Шымкент', 'Уральск'];
+
+const createDemoOverview = (
+  selectedDate: string,
+  selectedBranch: string,
+  searchQuery: string,
+  currentPage: number
+): OverviewResponse => {
+  const baseRows: DashboardRow[] = [
+    {
+      postomatId: '2314',
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'ул. Жарокова, д. 205',
+      category: 'Категория C***',
+      planned: true,
+      completed: true,
+      planComment: 'Приоритетная точка на утро',
+      factCount: 6,
+      factDate: selectedDate,
+      factTime: '09:40',
+      folderLinkText: 'Папка с фото',
+      status: 'Выполнено',
+    },
+    {
+      postomatId: '7162',
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'ул. Кармысова, д. 84/2к1',
+      category: 'Категория B***',
+      planned: true,
+      completed: false,
+      planComment: '',
+      factCount: 0,
+      factDate: '',
+      factTime: '',
+      folderLinkText: '',
+      status: 'Запланировано',
+    },
+    {
+      postomatId: '8928',
+      city: 'Уральск',
+      branch: 'Уральск',
+      address: 'ул. Брусиловского, д. 48/1',
+      category: 'Уличный***',
+      planned: true,
+      completed: false,
+      planComment: '',
+      factCount: 0,
+      factDate: '',
+      factTime: '',
+      folderLinkText: '',
+      status: 'Просрочено',
+    },
+    {
+      postomatId: '7689',
+      city: 'Арысь',
+      branch: 'Шымкент',
+      address: 'ул. Ергобек, д. 126',
+      category: 'Категория B***',
+      planned: false,
+      completed: true,
+      planComment: '',
+      factCount: 4,
+      factDate: selectedDate,
+      factTime: '13:18',
+      folderLinkText: 'Папка с фото',
+      status: 'Выполнено вне плана',
+    },
+    {
+      postomatId: '5374',
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'пр. Абылай Хана, д. 153',
+      category: 'Уличный***',
+      planned: true,
+      completed: true,
+      planComment: '',
+      factCount: 8,
+      factDate: selectedDate,
+      factTime: '15:22',
+      folderLinkText: 'Папка с фото',
+      status: 'Выполнено',
+    },
+  ];
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filtered = baseRows.filter((row) => {
+    if (selectedBranch && row.branch !== selectedBranch) return false;
+    if (!normalizedQuery) return true;
+    return [
+      row.postomatId,
+      row.city,
+      row.branch,
+      row.address,
+      row.category,
+      row.planComment,
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedQuery);
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
+  const safePage = Math.min(currentPage, totalPages);
+  const start = (safePage - 1) * PAGE_SIZE;
+  const rows = filtered.slice(start, start + PAGE_SIZE);
+
+  const plannedCount = filtered.filter((row) => row.planned).length;
+  const completedCount = filtered.filter((row) => row.completed).length;
+
+  return {
+    ok: true,
+    version: 'demo-preview',
+    filters: {
+      date: selectedDate,
+      branch: selectedBranch,
+      query: searchQuery,
+      page: safePage,
+      pageSize: PAGE_SIZE,
+    },
+    summary: {
+      plannedCount,
+      completedCount,
+      overdueCount: filtered.filter((row) => row.status === 'Просрочено').length,
+      completionRate: plannedCount ? Math.round((completedCount / plannedCount) * 100) : 0,
+    },
+    branches: DEMO_BRANCHES,
+    rows,
+    recentHistory: [
+      {
+        postomatId: '5374',
+        city: 'Алматы',
+        branch: 'Южная Столица',
+        address: 'пр. Абылай Хана, д. 153',
+        category: 'Уличный***',
+        date: selectedDate,
+        time: '15:22',
+        folderLinkText: 'Папка с фото',
+      },
+      {
+        postomatId: '2314',
+        city: 'Алматы',
+        branch: 'Южная Столица',
+        address: 'ул. Жарокова, д. 205',
+        category: 'Категория C***',
+        date: selectedDate,
+        time: '09:40',
+        folderLinkText: 'Папка с фото',
+      },
+    ],
+    pagination: {
+      page: safePage,
+      pageSize: PAGE_SIZE,
+      total,
+      totalPages,
+    },
+  };
+};
+
+const createDemoHistory = (postomatId: string): ObjectHistoryResponse => ({
+  ok: true,
+  version: 'demo-preview',
+  postomatId,
+  items: [
+    {
+      postomatId,
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'Демо-адрес',
+      category: 'Категория B***',
+      date: todayIso(),
+      time: '15:22',
+      folderLinkText: 'Папка с фото',
+    },
+    {
+      postomatId,
+      city: 'Алматы',
+      branch: 'Южная Столица',
+      address: 'Демо-адрес',
+      category: 'Категория B***',
+      date: todayIso(),
+      time: '10:14',
+      folderLinkText: 'Папка с фото',
+    },
+  ],
+});
+
 const todayIso = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -203,6 +392,7 @@ const PstDashboardPage = () => {
   const [overviewError, setOverviewError] = useState('');
   const [historyError, setHistoryError] = useState('');
   const deferredQuery = useDeferredValue(searchTerm.trim());
+  const isDemoMode = !DASHBOARD_WEB_APP_URL;
 
   useEffect(() => {
     const storedCode = window.sessionStorage.getItem(ACCESS_CODE_STORAGE_KEY) || '';
@@ -212,9 +402,15 @@ const PstDashboardPage = () => {
     }
   }, []);
 
-  const canLoadDashboard = Boolean(accessCode && DASHBOARD_WEB_APP_URL);
+  const canLoadDashboard = isDemoMode || Boolean(accessCode && DASHBOARD_WEB_APP_URL);
 
   const loadOverview = async (nextPage = page, nextBranch = selectedBranch, nextDate = selectedDate) => {
+    if (isDemoMode) {
+      setOverview(createDemoOverview(nextDate, nextBranch, deferredQuery, nextPage));
+      setOverviewError('');
+      return;
+    }
+
     if (!DASHBOARD_WEB_APP_URL || !accessCode) return;
 
     setIsLoadingOverview(true);
@@ -279,6 +475,11 @@ const PstDashboardPage = () => {
   };
 
   const handlePlanMutation = async (row: DashboardRow, shouldPlan: boolean) => {
+    if (isDemoMode) {
+      await loadOverview(page, selectedBranch, selectedDate);
+      return;
+    }
+
     if (!DASHBOARD_WEB_APP_URL || !accessCode) return;
 
     setMutationTargetId(row.postomatId);
@@ -307,6 +508,13 @@ const PstDashboardPage = () => {
   };
 
   const openHistory = async (row: DashboardRow) => {
+    if (isDemoMode) {
+      setHistoryTarget(row);
+      setHistoryError('');
+      setHistoryData(createDemoHistory(row.postomatId));
+      return;
+    }
+
     if (!DASHBOARD_WEB_APP_URL || !accessCode) return;
 
     setHistoryTarget(row);
@@ -413,14 +621,15 @@ const PstDashboardPage = () => {
                 <span className="font-bold text-brand-dark"> /pst</span>.
               </p>
 
-              {!DASHBOARD_WEB_APP_URL && (
-                <div className="mt-6 rounded-[24px] border border-[#f2d8b1] bg-[#fff9ee] px-5 py-4 text-sm font-semibold leading-6 text-[#8a6420]">
-                  Для запуска нужно прописать адрес dashboard web app в переменную
-                  <span className="font-black text-brand-dark"> VITE_PST_DASHBOARD_WEB_APP_URL</span>.
+              {isDemoMode && (
+                <div className="mt-6 rounded-[24px] border border-brand-green/20 bg-brand-green/10 px-5 py-4 text-sm font-semibold leading-6 text-brand-dark/74">
+                  Сейчас открыт демо-режим предпросмотра. Он нужен только чтобы посмотреть MVP без
+                  подключения dashboard API. Рабочие данные подключим отдельно, не ломая
+                  существующий <span className="font-black text-brand-dark">/pst</span>.
                 </div>
               )}
 
-              {!accessCode && (
+              {!isDemoMode && !accessCode && (
                 <div className="mt-8 max-w-xl rounded-[28px] border border-black/6 bg-[#f7f8f4] p-5 shadow-premium">
                   <div className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] text-brand-dark">
                     <ShieldCheck size={18} className="text-brand-green" />
@@ -450,7 +659,7 @@ const PstDashboardPage = () => {
               )}
             </div>
 
-            {accessCode && (
+            {canLoadDashboard && (
               <>
                 <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   {summaryCards.map((card) => (
@@ -727,6 +936,12 @@ const PstDashboardPage = () => {
                   На этом MVP руководитель уже может смотреть факт и сразу формировать план на
                   выбранную дату.
                 </p>
+                {isDemoMode && (
+                  <p>
+                    Сейчас это предпросмотр на демо-данных. Когда будешь готов, просто подключим
+                    отдельный dashboard web app и таблица станет источником живых данных.
+                  </p>
+                )}
               </div>
             </section>
 
