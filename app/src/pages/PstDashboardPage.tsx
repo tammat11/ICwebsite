@@ -53,6 +53,14 @@ type RecentHistoryItem = {
 
 type HistoryTableRow = RecentHistoryItem;
 
+type HistoryTarget = {
+  postomatId: string;
+  city: string;
+  branch: string;
+  address: string;
+  category: string;
+};
+
 type OverviewResponse = {
   ok: boolean;
   version: string;
@@ -508,7 +516,7 @@ const PstDashboardPage = () => {
   const [page, setPage] = useState(1);
   const [overview, setOverview] = useState<OverviewResponse | null>(null);
   const [historyData, setHistoryData] = useState<ObjectHistoryResponse | null>(null);
-  const [historyTarget, setHistoryTarget] = useState<DashboardRow | null>(null);
+  const [historyTarget, setHistoryTarget] = useState<HistoryTarget | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [mutationTargetId, setMutationTargetId] = useState('');
@@ -631,7 +639,7 @@ const PstDashboardPage = () => {
     }
   };
 
-  const openHistory = async (row: DashboardRow) => {
+  const openHistory = async (row: HistoryTarget) => {
     if (isDemoMode) {
       setHistoryTarget(row);
       setHistoryError('');
@@ -991,8 +999,17 @@ const PstDashboardPage = () => {
                             </tr>
                           )}
 
-                          {tableHistoryRows.map((row, index) => (
-                            <tr key={`${row.postomatId}-${row.date}-${row.time}-${index}`} className="align-top">
+                          {tableHistoryRows.map((row, index) => {
+                            const isSelected = historyTarget?.postomatId === row.postomatId;
+
+                            return (
+                            <tr
+                              key={`${row.postomatId}-${row.date}-${row.time}-${index}`}
+                              className={`align-top cursor-pointer transition ${
+                                isSelected ? 'bg-brand-green/5' : 'hover:bg-[#fbfcf8]'
+                              }`}
+                              onClick={() => openHistory(row)}
+                            >
                               <td className="px-4 py-4 text-sm font-black text-brand-dark">
                                 {row.postomatId}
                               </td>
@@ -1020,7 +1037,7 @@ const PstDashboardPage = () => {
                                 </span>
                               </td>
                             </tr>
-                          ))}
+                          )})}
                         </tbody>
                       </table>
                     </div>
