@@ -323,6 +323,39 @@ const getWeekDays = (isoDate: string) => {
   });
 };
 
+const getWeekPlanSlots = (isoDate: string) => {
+  const baseWeekDays = getWeekDays(isoDate);
+  const currentWeekStart = baseWeekDays[0];
+  const [year, month, day] = currentWeekStart.iso.split('-').map(Number);
+  const monday = new Date(year, (month || 1) - 1, day || 1);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const weekStart = new Date(monday);
+    weekStart.setDate(monday.getDate() + index * 7);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const startIso = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}-${String(weekStart.getDate()).padStart(2, '0')}`;
+
+    return {
+      id: index + 1,
+      startIso,
+      startLabel: `${String(weekStart.getDate()).padStart(2, '0')}.${String(
+        weekStart.getMonth() + 1
+      ).padStart(2, '0')}`,
+      endLabel: `${String(weekEnd.getDate()).padStart(2, '0')}.${String(
+        weekEnd.getMonth() + 1
+      ).padStart(2, '0')}`,
+      value: WEEKLY_PLAN_VALUES[index] ?? 0,
+      isCurrent: index === 0,
+    };
+  });
+};
+
 const statusTone: Record<string, string> = {
   Выполнено: 'bg-brand-green/14 text-brand-dark border-brand-green/30',
   Запланировано: 'bg-[#f7f8f4] text-brand-dark/70 border-black/8',
@@ -571,16 +604,7 @@ const PstDashboardPage = () => {
   const pagination = overview?.pagination;
   const summary = overview?.summary;
   const branches = overview?.branches ?? [];
-  const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
-  const weeklyPlan = useMemo(
-    () =>
-      weekDays.map((day, index) => ({
-        ...day,
-        value: WEEKLY_PLAN_VALUES[index] ?? 0,
-        isSelected: day.iso === selectedDate,
-      })),
-    [weekDays, selectedDate]
-  );
+  const weeklyPlan = useMemo(() => getWeekPlanSlots(selectedDate), [selectedDate]);
   const weeklyTotal = weeklyPlan.reduce((sum, item) => sum + item.value, 0);
   const weeklyPeak = Math.max(...weeklyPlan.map((item) => item.value), 1);
 
@@ -701,14 +725,14 @@ const PstDashboardPage = () => {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <div className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
-                        План недели
+                        Планы по неделям
                       </div>
                       <div className="mt-3 text-2xl font-black uppercase tracking-tight text-brand-dark sm:text-3xl">
-                        Начиная с этой недели
+                        Начиная с текущей недели
                       </div>
                       <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/58">
-                        Отдельный недельный ориентир для руководства. Сейчас выводим в dashboard
-                        как самостоятельный блок, позже спокойно привяжем к Google Sheets.
+                        Здесь показываем недельные планы вперед по неделям. Это отдельный
+                        управленческий ориентир, а не план по дням.
                       </div>
                     </div>
 
@@ -722,33 +746,28 @@ const PstDashboardPage = () => {
                     </div>
                   </div>
 
-                  <div className="mt-6 grid gap-3 md:grid-cols-7">
+                  <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     {weeklyPlan.map((item) => (
-                      <button
-                        key={item.iso}
-                        type="button"
-                        onClick={() => {
-                          setSelectedDate(item.iso);
-                          setPage(1);
-                        }}
+                      <div
+                        key={item.startIso}
                         className={`relative overflow-hidden rounded-[26px] border p-4 text-left transition ${
-                          item.isSelected
+                          item.isCurrent
                             ? 'border-brand-green bg-[#f5fbe9] shadow-[0_18px_35px_rgba(143,198,64,0.18)]'
-                            : 'border-black/6 bg-[#fbfcf8] hover:border-brand-green/30 hover:bg-white'
+                            : 'border-black/6 bg-[#fbfcf8]'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/38">
-                              {item.label.replace('.', '')}
+                              Неделя {item.id}
                             </div>
                             <div className="mt-2 text-lg font-black text-brand-dark">
-                              {item.day}.{item.month}
+                              {item.startLabel} - {item.endLabel}
                             </div>
                           </div>
-                          {item.isSelected && (
+                          {item.isCurrent && (
                             <div className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
-                              Фокус
+                              Текущая
                             </div>
                           )}
                         </div>
@@ -758,7 +777,7 @@ const PstDashboardPage = () => {
                             {item.value.toLocaleString('ru-RU')}
                           </div>
                           <div className="mt-2 text-[10px] font-black uppercase tracking-[0.22em] text-brand-dark/38">
-                            план на день
+                            план на неделю
                           </div>
                         </div>
 
@@ -770,7 +789,7 @@ const PstDashboardPage = () => {
                             }}
                           />
                         </div>
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </div>
