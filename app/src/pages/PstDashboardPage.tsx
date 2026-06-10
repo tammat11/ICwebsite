@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
   History,
   KeyRound,
   LoaderCircle,
@@ -21,7 +20,7 @@ import SeoHead from '../components/SeoHead';
 type DashboardSummary = {
   plannedCount: number;
   completedCount: number;
-  overdueCount: number;
+  lagCount: number;
   completionRate: number;
 };
 
@@ -223,7 +222,7 @@ const createDemoOverview = (
     summary: {
       plannedCount,
       completedCount,
-      overdueCount: filtered.filter((row) => row.status === 'Просрочено').length,
+      lagCount: Math.max(plannedCount - completedCount, 0),
       completionRate: plannedCount ? Math.round((completedCount / plannedCount) * 100) : 0,
     },
     branches: DEMO_BRANCHES,
@@ -686,26 +685,21 @@ const PstDashboardPage = () => {
   const summaryCards = useMemo(
     () => [
       {
-        label: 'План на дату',
-        value: summary?.plannedCount ?? '—',
-        icon: <ClipboardList size={22} />,
-      },
-      {
-        label: 'Факт с фото',
+        label: 'Факт на дату',
         value: summary?.completedCount ?? '—',
         icon: <CheckCircle2 size={22} />,
       },
       {
-        label: 'Выполнение',
+        label: 'Выполнение плана',
         value: summary ? `${summary.completionRate}%` : '—',
         icon: <Target size={22} />,
         accent: 'text-brand-green',
       },
       {
-        label: 'Просрочено',
-        value: summary?.overdueCount ?? '—',
+        label: 'Отставание',
+        value: summary?.lagCount ?? '—',
         icon: <AlertCircle size={22} />,
-        accent: summary && summary.overdueCount > 0 ? 'text-[#d35d59]' : 'text-brand-dark',
+        accent: summary && summary.lagCount > 0 ? 'text-[#d35d59]' : 'text-brand-dark',
       },
     ],
     [summary]
@@ -848,7 +842,7 @@ const PstDashboardPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+                <div className="mt-6 grid gap-4 md:grid-cols-3">
                   {summaryCards.map((card) => (
                     <DashboardCard
                       key={card.label}

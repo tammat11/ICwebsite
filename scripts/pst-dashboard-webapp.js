@@ -174,7 +174,7 @@ function handleOverview(event) {
     summary: {
       plannedCount: plannedCount,
       completedCount: completedCount,
-      overdueCount: mergedRows.filter((row) => row.status === 'Просрочено').length,
+      lagCount: Math.max(plannedCount - completedCount, 0),
       completionRate: plannedCount > 0 ? Math.round((completedCount / plannedCount) * 100) : 0,
     },
     branches: Array.from(
