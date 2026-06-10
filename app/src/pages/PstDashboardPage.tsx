@@ -94,6 +94,7 @@ const DASHBOARD_WEB_APP_URL =
   (import.meta.env.VITE_PST_DASHBOARD_WEB_APP_URL as string | undefined) || '';
 const ACCESS_CODE_STORAGE_KEY = 'pst-dashboard-access-code';
 const PAGE_SIZE = 25;
+const WEEKLY_PLAN_VALUES = [1300, 1500, 1700, 2000, 2200, 2200, 0];
 
 const DEMO_BRANCHES = ['Южная Столица', 'Шымкент', 'Уральск'];
 
@@ -297,6 +298,29 @@ const formatIsoDate = (value: string) => {
   const [year, month, day] = value.split('-');
   if (!year || !month || !day) return value;
   return `${day}.${month}.${year}`;
+};
+
+const getWeekDays = (isoDate: string) => {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  const baseDate = new Date(year, (month || 1) - 1, day || 1);
+  const currentDay = baseDate.getDay();
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+  const monday = new Date(baseDate);
+  monday.setDate(baseDate.getDate() + mondayOffset);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const current = new Date(monday);
+    current.setDate(monday.getDate() + index);
+
+    return {
+      iso: `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(
+        current.getDate()
+      ).padStart(2, '0')}`,
+      label: new Intl.DateTimeFormat('ru-RU', { weekday: 'short' }).format(current),
+      day: String(current.getDate()).padStart(2, '0'),
+      month: String(current.getMonth() + 1).padStart(2, '0'),
+    };
+  });
 };
 
 const statusTone: Record<string, string> = {
@@ -547,6 +571,18 @@ const PstDashboardPage = () => {
   const pagination = overview?.pagination;
   const summary = overview?.summary;
   const branches = overview?.branches ?? [];
+  const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
+  const weeklyPlan = useMemo(
+    () =>
+      weekDays.map((day, index) => ({
+        ...day,
+        value: WEEKLY_PLAN_VALUES[index] ?? 0,
+        isSelected: day.iso === selectedDate,
+      })),
+    [weekDays, selectedDate]
+  );
+  const weeklyTotal = weeklyPlan.reduce((sum, item) => sum + item.value, 0);
+  const weeklyPeak = Math.max(...weeklyPlan.map((item) => item.value), 1);
 
   const summaryCards = useMemo(
     () => [
@@ -661,6 +697,84 @@ const PstDashboardPage = () => {
 
             {canLoadDashboard && (
               <>
+                <div className="mt-6 rounded-[32px] border border-black/6 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <div className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
+                        План недели
+                      </div>
+                      <div className="mt-3 text-2xl font-black uppercase tracking-tight text-brand-dark sm:text-3xl">
+                        Начиная с этой недели
+                      </div>
+                      <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/58">
+                        Отдельный недельный ориентир для руководства. Сейчас выводим в dashboard
+                        как самостоятельный блок, позже спокойно привяжем к Google Sheets.
+                      </div>
+                    </div>
+
+                    <div className="rounded-[24px] border border-brand-green/20 bg-brand-green/10 px-5 py-4">
+                      <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                        Сумма недели
+                      </div>
+                      <div className="mt-2 text-3xl font-black leading-none text-brand-green">
+                        {weeklyTotal.toLocaleString('ru-RU')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid gap-3 md:grid-cols-7">
+                    {weeklyPlan.map((item) => (
+                      <button
+                        key={item.iso}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(item.iso);
+                          setPage(1);
+                        }}
+                        className={`relative overflow-hidden rounded-[26px] border p-4 text-left transition ${
+                          item.isSelected
+                            ? 'border-brand-green bg-[#f5fbe9] shadow-[0_18px_35px_rgba(143,198,64,0.18)]'
+                            : 'border-black/6 bg-[#fbfcf8] hover:border-brand-green/30 hover:bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/38">
+                              {item.label.replace('.', '')}
+                            </div>
+                            <div className="mt-2 text-lg font-black text-brand-dark">
+                              {item.day}.{item.month}
+                            </div>
+                          </div>
+                          {item.isSelected && (
+                            <div className="rounded-full bg-brand-green px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
+                              Фокус
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-5">
+                          <div className="text-[clamp(1.5rem,2vw,2rem)] font-black leading-none text-brand-dark">
+                            {item.value.toLocaleString('ru-RU')}
+                          </div>
+                          <div className="mt-2 text-[10px] font-black uppercase tracking-[0.22em] text-brand-dark/38">
+                            план на день
+                          </div>
+                        </div>
+
+                        <div className="mt-5 h-2 rounded-full bg-brand-dark/6">
+                          <div
+                            className="h-2 rounded-full bg-brand-green transition-all"
+                            style={{
+                              width: `${Math.max((item.value / weeklyPeak) * 100, item.value > 0 ? 12 : 0)}%`,
+                            }}
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   {summaryCards.map((card) => (
                     <DashboardCard
