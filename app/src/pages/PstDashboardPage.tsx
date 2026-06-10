@@ -746,7 +746,6 @@ const PstDashboardPage = () => {
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
           <section>
             <div className="rounded-[34px] border border-black/6 bg-white px-6 py-8 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:px-8">
-              <div className="section-tag">PST dashboard</div>
               <h1 className="max-w-4xl font-black uppercase leading-[0.88] tracking-tighter text-brand-dark text-[clamp(2.2rem,5vw,4.8rem)]">
                 Dashboard
                 <br />
