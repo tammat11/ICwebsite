@@ -1021,7 +1021,7 @@ const PstDashboardPage = () => {
                                 {row.time || '—'}
                               </td>
                               <td className="px-4 py-4">
-                                <span className="inline-flex rounded-full border border-black/8 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
+                                <span className="inline-flex min-w-[132px] justify-center whitespace-nowrap rounded-full border border-black/8 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark">
                                   {row.folderLinkText || 'Папка с фото'}
                                 </span>
                               </td>
