@@ -644,7 +644,7 @@ const PstDashboardPage = () => {
         path="/pst-dashboard"
       />
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto w-full max-w-[1600px] px-5 sm:px-6 xl:px-8 2xl:px-10">
         <div className="mb-10 flex items-center justify-between gap-4">
           <Link to="/" className="inline-flex">
             <img
@@ -666,7 +666,7 @@ const PstDashboardPage = () => {
           )}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
           <section>
             <div className="rounded-[34px] border border-black/6 bg-white px-6 py-8 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:px-8">
               <div className="section-tag">PST dashboard</div>
@@ -746,7 +746,7 @@ const PstDashboardPage = () => {
                     </div>
                   </div>
 
-                  <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
                     {weeklyPlan.map((item) => (
                       <div
                         key={item.startIso}
@@ -794,7 +794,7 @@ const PstDashboardPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
                   {summaryCards.map((card) => (
                     <DashboardCard
                       key={card.label}
@@ -807,7 +807,7 @@ const PstDashboardPage = () => {
                 </div>
 
                 <div className="mt-6 rounded-[32px] border border-black/6 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-6">
-                  <div className="grid gap-4 xl:grid-cols-[220px_220px_minmax(0,1fr)_auto]">
+                  <div className="grid gap-4 2xl:grid-cols-[220px_240px_minmax(0,1fr)_auto]">
                     <label className="block">
                       <div className="mb-2 text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
                         Дата
