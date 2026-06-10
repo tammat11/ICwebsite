@@ -6,9 +6,8 @@ const OBJECTS_SHEET_CANDIDATES = [
   'Список уборки Kaspi Postomat',
 ];
 const HISTORY_SHEET_NAME = 'История уборок';
-const PLAN_SHEET_NAME = 'План уборок';
-const SCRIPT_VERSION = '2026-06-10-pst-dashboard-v2';
-const DASHBOARD_TOKEN = 'CHANGE_ME_PST_DASHBOARD_TOKEN';
+const SCRIPT_VERSION = '2026-06-10-pst-dashboard-lite-v1';
+const DASHBOARD_TOKEN = '';
 const DATA_START_ROW = 2;
 
 const OBJECT_HEADER_CANDIDATES = {
@@ -33,17 +32,6 @@ const HISTORY_HEADER_CANDIDATES = {
   ],
 };
 
-const PLAN_HEADERS = [
-  'Дата',
-  'POSTOMAT_ID',
-  'Город',
-  'Филиал',
-  'Адрес',
-  'Категория точки',
-  'План',
-  'Комментарий',
-];
-
 function doGet(event) {
   try {
     assertToken(event);
@@ -55,10 +43,6 @@ function doGet(event) {
       payload = handleOverview(event);
     } else if (action === 'object_history') {
       payload = handleObjectHistory(event);
-    } else if (action === 'upsert_plan') {
-      payload = handleUpsertPlan(event);
-    } else if (action === 'remove_plan') {
-      payload = handleRemovePlan(event);
     } else if (action === 'health') {
       payload = { ok: true, version: SCRIPT_VERSION, action: 'health' };
     } else {
@@ -82,7 +66,6 @@ function handleOverview(event) {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const objectsSheet = getObjectsSheet(spreadsheet);
   const historySheet = getSheetRequired(spreadsheet, HISTORY_SHEET_NAME);
-  const planSheet = getOrCreatePlanSheet(spreadsheet);
 
   const page = Math.max(Number(event.parameter.page || 1), 1);
   const pageSize = Math.min(Math.max(Number(event.parameter.pageSize || 25), 10), 100);
@@ -91,75 +74,27 @@ function handleOverview(event) {
   const query = normalizeSearch(String(event.parameter.query || ''));
 
   const objects = loadObjects(objectsSheet);
-  const planRows = loadPlanRows(planSheet, selectedDate);
-  const historyRows = loadHistoryRows(historySheet, selectedDate);
+  const allHistoryRows = enrichHistoryRows(loadHistoryRows(historySheet), objects);
 
-  const factsById = new Map();
-  historyRows.forEach((row) => {
-    if (!factsById.has(row.postomatId)) {
-      factsById.set(row.postomatId, []);
-    }
-    factsById.get(row.postomatId).push(row);
-  });
-
-  const planById = new Map();
-  planRows.forEach((row) => {
-    planById.set(row.postomatId, row);
-  });
-
-  const mergedRows = Array.from(objects.values())
-    .map((object) => {
-      const plan = planById.get(object.postomatId) || null;
-      const facts = factsById.get(object.postomatId) || [];
-      const latestFact =
-        facts
-          .slice()
-          .sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`))[0] || null;
-      const planned = Boolean(plan);
-      const completed = facts.length > 0;
-
-      return {
-        postomatId: object.postomatId,
-        city: object.city,
-        branch: object.branch,
-        address: object.address,
-        category: object.category,
-        planned: planned,
-        completed: completed,
-        planComment: plan ? plan.comment : '',
-        factCount: facts.length,
-        factDate: latestFact ? latestFact.date : '',
-        factTime: latestFact ? latestFact.time : '',
-        folderLinkText: latestFact ? latestFact.folderLinkText : '',
-        status: getDashboardStatus(selectedDate, planned, completed),
-        searchIndex: normalizeSearch(
-          [
-            object.postomatId,
-            object.city,
-            object.branch,
-            object.address,
-            object.category,
-            plan ? plan.comment : '',
-          ].join(' ')
-        ),
-      };
-    })
+  const selectedDateRows = allHistoryRows
+    .filter((row) => row.date === selectedDate)
     .filter((row) => (!selectedBranch ? true : row.branch === selectedBranch))
-    .filter((row) => (!query ? true : row.searchIndex.indexOf(query) !== -1))
-    .sort((a, b) => {
-      const statusRank = getStatusRank(a.status) - getStatusRank(b.status);
-      if (statusRank !== 0) return statusRank;
-      return a.address.localeCompare(b.address, 'ru');
-    });
+    .filter((row) => historyMatchesQuery(row, query))
+    .sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`));
 
-  const total = mergedRows.length;
+  const total = selectedDateRows.length;
   const totalPages = Math.max(Math.ceil(total / pageSize), 1);
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
-  const rows = mergedRows.slice(pageStart, pageStart + pageSize).map(stripSearchIndex);
+  const pagedRows = selectedDateRows.slice(pageStart, pageStart + pageSize);
 
-  const plannedCount = mergedRows.filter((row) => row.planned).length;
-  const completedCount = mergedRows.filter((row) => row.completed).length;
+  const weekRange = getWeekRange(selectedDate);
+  const weeklyFactCount = countUniquePostomats(
+    allHistoryRows
+      .filter((row) => row.date >= weekRange.start && row.date <= weekRange.end)
+      .filter((row) => (!selectedBranch ? true : row.branch === selectedBranch))
+      .filter((row) => historyMatchesQuery(row, query))
+  );
 
   return {
     ok: true,
@@ -172,10 +107,8 @@ function handleOverview(event) {
       pageSize: pageSize,
     },
     summary: {
-      plannedCount: plannedCount,
-      completedCount: completedCount,
-      lagCount: Math.max(plannedCount - completedCount, 0),
-      completionRate: plannedCount > 0 ? Math.round((completedCount / plannedCount) * 100) : 0,
+      factOnDate: countUniquePostomats(selectedDateRows),
+      weeklyFactCount: weeklyFactCount,
     },
     branches: Array.from(
       new Set(
@@ -184,11 +117,8 @@ function handleOverview(event) {
           .filter(Boolean)
       )
     ).sort((a, b) => a.localeCompare(b, 'ru')),
-    rows: rows,
-    recentHistory: historyRows
-      .slice()
-      .sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`))
-      .slice(0, 12),
+    rows: pagedRows,
+    recentHistory: pagedRows,
     pagination: {
       page: safePage,
       pageSize: pageSize,
@@ -205,8 +135,10 @@ function handleObjectHistory(event) {
   }
 
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const objectsSheet = getObjectsSheet(spreadsheet);
   const historySheet = getSheetRequired(spreadsheet, HISTORY_SHEET_NAME);
-  const historyRows = loadHistoryRows(historySheet);
+  const objects = loadObjects(objectsSheet);
+  const historyRows = enrichHistoryRows(loadHistoryRows(historySheet), objects);
 
   return {
     ok: true,
@@ -215,96 +147,7 @@ function handleObjectHistory(event) {
     items: historyRows
       .filter((row) => row.postomatId === postomatId)
       .sort((a, b) => `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`))
-      .slice(0, 50),
-  };
-}
-
-function handleUpsertPlan(event) {
-  const postomatId = String(event.parameter.postomatId || '').trim();
-  const isoDate = normalizeIsoDate(event.parameter.date);
-  const comment = String(event.parameter.comment || '').trim();
-
-  if (!postomatId) throw new Error('postomatId is required');
-  if (!isoDate) throw new Error('date is required');
-
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const objectsSheet = getObjectsSheet(spreadsheet);
-  const planSheet = getOrCreatePlanSheet(spreadsheet);
-  const objects = loadObjects(objectsSheet);
-  const object = objects.get(postomatId);
-
-  if (!object) {
-    throw new Error(`Object not found by postomatId: ${postomatId}`);
-  }
-
-  const headers = getHeaderMap(planSheet, {
-    date: ['Дата'],
-    id: ['POSTOMAT_ID', 'ID'],
-  });
-
-  const existingRow = findPlanRow(planSheet, headers, isoDate, postomatId);
-  const rowValues = [
-    formatTableDate(isoDate),
-    object.postomatId,
-    object.city,
-    object.branch,
-    object.address,
-    object.category,
-    'Да',
-    comment,
-  ];
-
-  if (existingRow) {
-    planSheet.getRange(existingRow, 1, 1, PLAN_HEADERS.length).setValues([rowValues]);
-  } else {
-    planSheet.appendRow(rowValues);
-  }
-
-  return {
-    ok: true,
-    version: SCRIPT_VERSION,
-    action: 'upsert_plan',
-    postomatId: postomatId,
-    date: isoDate,
-  };
-}
-
-function handleRemovePlan(event) {
-  const postomatId = String(event.parameter.postomatId || '').trim();
-  const isoDate = normalizeIsoDate(event.parameter.date);
-
-  if (!postomatId) throw new Error('postomatId is required');
-  if (!isoDate) throw new Error('date is required');
-
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const planSheet = getOrCreatePlanSheet(spreadsheet);
-  const headers = getHeaderMap(planSheet, {
-    date: ['Дата'],
-    id: ['POSTOMAT_ID', 'ID'],
-  });
-
-  const lastRow = planSheet.getLastRow();
-  if (lastRow >= DATA_START_ROW) {
-    const values = planSheet
-      .getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, planSheet.getLastColumn())
-      .getDisplayValues();
-
-    for (let index = values.length - 1; index >= 0; index -= 1) {
-      const row = values[index];
-      const rowDate = normalizeTableDate(getValueByHeader(row, headers, 'date'));
-      const rowId = getValueByHeader(row, headers, 'id');
-      if (rowDate === isoDate && rowId === postomatId) {
-        planSheet.deleteRow(DATA_START_ROW + index);
-      }
-    }
-  }
-
-  return {
-    ok: true,
-    version: SCRIPT_VERSION,
-    action: 'remove_plan',
-    postomatId: postomatId,
-    date: isoDate,
+      .slice(0, 100),
   };
 }
 
@@ -316,7 +159,7 @@ function getObjectsSheet(spreadsheet) {
 
   const fallback = spreadsheet
     .getSheets()
-    .filter((sheet) => sheet.getName() !== HISTORY_SHEET_NAME && sheet.getName() !== PLAN_SHEET_NAME)[0];
+    .filter((sheet) => sheet.getName() !== HISTORY_SHEET_NAME)[0];
   if (!fallback) {
     throw new Error('Objects sheet not found');
   }
@@ -329,22 +172,6 @@ function getSheetRequired(spreadsheet, sheetName) {
     throw new Error(`Sheet not found: ${sheetName}`);
   }
   return sheet;
-}
-
-function getOrCreatePlanSheet(spreadsheet) {
-  const existingSheet = spreadsheet.getSheetByName(PLAN_SHEET_NAME);
-  const planSheet = existingSheet || spreadsheet.insertSheet(PLAN_SHEET_NAME);
-  ensurePlanHeaders(planSheet);
-  return planSheet;
-}
-
-function ensurePlanHeaders(sheet) {
-  if (sheet.getMaxColumns() < PLAN_HEADERS.length) {
-    sheet.insertColumnsAfter(sheet.getMaxColumns(), PLAN_HEADERS.length - sheet.getMaxColumns());
-  }
-  sheet.getRange(1, 1, 1, PLAN_HEADERS.length).setValues([PLAN_HEADERS]);
-  sheet.getRange(1, 1, 1, PLAN_HEADERS.length).setFontWeight('bold');
-  sheet.setFrozenRows(1);
 }
 
 function loadObjects(sheet) {
@@ -372,41 +199,7 @@ function loadObjects(sheet) {
   return objects;
 }
 
-function loadPlanRows(sheet, selectedDate) {
-  const headers = getHeaderMap(sheet, {
-    date: ['Дата'],
-    id: ['POSTOMAT_ID', 'ID'],
-    city: ['Город'],
-    branch: ['Филиал'],
-    address: ['Адрес'],
-    category: ['Категория точки'],
-    plan: ['План'],
-    comment: ['Комментарий'],
-  });
-
-  const lastRow = sheet.getLastRow();
-  if (lastRow < DATA_START_ROW) return [];
-
-  const values = sheet
-    .getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, sheet.getLastColumn())
-    .getDisplayValues();
-
-  return values
-    .map((row) => ({
-      date: normalizeTableDate(getValueByHeader(row, headers, 'date')),
-      postomatId: getValueByHeader(row, headers, 'id'),
-      city: getValueByHeader(row, headers, 'city'),
-      branch: getValueByHeader(row, headers, 'branch'),
-      address: getValueByHeader(row, headers, 'address'),
-      category: getValueByHeader(row, headers, 'category'),
-      plan: getValueByHeader(row, headers, 'plan'),
-      comment: getValueByHeader(row, headers, 'comment'),
-    }))
-    .filter((row) => row.postomatId)
-    .filter((row) => (!selectedDate ? true : row.date === selectedDate));
-}
-
-function loadHistoryRows(sheet, selectedDate) {
+function loadHistoryRows(sheet) {
   const headers = getHeaderMap(sheet, HISTORY_HEADER_CANDIDATES);
   const lastRow = sheet.getLastRow();
   if (lastRow < DATA_START_ROW) return [];
@@ -427,7 +220,72 @@ function loadHistoryRows(sheet, selectedDate) {
       folderLinkText: getValueByHeader(row, headers, 'folder'),
     }))
     .filter((row) => row.postomatId)
-    .filter((row) => (!selectedDate ? true : row.date === selectedDate));
+    .filter((row) => row.date);
+}
+
+function enrichHistoryRows(rows, objects) {
+  return rows.map((row) => {
+    const object = objects.get(row.postomatId);
+    return {
+      postomatId: row.postomatId,
+      city: row.city || (object ? object.city : ''),
+      branch: row.branch || (object ? object.branch : ''),
+      address: row.address || (object ? object.address : ''),
+      category: row.category || (object ? object.category : ''),
+      date: row.date,
+      time: row.time,
+      folderLinkText: row.folderLinkText,
+    };
+  });
+}
+
+function historyMatchesQuery(row, query) {
+  if (!query) return true;
+  return normalizeSearch(
+    [
+      row.postomatId,
+      row.city,
+      row.branch,
+      row.address,
+      row.category,
+      row.date,
+      row.time,
+    ].join(' ')
+  ).indexOf(query) !== -1;
+}
+
+function countUniquePostomats(rows) {
+  return new Set(
+    rows
+      .map((row) => row.postomatId)
+      .filter(Boolean)
+  ).size;
+}
+
+function getWeekRange(isoDate) {
+  const parts = String(isoDate || '')
+    .split('-')
+    .map(Number);
+  const date = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+  const weekday = date.getDay();
+  const mondayOffset = weekday === 0 ? -6 : 1 - weekday;
+
+  const start = new Date(date);
+  start.setDate(date.getDate() + mondayOffset);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  return {
+    start: formatIsoDate(start),
+    end: formatIsoDate(end),
+  };
+}
+
+function formatIsoDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate()
+  ).padStart(2, '0')}`;
 }
 
 function getHeaderMap(sheet, candidatesByKey) {
@@ -445,55 +303,8 @@ function getValueByHeader(row, headerMap, key) {
   return String(row[index] || '').trim();
 }
 
-function findPlanRow(sheet, headers, isoDate, postomatId) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < DATA_START_ROW) return 0;
-
-  const values = sheet
-    .getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, sheet.getLastColumn())
-    .getDisplayValues();
-
-  for (let index = 0; index < values.length; index += 1) {
-    const row = values[index];
-    const rowDate = normalizeTableDate(getValueByHeader(row, headers, 'date'));
-    const rowId = getValueByHeader(row, headers, 'id');
-    if (rowDate === isoDate && rowId === postomatId) {
-      return DATA_START_ROW + index;
-    }
-  }
-
-  return 0;
-}
-
-function getDashboardStatus(selectedDate, planned, completed) {
-  const today = getTodayIso();
-  if (planned && completed) return 'Выполнено';
-  if (planned && !completed && selectedDate < today) return 'Просрочено';
-  if (planned && !completed) return 'Запланировано';
-  if (!planned && completed) return 'Выполнено вне плана';
-  return 'Без статуса';
-}
-
-function getStatusRank(status) {
-  const order = {
-    'Просрочено': 0,
-    'Запланировано': 1,
-    'Выполнено': 2,
-    'Выполнено вне плана': 3,
-    'Без статуса': 4,
-  };
-  return order[status] !== undefined ? order[status] : 99;
-}
-
-function stripSearchIndex(row) {
-  const clean = {};
-  Object.keys(row).forEach((key) => {
-    if (key !== 'searchIndex') clean[key] = row[key];
-  });
-  return clean;
-}
-
 function assertToken(event) {
+  if (!DASHBOARD_TOKEN) return;
   const token = String((event.parameter && event.parameter.token) || '').trim();
   if (!token || token !== DASHBOARD_TOKEN) {
     throw new Error('Unauthorized');
@@ -518,38 +329,24 @@ function normalizeIsoDate(value) {
 function normalizeTableDate(value) {
   const trimmed = String(value || '').trim();
   const match = trimmed.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
-  if (!match) return '';
-  return `${match[3]}-${match[2]}-${match[1]}`;
-}
+  if (match) {
+    return `${match[3]}-${match[2]}-${match[1]}`;
+  }
 
-function formatTableDate(isoDate) {
-  const match = normalizeIsoDate(isoDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return isoDate;
-  return `${match[3]}.${match[2]}.${match[1]}`;
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+  }
+
+  return '';
 }
 
 function getTodayIso() {
-  const timezone = Session.getScriptTimeZone();
-  return Utilities.formatDate(new Date(), timezone, 'yyyy-MM-dd');
+  return formatIsoDate(new Date());
 }
 
 function respond(payload, event) {
-  const callback = sanitizeCallbackName(String((event.parameter && event.parameter.callback) || '').trim());
-  if (callback) {
-    return ContentService.createTextOutput(`${callback}(${JSON.stringify(payload)})`).setMimeType(
-      ContentService.MimeType.JAVASCRIPT
-    );
-  }
-
-  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
-    ContentService.MimeType.JSON
-  );
-}
-
-function sanitizeCallbackName(value) {
-  if (!value) return '';
-  if (!/^[a-zA-Z_$][0-9a-zA-Z_$\.]*$/.test(value)) {
-    throw new Error('Invalid callback name');
-  }
-  return value;
+  const callback = String((event.parameter && event.parameter.callback) || '').trim();
+  const response = callback ? `${callback}(${JSON.stringify(payload)});` : JSON.stringify(payload);
+  return ContentService.createTextOutput(response).setMimeType(ContentService.MimeType.JAVASCRIPT);
 }

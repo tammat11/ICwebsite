@@ -6,22 +6,17 @@ import {
   ChevronLeft,
   ChevronRight,
   History,
-  KeyRound,
   LoaderCircle,
   RefreshCw,
   Search,
-  ShieldCheck,
   Target,
-  XCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SeoHead from '../components/SeoHead';
 
 type DashboardSummary = {
-  plannedCount: number;
-  completedCount: number;
-  lagCount: number;
-  completionRate: number;
+  factOnDate: number;
+  weeklyFactCount: number;
 };
 
 type DashboardRow = {
@@ -92,16 +87,8 @@ type ObjectHistoryResponse = {
   items: RecentHistoryItem[];
 };
 
-type PlanMutationResponse = {
-  ok: boolean;
-  version: string;
-  error?: string;
-  action?: string;
-};
-
 const DASHBOARD_WEB_APP_URL =
   (import.meta.env.VITE_PST_DASHBOARD_WEB_APP_URL as string | undefined) || '';
-const ACCESS_CODE_STORAGE_KEY = 'pst-dashboard-access-code';
 const PAGE_SIZE = 25;
 const WEEKLY_PLAN_VALUES = [1300, 1500, 1700, 2000, 2200, 2200, 0];
 
@@ -214,8 +201,8 @@ const createDemoOverview = (
   const start = (safePage - 1) * PAGE_SIZE;
   const rows = filtered.slice(start, start + PAGE_SIZE);
 
-  const plannedCount = filtered.filter((row) => row.planned).length;
-  const completedCount = filtered.filter((row) => row.completed).length;
+  const factOnDate = filtered.filter((row) => row.completed).length;
+  const weeklyFactCount = filtered.filter((row) => row.completed).length;
 
   return {
     ok: true,
@@ -228,10 +215,8 @@ const createDemoOverview = (
       pageSize: PAGE_SIZE,
     },
     summary: {
-      plannedCount,
-      completedCount,
-      lagCount: Math.max(plannedCount - completedCount, 0),
-      completionRate: plannedCount ? Math.round((completedCount / plannedCount) * 100) : 0,
+      factOnDate,
+      weeklyFactCount,
     },
     branches: DEMO_BRANCHES,
     rows,
@@ -508,8 +493,6 @@ const DashboardCard = ({
 );
 
 const PstDashboardPage = () => {
-  const [accessCodeInput, setAccessCodeInput] = useState('');
-  const [accessCode, setAccessCode] = useState('');
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const [selectedBranch, setSelectedBranch] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -519,22 +502,12 @@ const PstDashboardPage = () => {
   const [historyTarget, setHistoryTarget] = useState<HistoryTarget | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [mutationTargetId, setMutationTargetId] = useState('');
-  const [authError, setAuthError] = useState('');
   const [overviewError, setOverviewError] = useState('');
   const [historyError, setHistoryError] = useState('');
   const deferredQuery = useDeferredValue(searchTerm.trim());
   const isDemoMode = !DASHBOARD_WEB_APP_URL;
 
-  useEffect(() => {
-    const storedCode = window.sessionStorage.getItem(ACCESS_CODE_STORAGE_KEY) || '';
-    if (storedCode) {
-      setAccessCode(storedCode);
-      setAccessCodeInput(storedCode);
-    }
-  }, []);
-
-  const canLoadDashboard = isDemoMode || Boolean(accessCode && DASHBOARD_WEB_APP_URL);
+  const canLoadDashboard = isDemoMode || Boolean(DASHBOARD_WEB_APP_URL);
 
   const loadOverview = async (nextPage = page, nextBranch = selectedBranch, nextDate = selectedDate) => {
     if (isDemoMode) {
@@ -543,14 +516,13 @@ const PstDashboardPage = () => {
       return;
     }
 
-    if (!DASHBOARD_WEB_APP_URL || !accessCode) return;
+    if (!DASHBOARD_WEB_APP_URL) return;
 
     setIsLoadingOverview(true);
     setOverviewError('');
 
     try {
       const payload = await jsonpRequest<OverviewResponse>(DASHBOARD_WEB_APP_URL, {
-        token: accessCode,
         action: 'overview',
         date: nextDate,
         branch: nextBranch,
@@ -579,65 +551,6 @@ const PstDashboardPage = () => {
     loadOverview(page, selectedBranch, selectedDate);
   }, [canLoadDashboard, page, selectedBranch, selectedDate, deferredQuery]);
 
-  const handleAccessSubmit = async () => {
-    const normalizedCode = accessCodeInput.trim();
-    if (!normalizedCode) {
-      setAuthError('Введите код доступа.');
-      return;
-    }
-
-    if (!DASHBOARD_WEB_APP_URL) {
-      setAuthError('Не настроен адрес dashboard web app.');
-      return;
-    }
-
-    setAuthError('');
-    setAccessCode(normalizedCode);
-    window.sessionStorage.setItem(ACCESS_CODE_STORAGE_KEY, normalizedCode);
-    setPage(1);
-  };
-
-  const handleLogout = () => {
-    setAccessCode('');
-    setAccessCodeInput('');
-    setOverview(null);
-    setHistoryData(null);
-    setHistoryTarget(null);
-    window.sessionStorage.removeItem(ACCESS_CODE_STORAGE_KEY);
-  };
-
-  const handlePlanMutation = async (row: DashboardRow, shouldPlan: boolean) => {
-    if (isDemoMode) {
-      await loadOverview(page, selectedBranch, selectedDate);
-      return;
-    }
-
-    if (!DASHBOARD_WEB_APP_URL || !accessCode) return;
-
-    setMutationTargetId(row.postomatId);
-    setOverviewError('');
-
-    try {
-      const payload = await jsonpRequest<PlanMutationResponse>(DASHBOARD_WEB_APP_URL, {
-        token: accessCode,
-        action: shouldPlan ? 'upsert_plan' : 'remove_plan',
-        postomatId: row.postomatId,
-        date: selectedDate,
-      });
-
-      if (!payload.ok) {
-        throw new Error(payload.error || 'Не удалось обновить план.');
-      }
-
-      await loadOverview(page, selectedBranch, selectedDate);
-    } catch (error) {
-      setOverviewError(
-        error instanceof Error ? error.message : 'Не удалось обновить план по точке.'
-      );
-    } finally {
-      setMutationTargetId('');
-    }
-  };
 
   const openHistory = async (row: HistoryTarget) => {
     if (isDemoMode) {
@@ -647,7 +560,7 @@ const PstDashboardPage = () => {
       return;
     }
 
-    if (!DASHBOARD_WEB_APP_URL || !accessCode) return;
+    if (!DASHBOARD_WEB_APP_URL) return;
 
     setHistoryTarget(row);
     setHistoryData(null);
@@ -656,7 +569,6 @@ const PstDashboardPage = () => {
 
     try {
       const payload = await jsonpRequest<ObjectHistoryResponse>(DASHBOARD_WEB_APP_URL, {
-        token: accessCode,
         action: 'object_history',
         postomatId: row.postomatId,
       });
@@ -693,24 +605,27 @@ const PstDashboardPage = () => {
   const summaryCards = useMemo(
     () => [
       {
-        label: 'Факт на дату',
-        value: summary?.completedCount ?? '—',
+        label: '\u0424\u0430\u043a\u0442 \u043d\u0430 \u0434\u0430\u0442\u0443',
+        value: summary?.factOnDate ?? '\u2014',
         icon: <CheckCircle2 size={22} />,
       },
       {
-        label: 'Выполнение плана',
-        value: summary ? `${summary.completionRate}%` : '—',
+        label: '\u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435 \u043f\u043b\u0430\u043d\u0430',
+        value: `${Math.min(Math.round((((summary?.weeklyFactCount ?? 0) / Math.max(weeklyPlan[0]?.value ?? 0, 1)) * 100)), 999)}%`,
         icon: <Target size={22} />,
         accent: 'text-brand-green',
       },
       {
-        label: 'Отставание',
-        value: summary?.lagCount ?? '—',
+        label: '\u041e\u0442\u0441\u0442\u0430\u0432\u0430\u043d\u0438\u0435',
+        value: Math.max((weeklyPlan[0]?.value ?? 0) - (summary?.weeklyFactCount ?? 0), 0),
         icon: <AlertCircle size={22} />,
-        accent: summary && summary.lagCount > 0 ? 'text-[#d35d59]' : 'text-brand-dark',
+        accent:
+          Math.max((weeklyPlan[0]?.value ?? 0) - (summary?.weeklyFactCount ?? 0), 0) > 0
+            ? 'text-[#d35d59]'
+            : 'text-brand-dark',
       },
     ],
-    [summary]
+    [summary, weeklyPlan]
   );
 
   return (
@@ -722,7 +637,7 @@ const PstDashboardPage = () => {
       />
 
       <div className="mx-auto w-full max-w-[1600px] px-5 sm:px-6 xl:px-8 2xl:px-10">
-        <div className="mb-10 flex items-center justify-between gap-4">
+        <div className="mb-10 flex items-center gap-4">
           <Link to="/" className="inline-flex">
             <img
               src="/logo_IC_group.png"
@@ -731,16 +646,6 @@ const PstDashboardPage = () => {
             />
           </Link>
 
-          {accessCode && (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-4 py-3 text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark transition hover:border-brand-green/30 hover:text-brand-green"
-            >
-              <KeyRound size={16} />
-              Сменить код
-            </button>
-          )}
         </div>
 
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
@@ -752,34 +657,6 @@ const PstDashboardPage = () => {
                 <span className="text-brand-green">Kaspi Postomat</span>
               </h1>
 
-              {!isDemoMode && !accessCode && (
-                <div className="mt-8 max-w-xl rounded-[28px] border border-black/6 bg-[#f7f8f4] p-5 shadow-premium">
-                  <div className="flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] text-brand-dark">
-                    <ShieldCheck size={18} className="text-brand-green" />
-                    Доступ руководства
-                  </div>
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                    <input
-                      type="password"
-                      value={accessCodeInput}
-                      onChange={(event) => setAccessCodeInput(event.target.value)}
-                      placeholder="Введите код доступа"
-                      className="min-w-0 flex-1 rounded-2xl border border-brand-dark/10 bg-white px-4 py-4 text-sm font-semibold text-brand-dark outline-none transition focus:border-brand-green"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAccessSubmit}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-green px-6 py-4 text-sm font-black uppercase tracking-[0.18em] text-brand-dark transition hover:scale-[1.01] hover:shadow-[0_18px_35px_rgba(143,198,64,0.24)]"
-                    >
-                      <ShieldCheck size={16} />
-                      Открыть
-                    </button>
-                  </div>
-                  {authError && (
-                    <div className="mt-3 text-sm font-semibold text-[#d35d59]">{authError}</div>
-                  )}
-                </div>
-              )}
             </div>
 
             {canLoadDashboard && (
