@@ -33,6 +33,9 @@ import SeoHead from './components/SeoHead';
 import { getSeoLanding } from './data/seoLandings';
 import { buildBreadcrumbSchema, SITE_URL } from './utils/seo';
 
+const VERSION_CHECK_STORAGE_KEY = 'ic-group-version-auto-reload';
+const VERSION_CHECK_INTERVAL_MS = 60_000;
+
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
 
@@ -52,6 +55,62 @@ function ScrollToTop() {
   return null;
 }
 
+function VersionRefreshGuard() {
+  useEffect(() => {
+    if (import.meta.env.DEV) return;
+
+    const currentVersion = String(import.meta.env.VITE_APP_BUILD_ID || '').trim();
+    if (!currentVersion) return;
+
+    let disposed = false;
+
+    const checkVersion = async () => {
+      try {
+        const response = await fetch(`/version.json?ts=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'cache-control': 'no-cache',
+            pragma: 'no-cache',
+          },
+        });
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as { version?: string };
+        const remoteVersion = String(payload?.version || '').trim();
+
+        if (!remoteVersion || disposed) return;
+
+        if (remoteVersion === currentVersion) {
+          const reloadedVersion = window.sessionStorage.getItem(VERSION_CHECK_STORAGE_KEY);
+          if (reloadedVersion) {
+            window.sessionStorage.removeItem(VERSION_CHECK_STORAGE_KEY);
+          }
+          return;
+        }
+
+        const alreadyReloadedFor = window.sessionStorage.getItem(VERSION_CHECK_STORAGE_KEY);
+        if (alreadyReloadedFor === remoteVersion) return;
+
+        window.sessionStorage.setItem(VERSION_CHECK_STORAGE_KEY, remoteVersion);
+        window.location.reload();
+      } catch (error) {
+        console.warn('Version check failed', error);
+      }
+    };
+
+    checkVersion();
+    const intervalId = window.setInterval(checkVersion, VERSION_CHECK_INTERVAL_MS);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  return null;
+}
+
 function App() {
   useEffect(() => {
     console.log('App initialized on', window.location.href);
@@ -64,6 +123,7 @@ function App() {
 
   return (
     <>
+      <VersionRefreshGuard />
       <ScrollProgress />
       <ScrollToTop />
       {location.pathname !== '/admin' && location.pathname !== '/admin/map' && !isTenderRoute && !isPstRoute && <Navbar onCalcOpen={() => setCalcOpen(true)} />}
