@@ -6,7 +6,7 @@ const OBJECTS_SHEET_CANDIDATES = [
   'Список уборки Kaspi Postomat',
 ];
 const HISTORY_SHEET_NAME = 'История уборок';
-const SCRIPT_VERSION = '2026-06-10-pst-dashboard-lite-v1';
+const SCRIPT_VERSION = '2026-06-11-pst-dashboard-lite-v2';
 const DASHBOARD_TOKEN = '';
 const DATA_START_ROW = 2;
 
@@ -89,9 +89,14 @@ function handleOverview(event) {
   const pagedRows = selectedDateRows.slice(pageStart, pageStart + pageSize);
 
   const weekRange = getWeekRange(selectedDate);
-  const weeklyFactCount = countUniquePostomats(
+  const cumulativeFactRows = allHistoryRows
+    .filter((row) => row.date <= selectedDate)
+    .filter((row) => (!selectedBranch ? true : row.branch === selectedBranch))
+    .filter((row) => historyMatchesQuery(row, query));
+
+  const weeklyFactCount = countHistoryRows(
     allHistoryRows
-      .filter((row) => row.date >= weekRange.start && row.date <= weekRange.end)
+      .filter((row) => row.date >= weekRange.start && row.date <= selectedDate)
       .filter((row) => (!selectedBranch ? true : row.branch === selectedBranch))
       .filter((row) => historyMatchesQuery(row, query))
   );
@@ -107,7 +112,7 @@ function handleOverview(event) {
       pageSize: pageSize,
     },
     summary: {
-      factOnDate: countUniquePostomats(selectedDateRows),
+      factOnDate: countHistoryRows(cumulativeFactRows),
       weeklyFactCount: weeklyFactCount,
     },
     branches: Array.from(
@@ -262,6 +267,10 @@ function countUniquePostomats(rows) {
       .map((row) => row.postomatId)
       .filter(Boolean)
   ).size;
+}
+
+function countHistoryRows(rows) {
+  return rows.length;
 }
 
 function getWeekRange(isoDate) {

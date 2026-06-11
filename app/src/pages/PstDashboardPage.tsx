@@ -204,8 +204,8 @@ const createDemoOverview = (
   const start = (safePage - 1) * PAGE_SIZE;
   const rows = filtered.slice(start, start + PAGE_SIZE);
 
-  const factOnDate = filtered.filter((row) => row.completed).length;
-  const weeklyFactCount = filtered.filter((row) => row.completed).length;
+  const factOnDate = filtered.filter((row) => row.completed).reduce((sum, row) => sum + Math.max(row.factCount || 0, 1), 0);
+  const weeklyFactCount = factOnDate;
 
   return {
     ok: true,
@@ -604,6 +604,15 @@ const PstDashboardPage = () => {
   const weeklyPlan = useMemo(() => getWeekPlanSlots(selectedDate), [selectedDate]);
   const weeklyTotal = weeklyPlan.reduce((sum, item) => sum + item.value, 0);
   const weeklyPeak = Math.max(...weeklyPlan.map((item) => item.value), 1);
+  const currentWeekPlanValue = weeklyPlan[0]?.value ?? 0;
+  const weeklyCompletionPercent = Math.max(
+    0,
+    Math.min(
+      Math.round((((summary?.weeklyFactCount ?? 0) / Math.max(currentWeekPlanValue, 1)) * 100)),
+      100
+    )
+  );
+  const weeklyLag = Math.max(currentWeekPlanValue - (summary?.weeklyFactCount ?? 0), 0);
 
   const summaryCards = useMemo(
     () => [
@@ -614,21 +623,18 @@ const PstDashboardPage = () => {
       },
       {
         label: '\u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435 \u043f\u043b\u0430\u043d\u0430',
-        value: `${Math.min(Math.round((((summary?.weeklyFactCount ?? 0) / Math.max(weeklyPlan[0]?.value ?? 0, 1)) * 100)), 999)}%`,
+        value: `${weeklyCompletionPercent}%`,
         icon: <Target size={22} />,
         accent: 'text-brand-green',
       },
       {
         label: '\u041e\u0442\u0441\u0442\u0430\u0432\u0430\u043d\u0438\u0435',
-        value: Math.max((weeklyPlan[0]?.value ?? 0) - (summary?.weeklyFactCount ?? 0), 0),
+        value: weeklyLag,
         icon: <AlertCircle size={22} />,
-        accent:
-          Math.max((weeklyPlan[0]?.value ?? 0) - (summary?.weeklyFactCount ?? 0), 0) > 0
-            ? 'text-[#d35d59]'
-            : 'text-brand-dark',
+        accent: weeklyLag > 0 ? 'text-[#d35d59]' : 'text-brand-dark',
       },
     ],
-    [summary, weeklyPlan]
+    [summary, weeklyCompletionPercent, weeklyLag]
   );
 
   return (
@@ -719,7 +725,11 @@ const PstDashboardPage = () => {
                                 item.isCurrent ? 'bg-brand-green' : 'bg-brand-green/85'
                               }`}
                               style={{
-                                width: `${Math.max((item.value / weeklyPeak) * 100, item.value > 0 ? 12 : 0)}%`,
+                                width: `${
+                                  item.isCurrent
+                                    ? Math.max(weeklyCompletionPercent, currentWeekPlanValue > 0 ? 8 : 0)
+                                    : Math.max((item.value / weeklyPeak) * 100, item.value > 0 ? 12 : 0)
+                                }%`,
                               }}
                             />
                           </div>
