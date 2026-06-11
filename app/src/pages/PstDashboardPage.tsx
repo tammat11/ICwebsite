@@ -603,16 +603,16 @@ const PstDashboardPage = () => {
   );
   const weeklyPlan = useMemo(() => getWeekPlanSlots(selectedDate), [selectedDate]);
   const weeklyTotal = weeklyPlan.reduce((sum, item) => sum + item.value, 0);
-  const weeklyPeak = Math.max(...weeklyPlan.map((item) => item.value), 1);
   const currentWeekPlanValue = weeklyPlan[0]?.value ?? 0;
+  const factOnDateValue = summary?.factOnDate ?? 0;
   const weeklyCompletionPercent = Math.max(
     0,
     Math.min(
-      Math.round((((summary?.weeklyFactCount ?? 0) / Math.max(currentWeekPlanValue, 1)) * 100)),
+      Math.round(((factOnDateValue / Math.max(currentWeekPlanValue, 1)) * 100)),
       100
     )
   );
-  const weeklyLag = Math.max(currentWeekPlanValue - (summary?.weeklyFactCount ?? 0), 0);
+  const weeklyLag = Math.max(currentWeekPlanValue - factOnDateValue, 0);
 
   const summaryCards = useMemo(
     () => [
@@ -634,7 +634,7 @@ const PstDashboardPage = () => {
         accent: weeklyLag > 0 ? 'text-[#d35d59]' : 'text-brand-dark',
       },
     ],
-    [summary, weeklyCompletionPercent, weeklyLag]
+    [summary, weeklyCompletionPercent, weeklyLag, factOnDateValue]
   );
 
   return (
@@ -726,9 +726,13 @@ const PstDashboardPage = () => {
                               }`}
                               style={{
                                 width: `${
-                                  item.isCurrent
-                                    ? Math.max(weeklyCompletionPercent, currentWeekPlanValue > 0 ? 8 : 0)
-                                    : Math.max((item.value / weeklyPeak) * 100, item.value > 0 ? 12 : 0)
+                                  Math.max(
+                                    Math.min(
+                                      Math.round(((factOnDateValue / Math.max(item.value, 1)) * 100)),
+                                      100
+                                    ),
+                                    item.value > 0 ? 8 : 0
+                                  )
                                 }%`,
                               }}
                             />

@@ -16,7 +16,7 @@ const OBJECT_HEADER_CANDIDATES = {
   branch: ['Филиал'],
   address: ['Адрес'],
   category: ['Категория точки'],
-  washed: ['???????'],
+  washed: ['???????', '\u041f\u043e\u043c\u044b\u043b\u0438?'],
 };
 
 const HISTORY_HEADER_CANDIDATES = {
