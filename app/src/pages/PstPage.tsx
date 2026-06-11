@@ -969,13 +969,25 @@ const PstPage = () => {
   };
 
   const totalPhotosCount = beforePhotos.length + afterPhotos.length;
-  const isReady = Boolean(selectedLocation && totalPhotosCount > 0);
+  const hasBeforePhotos = beforePhotos.length > 0;
+  const hasAfterPhotos = afterPhotos.length > 0;
+  const isReady = Boolean(selectedLocation && hasBeforePhotos && hasAfterPhotos);
 
   const handleSubmit = async () => {
     if (!isReady || isSubmittingRef.current) return;
 
     if (!PST_SHEETS_WEB_APP_URL) {
       setSubmitError('Не настроен адрес Google Apps Script для отправки в таблицу.');
+      return;
+    }
+
+    if (!selectedLocation) {
+      setSubmitError('\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043b\u043e\u043a\u0430\u0446\u0438\u044e.');
+      return;
+    }
+
+    if (!hasBeforePhotos || !hasAfterPhotos) {
+      setSubmitError('\u0414\u043b\u044f \u043e\u0442\u043f\u0440\u0430\u0432\u043a\u0438 \u043d\u0443\u0436\u043d\u043e \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u043d\u043e \u0444\u043e\u0442\u043e \u0432 \u0440\u0430\u0437\u0434\u0435\u043b\u044b \u00ab\u0414\u043e\u00bb \u0438 \u00ab\u041f\u043e\u0441\u043b\u0435\u00bb.');
       return;
     }
 
@@ -1364,6 +1376,17 @@ const PstPage = () => {
                 >
                   {isSubmitting ? 'Отправляем...' : 'Отправить'}
                 </button>
+                {!isReady && (
+                  <div className="mt-3 text-sm font-semibold leading-6 text-brand-dark/48">
+                    {selectedLocation
+                      ? !hasBeforePhotos && !hasAfterPhotos
+                        ? '\u0414\u043e\u0431\u0430\u0432\u044c\u0442\u0435 \u0444\u043e\u0442\u043e\u0433\u0440\u0430\u0444\u0438\u0438 \u0432 \u0440\u0430\u0437\u0434\u0435\u043b\u044b \u00ab\u0414\u043e\u00bb \u0438 \u00ab\u041f\u043e\u0441\u043b\u0435\u00bb, \u0447\u0442\u043e\u0431\u044b \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0443\u0431\u043e\u0440\u043a\u0443 \u043e\u0434\u043d\u043e\u0439 \u0446\u0435\u043b\u044c\u043d\u043e\u0439 \u0437\u0430\u043f\u0438\u0441\u044c\u044e.'
+                        : !hasBeforePhotos
+                          ? '\u0414\u043e\u0431\u0430\u0432\u044c\u0442\u0435 \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u043d\u043e \u0444\u043e\u0442\u043e \u0432 \u0440\u0430\u0437\u0434\u0435\u043b \u00ab\u0414\u043e\u00bb.'
+                          : '\u0414\u043e\u0431\u0430\u0432\u044c\u0442\u0435 \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u043d\u043e \u0444\u043e\u0442\u043e \u0432 \u0440\u0430\u0437\u0434\u0435\u043b \u00ab\u041f\u043e\u0441\u043b\u0435\u00bb.'
+                      : '\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043b\u043e\u043a\u0430\u0446\u0438\u044e \u0438 \u0434\u043e\u0431\u0430\u0432\u044c\u0442\u0435 \u0444\u043e\u0442\u043e \u0434\u043e \u0438 \u043f\u043e\u0441\u043b\u0435 \u0443\u0431\u043e\u0440\u043a\u0438.'}
+                  </div>
+                )}
               </div>
             </section>
           )}
