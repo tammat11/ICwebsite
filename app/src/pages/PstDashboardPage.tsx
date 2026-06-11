@@ -91,7 +91,7 @@ type ObjectHistoryResponse = {
 
 const DASHBOARD_WEB_APP_URL =
   (import.meta.env.VITE_PST_DASHBOARD_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbzv4QxnMmCt7N7TBzeu_h_AWkqvKHNHCGMoaXDOcFIPoEcvEcnmZTzSXekxkg9JpQY7zg/exec';
+  'https://script.google.com/macros/s/AKfycbz6sbl8CNLXt0LE9I1l1DebRJtNPydOZgUEsQvBGU2Nzh25crC_10YxPp6gtlB2JY6UtA/exec';
 const PAGE_SIZE = 25;
 const WEEKLY_PLAN_VALUES = [1300, 1500, 1700, 2000, 2200, 2200, 0];
 
