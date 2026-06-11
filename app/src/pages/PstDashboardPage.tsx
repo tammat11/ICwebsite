@@ -204,7 +204,7 @@ const createDemoOverview = (
   const start = (safePage - 1) * PAGE_SIZE;
   const rows = filtered.slice(start, start + PAGE_SIZE);
 
-  const factOnDate = filtered.filter((row) => row.completed).reduce((sum, row) => sum + Math.max(row.factCount || 0, 1), 0);
+  const factOnDate = baseRows.filter((row) => row.completed).reduce((sum, row) => sum + Math.max(row.factCount || 0, 1), 0);
   const weeklyFactCount = factOnDate;
 
   return {

@@ -77,9 +77,6 @@ function handleOverview(event) {
   const objects = loadObjects(objectsSheet);
   const allHistoryRows = enrichHistoryRows(loadHistoryRows(historySheet), objects);
   const allObjects = Array.from(objects.values());
-  const filteredObjects = allObjects
-    .filter((item) => (!selectedBranch ? true : item.branch === selectedBranch))
-    .filter((item) => objectMatchesQuery(item, query));
 
   const selectedDateRows = allHistoryRows
     .filter((row) => row.date === selectedDate)
@@ -93,7 +90,7 @@ function handleOverview(event) {
   const pageStart = (safePage - 1) * pageSize;
   const pagedRows = selectedDateRows.slice(pageStart, pageStart + pageSize);
 
-  const washedObjectsCount = filteredObjects.filter((item) => item.washed).length;
+  const washedObjectsCount = allObjects.filter((item) => item.washed).length;
 
   return {
     ok: true,
