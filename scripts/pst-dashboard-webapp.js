@@ -6,7 +6,7 @@ const OBJECTS_SHEET_CANDIDATES = [
   'Список уборки Kaspi Postomat',
 ];
 const HISTORY_SHEET_NAME = 'История уборок';
-const SCRIPT_VERSION = '2026-06-11-pst-dashboard-lite-v2';
+const SCRIPT_VERSION = '2026-06-11-pst-dashboard-lite-v3';
 const DASHBOARD_TOKEN = '';
 const DATA_START_ROW = 2;
 
@@ -16,6 +16,7 @@ const OBJECT_HEADER_CANDIDATES = {
   branch: ['Филиал'],
   address: ['Адрес'],
   category: ['Категория точки'],
+  washed: ['???????'],
 };
 
 const HISTORY_HEADER_CANDIDATES = {
@@ -75,6 +76,10 @@ function handleOverview(event) {
 
   const objects = loadObjects(objectsSheet);
   const allHistoryRows = enrichHistoryRows(loadHistoryRows(historySheet), objects);
+  const allObjects = Array.from(objects.values());
+  const filteredObjects = allObjects
+    .filter((item) => (!selectedBranch ? true : item.branch === selectedBranch))
+    .filter((item) => objectMatchesQuery(item, query));
 
   const selectedDateRows = allHistoryRows
     .filter((row) => row.date === selectedDate)
@@ -88,18 +93,7 @@ function handleOverview(event) {
   const pageStart = (safePage - 1) * pageSize;
   const pagedRows = selectedDateRows.slice(pageStart, pageStart + pageSize);
 
-  const weekRange = getWeekRange(selectedDate);
-  const cumulativeFactRows = allHistoryRows
-    .filter((row) => row.date <= selectedDate)
-    .filter((row) => (!selectedBranch ? true : row.branch === selectedBranch))
-    .filter((row) => historyMatchesQuery(row, query));
-
-  const weeklyFactCount = countHistoryRows(
-    allHistoryRows
-      .filter((row) => row.date >= weekRange.start && row.date <= selectedDate)
-      .filter((row) => (!selectedBranch ? true : row.branch === selectedBranch))
-      .filter((row) => historyMatchesQuery(row, query))
-  );
+  const washedObjectsCount = filteredObjects.filter((item) => item.washed).length;
 
   return {
     ok: true,
@@ -112,8 +106,8 @@ function handleOverview(event) {
       pageSize: pageSize,
     },
     summary: {
-      factOnDate: countHistoryRows(cumulativeFactRows),
-      weeklyFactCount: weeklyFactCount,
+      factOnDate: washedObjectsCount,
+      weeklyFactCount: washedObjectsCount,
     },
     branches: Array.from(
       new Set(
@@ -186,7 +180,7 @@ function loadObjects(sheet) {
 
   const values = sheet
     .getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, sheet.getLastColumn())
-    .getDisplayValues();
+    .getValues();
   const objects = new Map();
 
   values.forEach((row) => {
@@ -198,6 +192,7 @@ function loadObjects(sheet) {
       branch: getValueByHeader(row, headers, 'branch'),
       address: getValueByHeader(row, headers, 'address'),
       category: getValueByHeader(row, headers, 'category'),
+      washed: getBooleanByHeader(row, headers, 'washed'),
     });
   });
 
@@ -273,6 +268,11 @@ function countHistoryRows(rows) {
   return rows.length;
 }
 
+function objectMatchesQuery(row, query) {
+  if (!query) return true;
+  return normalizeSearch([row.postomatId, row.city, row.branch, row.address, row.category].join(' ')).indexOf(query) !== -1;
+}
+
 function getWeekRange(isoDate) {
   const parts = String(isoDate || '')
     .split('-')
@@ -312,6 +312,18 @@ function getValueByHeader(row, headerMap, key) {
   const index = headerMap[key];
   if (index === undefined || index === -1) return '';
   return String(row[index] || '').trim();
+}
+
+function getBooleanByHeader(row, headerMap, key) {
+  const index = headerMap[key];
+  if (index === undefined || index === -1) return false;
+  const value = row[index];
+  if (value === true) return true;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    return normalized === 'true' || normalized === '??????' || normalized === '??';
+  }
+  return false;
 }
 
 function getLinkByHeader(richTextRow, headerMap, key) {
