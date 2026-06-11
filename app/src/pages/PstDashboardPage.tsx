@@ -91,7 +91,7 @@ type ObjectHistoryResponse = {
 
 const DASHBOARD_WEB_APP_URL =
   (import.meta.env.VITE_PST_DASHBOARD_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbz6sbl8CNLXt0LE9I1l1DebRJtNPydOZgUEsQvBGU2Nzh25crC_10YxPp6gtlB2JY6UtA/exec';
+  'https://script.google.com/macros/s/AKfycbzEsZKczASxXauJXfIc5rK4bcUIwcUt8Zq6ssDmZD6lGc7oqGJEiCDUMGlw-Bq0OsTidw/exec';
 const PAGE_SIZE = 25;
 const WEEKLY_PLAN_VALUES = [1300, 1500, 1700, 2000, 2200, 2200, 0];
 
@@ -953,64 +953,6 @@ const PstDashboardPage = () => {
           </section>
 
           <aside className="space-y-6">
-            <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
-                    Последняя активность
-                  </div>
-                  <div className="mt-2 text-sm font-semibold text-brand-dark/55">
-                    {selectedDate ? `На дату ${formatIsoDate(selectedDate)}` : 'По текущим данным'}
-                  </div>
-                </div>
-                {isLoadingOverview && <LoaderCircle size={18} className="animate-spin text-brand-green" />}
-              </div>
-
-              <div className="mt-4 space-y-3">
-                {(overview?.recentHistory ?? []).length === 0 && (
-                  <div className="rounded-[22px] border border-dashed border-black/8 bg-[#fbfcf8] px-4 py-4 text-sm font-semibold text-brand-dark/48">
-                    Пока нет недавних записей для этой даты.
-                  </div>
-                )}
-
-                {(overview?.recentHistory ?? []).map((item, index) => (
-                  <div
-                    key={`${item.postomatId}-${item.date}-${item.time}-${index}`}
-                    className="rounded-[22px] border border-black/6 bg-[#fbfcf8] px-4 py-4"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-brand-dark/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-dark/55">
-                        ID {item.postomatId}
-                      </span>
-                      <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">
-                        {item.branch || 'Без филиала'}
-                      </span>
-                    </div>
-                    <div className="mt-3 text-sm font-black leading-6 text-brand-dark">
-                      {item.address}
-                    </div>
-                    <div className="mt-2 text-sm font-semibold text-brand-dark/55">
-                      {formatIsoDate(item.date)} • {item.time || '—'}
-                    </div>
-                    <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/58">
-                      {item.folderLinkUrl ? (
-                        <a
-                          href={item.folderLinkUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-brand-green underline decoration-brand-green/35 underline-offset-4 transition hover:text-brand-dark"
-                        >
-                          {item.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'}
-                        </a>
-                      ) : (
-                        item.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             <section className="rounded-[32px] border border-black/6 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
               <div className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
                 История точки
