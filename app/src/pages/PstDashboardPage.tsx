@@ -32,6 +32,7 @@ type DashboardRow = {
   factDate: string;
   factTime: string;
   folderLinkText: string;
+  folderLinkUrl?: string;
   status: string;
 };
 
@@ -44,6 +45,7 @@ type RecentHistoryItem = {
   date: string;
   time: string;
   folderLinkText: string;
+  folderLinkUrl?: string;
 };
 
 type HistoryTableRow = RecentHistoryItem;
@@ -909,9 +911,21 @@ const PstDashboardPage = () => {
                                 <div className="mt-1 text-brand-dark/45">{row.time || '—'}</div>
                               </td>
                               <td className="px-4 py-4">
-                                <span className="inline-flex w-full justify-center whitespace-nowrap rounded-full border border-black/8 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark">
-                                  {row.folderLinkText || 'Папка с фото'}
-                                </span>
+                                {row.folderLinkUrl ? (
+                                  <a
+                                    href={row.folderLinkUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={(event) => event.stopPropagation()}
+                                    className="inline-flex w-full justify-center whitespace-nowrap rounded-full border border-black/8 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark transition hover:border-brand-green/30 hover:text-brand-green"
+                                  >
+                                    {row.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'}
+                                  </a>
+                                ) : (
+                                  <span className="inline-flex w-full justify-center whitespace-nowrap rounded-full border border-black/8 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-brand-dark/45">
+                                    {row.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'}
+                                  </span>
+                                )}
                               </td>
                             </tr>
                           )})}
@@ -963,6 +977,20 @@ const PstDashboardPage = () => {
                     </div>
                     <div className="mt-2 text-sm font-semibold text-brand-dark/55">
                       {formatIsoDate(item.date)} • {item.time || '—'}
+                    </div>
+                    <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/58">
+                      {item.folderLinkUrl ? (
+                        <a
+                          href={item.folderLinkUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-brand-green underline decoration-brand-green/35 underline-offset-4 transition hover:text-brand-dark"
+                        >
+                          {item.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'}
+                        </a>
+                      ) : (
+                        item.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1026,7 +1054,18 @@ const PstDashboardPage = () => {
                             {formatIsoDate(item.date)} • {item.time || '—'}
                           </div>
                           <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/58">
-                            {item.folderLinkText || 'Папка с фото'}
+                            {item.folderLinkUrl ? (
+                              <a
+                                href={item.folderLinkUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-brand-green underline decoration-brand-green/35 underline-offset-4 transition hover:text-brand-dark"
+                              >
+                                {item.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'}
+                              </a>
+                            ) : (
+                              item.folderLinkText || '\u041f\u0430\u043f\u043a\u0430 \u0441 \u0444\u043e\u0442\u043e'
+                            )}
                           </div>
                         </div>
                       ))}

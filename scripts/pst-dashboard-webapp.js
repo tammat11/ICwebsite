@@ -204,12 +204,12 @@ function loadHistoryRows(sheet) {
   const lastRow = sheet.getLastRow();
   if (lastRow < DATA_START_ROW) return [];
 
-  const values = sheet
-    .getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, sheet.getLastColumn())
-    .getDisplayValues();
+  const range = sheet.getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, sheet.getLastColumn());
+  const values = range.getDisplayValues();
+  const richTextValues = range.getRichTextValues();
 
   return values
-    .map((row) => ({
+    .map((row, rowIndex) => ({
       postomatId: getValueByHeader(row, headers, 'id'),
       city: getValueByHeader(row, headers, 'city'),
       branch: getValueByHeader(row, headers, 'branch'),
@@ -218,6 +218,7 @@ function loadHistoryRows(sheet) {
       date: normalizeTableDate(getValueByHeader(row, headers, 'date')),
       time: getValueByHeader(row, headers, 'time'),
       folderLinkText: getValueByHeader(row, headers, 'folder'),
+      folderLinkUrl: getLinkByHeader(richTextValues[rowIndex], headers, 'folder'),
     }))
     .filter((row) => row.postomatId)
     .filter((row) => row.date);
@@ -235,6 +236,7 @@ function enrichHistoryRows(rows, objects) {
       date: row.date,
       time: row.time,
       folderLinkText: row.folderLinkText,
+      folderLinkUrl: row.folderLinkUrl,
     };
   });
 }
@@ -301,6 +303,27 @@ function getValueByHeader(row, headerMap, key) {
   const index = headerMap[key];
   if (index === undefined || index === -1) return '';
   return String(row[index] || '').trim();
+}
+
+function getLinkByHeader(richTextRow, headerMap, key) {
+  const index = headerMap[key];
+  if (index === undefined || index === -1) return '';
+
+  const richTextCell = richTextRow[index];
+  if (!richTextCell) return '';
+
+  const directLink = richTextCell.getLinkUrl();
+  if (directLink) return String(directLink).trim();
+
+  const runs = richTextCell.getRuns();
+  if (!runs || !runs.length) return '';
+
+  for (let indexRun = 0; indexRun < runs.length; indexRun += 1) {
+    const runLink = runs[indexRun].getLinkUrl();
+    if (runLink) return String(runLink).trim();
+  }
+
+  return '';
 }
 
 function assertToken(event) {
