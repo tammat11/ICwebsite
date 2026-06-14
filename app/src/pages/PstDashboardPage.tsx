@@ -552,6 +552,17 @@ const formatIsoDate = (value: string) => {
   return `${day}.${month}.${year}`;
 };
 
+const formatPercent = (value: number) => {
+  if (!Number.isFinite(value)) return '0%';
+
+  const normalized = Math.round(value * 100) / 100;
+
+  return `${normalized.toLocaleString('ru-RU', {
+    minimumFractionDigits: normalized % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  })}%`;
+};
+
 const getWeekDays = (isoDate: string) => {
   const [year, month, day] = isoDate.split('-').map(Number);
   const baseDate = new Date(year, (month || 1) - 1, day || 1);
