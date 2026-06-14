@@ -1,6 +1,7 @@
 import { type ReactNode, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
+  BarChart3,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -17,6 +18,30 @@ import SeoHead from '../components/SeoHead';
 type DashboardSummary = {
   factOnDate: number;
   weeklyFactCount: number;
+};
+
+type BranchReportDay = {
+  label: string;
+  plan: number;
+  fact: number;
+};
+
+type BranchReportRow = {
+  branch: string;
+  days: BranchReportDay[];
+};
+
+type WeeklyBranchReport = {
+  id: string;
+  title: string;
+  period: string;
+  weeklyPlan: number;
+  weeklyFact: number;
+  weeklyCompletion: number;
+  days: string[];
+  totals: BranchReportDay[];
+  dailyCompletion: number[];
+  branches: BranchReportRow[];
 };
 
 type DashboardRow = {
@@ -94,6 +119,170 @@ const DASHBOARD_WEB_APP_URL =
   'https://script.google.com/macros/s/AKfycbzEsZKczASxXauJXfIc5rK4bcUIwcUt8Zq6ssDmZD6lGc7oqGJEiCDUMGlw-Bq0OsTidw/exec';
 const PAGE_SIZE = 25;
 const WEEKLY_PLAN_VALUES = [1300, 1500, 1700, 2000, 2200, 2200, 0];
+const BRANCH_REPORTS: WeeklyBranchReport[] = [
+  {
+    id: 'report-week-1',
+    title: 'Отчетная неделя',
+    period: '01.06.2026 - 07.06.2026',
+    weeklyPlan: 987,
+    weeklyFact: 725,
+    weeklyCompletion: 73.45,
+    days: ['01.06', '02.06', '03.06', '04.06', '05.06', '06.06', '07.06'],
+    totals: [
+      { label: '01.06', plan: 120, fact: 66 },
+      { label: '02.06', plan: 120, fact: 73 },
+      { label: '03.06', plan: 150, fact: 83 },
+      { label: '04.06', plan: 137, fact: 117 },
+      { label: '05.06', plan: 140, fact: 113 },
+      { label: '06.06', plan: 164, fact: 131 },
+      { label: '07.06', plan: 156, fact: 142 },
+    ],
+    dailyCompletion: [55, 60.83, 55.33, 85.4, 80.71, 79.88, 91.03],
+    branches: [
+      {
+        branch: 'Южная столица',
+        days: [
+          { label: '01.06', plan: 89, fact: 43 },
+          { label: '02.06', plan: 80, fact: 40 },
+          { label: '03.06', plan: 95, fact: 49 },
+          { label: '04.06', plan: 99, fact: 81 },
+          { label: '05.06', plan: 95, fact: 71 },
+          { label: '06.06', plan: 93, fact: 78 },
+          { label: '07.06', plan: 92, fact: 89 },
+        ],
+      },
+      {
+        branch: 'Шымкент',
+        days: [
+          { label: '01.06', plan: 20, fact: 12 },
+          { label: '02.06', plan: 25, fact: 21 },
+          { label: '03.06', plan: 40, fact: 25 },
+          { label: '04.06', plan: 22, fact: 22 },
+          { label: '05.06', plan: 30, fact: 29 },
+          { label: '06.06', plan: 44, fact: 27 },
+          { label: '07.06', plan: 43, fact: 34 },
+        ],
+      },
+      {
+        branch: 'Туркестан',
+        days: [
+          { label: '01.06', plan: 11, fact: 11 },
+          { label: '02.06', plan: 15, fact: 12 },
+          { label: '03.06', plan: 15, fact: 9 },
+          { label: '04.06', plan: 16, fact: 14 },
+          { label: '05.06', plan: 15, fact: 13 },
+          { label: '06.06', plan: 15, fact: 14 },
+          { label: '07.06', plan: 12, fact: 10 },
+        ],
+      },
+      {
+        branch: 'Кентау',
+        days: [
+          { label: '01.06', plan: 0, fact: 0 },
+          { label: '02.06', plan: 0, fact: 0 },
+          { label: '03.06', plan: 0, fact: 0 },
+          { label: '04.06', plan: 0, fact: 0 },
+          { label: '05.06', plan: 0, fact: 0 },
+          { label: '06.06', plan: 12, fact: 12 },
+          { label: '07.06', plan: 9, fact: 9 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'report-week-2',
+    title: 'План на текущую неделю',
+    period: '08.06.2026 - 14.06.2026',
+    weeklyPlan: 1458,
+    weeklyFact: 106,
+    weeklyCompletion: 7.27,
+    days: ['08.06', '09.06', '10.06', '11.06', '12.06', '13.06', '14.06'],
+    totals: [
+      { label: '08.06', plan: 153, fact: 106 },
+      { label: '09.06', plan: 174, fact: 0 },
+      { label: '10.06', plan: 189, fact: 0 },
+      { label: '11.06', plan: 182, fact: 0 },
+      { label: '12.06', plan: 198, fact: 0 },
+      { label: '13.06', plan: 220, fact: 0 },
+      { label: '14.06', plan: 342, fact: 0 },
+    ],
+    dailyCompletion: [69.28, 0, 0, 0, 0, 0, 0],
+    branches: [
+      {
+        branch: 'Южная столица',
+        days: [
+          { label: '08.06', plan: 101, fact: 62 },
+          { label: '09.06', plan: 100, fact: 0 },
+          { label: '10.06', plan: 100, fact: 0 },
+          { label: '11.06', plan: 100, fact: 0 },
+          { label: '12.06', plan: 100, fact: 0 },
+          { label: '13.06', plan: 100, fact: 0 },
+          { label: '14.06', plan: 225, fact: 0 },
+        ],
+      },
+      {
+        branch: 'Шымкент',
+        days: [
+          { label: '08.06', plan: 17, fact: 14 },
+          { label: '09.06', plan: 19, fact: 0 },
+          { label: '10.06', plan: 30, fact: 0 },
+          { label: '11.06', plan: 24, fact: 0 },
+          { label: '12.06', plan: 33, fact: 0 },
+          { label: '13.06', plan: 38, fact: 0 },
+          { label: '14.06', plan: 30, fact: 0 },
+        ],
+      },
+      {
+        branch: 'Уральск',
+        days: [
+          { label: '08.06', plan: 11, fact: 9 },
+          { label: '09.06', plan: 13, fact: 0 },
+          { label: '10.06', plan: 15, fact: 0 },
+          { label: '11.06', plan: 13, fact: 0 },
+          { label: '12.06', plan: 16, fact: 0 },
+          { label: '13.06', plan: 29, fact: 0 },
+          { label: '14.06', plan: 35, fact: 0 },
+        ],
+      },
+      {
+        branch: 'Актау',
+        days: [
+          { label: '08.06', plan: 0, fact: 0 },
+          { label: '09.06', plan: 9, fact: 0 },
+          { label: '10.06', plan: 10, fact: 0 },
+          { label: '11.06', plan: 10, fact: 0 },
+          { label: '12.06', plan: 12, fact: 0 },
+          { label: '13.06', plan: 16, fact: 0 },
+          { label: '14.06', plan: 16, fact: 0 },
+        ],
+      },
+      {
+        branch: 'Тараз',
+        days: [
+          { label: '08.06', plan: 0, fact: 0 },
+          { label: '09.06', plan: 11, fact: 0 },
+          { label: '10.06', plan: 11, fact: 0 },
+          { label: '11.06', plan: 15, fact: 0 },
+          { label: '12.06', plan: 16, fact: 0 },
+          { label: '13.06', plan: 16, fact: 0 },
+          { label: '14.06', plan: 15, fact: 0 },
+        ],
+      },
+      {
+        branch: 'Кызылорда',
+        days: [
+          { label: '08.06', plan: 24, fact: 21 },
+          { label: '09.06', plan: 22, fact: 0 },
+          { label: '10.06', plan: 23, fact: 0 },
+          { label: '11.06', plan: 20, fact: 0 },
+          { label: '12.06', plan: 21, fact: 0 },
+          { label: '13.06', plan: 21, fact: 0 },
+          { label: '14.06', plan: 21, fact: 0 },
+        ],
+      },
+    ],
+  },
+];
 
 const DEMO_BRANCHES = ['Южная Столица', 'Шымкент', 'Уральск'];
 
@@ -500,6 +689,7 @@ const PstDashboardPage = () => {
   const [selectedBranch, setSelectedBranch] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [activeBranchReportId, setActiveBranchReportId] = useState(BRANCH_REPORTS[0]?.id ?? '');
   const [overview, setOverview] = useState<OverviewResponse | null>(null);
   const [historyData, setHistoryData] = useState<ObjectHistoryResponse | null>(null);
   const [historyTarget, setHistoryTarget] = useState<HistoryTarget | null>(null);
@@ -511,6 +701,8 @@ const PstDashboardPage = () => {
   const isDemoMode = !DASHBOARD_WEB_APP_URL;
 
   const canLoadDashboard = isDemoMode || Boolean(DASHBOARD_WEB_APP_URL);
+  const activeBranchReport =
+    BRANCH_REPORTS.find((report) => report.id === activeBranchReportId) ?? BRANCH_REPORTS[0];
 
   const loadOverview = async (nextPage = page, nextBranch = selectedBranch, nextDate = selectedDate) => {
     if (isDemoMode) {
@@ -754,6 +946,197 @@ const PstDashboardPage = () => {
                     />
                   ))}
                 </div>
+
+                {activeBranchReport && (
+                  <div className="mt-6 rounded-[32px] border border-black/6 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-6">
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-dark/38">
+                          Отчет по филиалам
+                        </div>
+                        <div className="mt-2 text-2xl font-black uppercase tracking-tight text-brand-dark sm:text-3xl">
+                          План / факт по дням
+                        </div>
+                        <div className="mt-2 text-sm font-semibold text-brand-dark/58">
+                          Интерфейс повторяет логику Excel-отчета: филиалы, ежедневный план и факт, итоги и выполнение недели.
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {BRANCH_REPORTS.map((report) => {
+                          const isActive = report.id === activeBranchReport.id;
+                          return (
+                            <button
+                              key={report.id}
+                              type="button"
+                              onClick={() => setActiveBranchReportId(report.id)}
+                              className={`rounded-full border px-4 py-3 text-left transition ${
+                                isActive
+                                  ? 'border-brand-green bg-brand-green/10 text-brand-dark shadow-[0_8px_24px_rgba(143,198,64,0.18)]'
+                                  : 'border-black/8 bg-[#fbfcf8] text-brand-dark/62 hover:border-brand-green/30'
+                              }`}
+                            >
+                              <div className="text-[10px] font-black uppercase tracking-[0.22em]">
+                                {report.title}
+                              </div>
+                              <div className="mt-1 text-sm font-black">{report.period}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                      <div className="rounded-[26px] border border-black/6 bg-[#fbfcf8] p-5">
+                        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/38">
+                          План недели
+                        </div>
+                        <div className="mt-3 text-[clamp(2rem,3vw,3rem)] font-black leading-none text-brand-dark">
+                          {activeBranchReport.weeklyPlan.toLocaleString('ru-RU')}
+                        </div>
+                      </div>
+
+                      <div className="rounded-[26px] border border-black/6 bg-[#fbfcf8] p-5">
+                        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/38">
+                          Факт недели
+                        </div>
+                        <div className="mt-3 text-[clamp(2rem,3vw,3rem)] font-black leading-none text-brand-dark">
+                          {activeBranchReport.weeklyFact.toLocaleString('ru-RU')}
+                        </div>
+                      </div>
+
+                      <div className="rounded-[26px] border border-brand-green/18 bg-brand-green/10 p-5">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                              Выполнение недели
+                            </div>
+                            <div className="mt-3 text-[clamp(2rem,3vw,3rem)] font-black leading-none text-brand-green">
+                              {formatPercent(activeBranchReport.weeklyCompletion)}
+                            </div>
+                          </div>
+                          <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white text-brand-green shadow-sm">
+                            <BarChart3 size={22} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 overflow-hidden rounded-[28px] border border-black/6">
+                      <div className="overflow-x-auto">
+                        <table className="min-w-[1100px] w-full border-collapse">
+                          <thead className="bg-[#f7f8f4]">
+                            <tr>
+                              <th className="px-4 py-4 text-left text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                                Филиал
+                              </th>
+                              {activeBranchReport.days.map((day) => (
+                                <th
+                                  key={day}
+                                  className="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42"
+                                >
+                                  <div>{day}</div>
+                                  <div className="mt-2 flex gap-2 text-[9px] text-brand-dark/32">
+                                    <span>план</span>
+                                    <span>факт</span>
+                                  </div>
+                                </th>
+                              ))}
+                              <th className="px-4 py-4 text-left text-[10px] font-black uppercase tracking-[0.24em] text-brand-dark/42">
+                                Итого
+                              </th>
+                            </tr>
+                          </thead>
+
+                          <tbody className="divide-y divide-black/6 bg-white">
+                            {activeBranchReport.branches.map((branchRow) => {
+                              const branchPlan = branchRow.days.reduce((sum, day) => sum + day.plan, 0);
+                              const branchFact = branchRow.days.reduce((sum, day) => sum + day.fact, 0);
+                              const branchCompletion = branchPlan > 0 ? (branchFact / branchPlan) * 100 : 0;
+
+                              return (
+                                <tr key={branchRow.branch} className="align-top">
+                                  <td className="px-4 py-4">
+                                    <div className="text-sm font-black text-brand-dark">{branchRow.branch}</div>
+                                  </td>
+
+                                  {branchRow.days.map((day) => {
+                                    const dayCompletion = day.plan > 0 ? Math.min((day.fact / day.plan) * 100, 100) : 0;
+
+                                    return (
+                                      <td key={`${branchRow.branch}-${day.label}`} className="px-3 py-4">
+                                        <div className="rounded-[20px] border border-black/6 bg-[#fbfcf8] p-3">
+                                          <div className="flex items-baseline justify-between gap-3">
+                                            <span className="text-xs font-black text-brand-dark">{day.plan}</span>
+                                            <span className="text-xs font-semibold text-brand-dark/58">{day.fact}</span>
+                                          </div>
+                                          <div className="mt-3 h-1.5 rounded-full bg-brand-dark/6">
+                                            <div
+                                              className="h-1.5 rounded-full bg-brand-green transition-all"
+                                              style={{ width: `${Math.max(Math.round(dayCompletion), day.plan > 0 ? 6 : 0)}%` }}
+                                            />
+                                          </div>
+                                        </div>
+                                      </td>
+                                    );
+                                  })}
+
+                                  <td className="px-4 py-4">
+                                    <div className="rounded-[22px] border border-brand-green/20 bg-brand-green/10 p-4">
+                                      <div className="text-xs font-black uppercase tracking-[0.18em] text-brand-dark/45">
+                                        {branchFact} / {branchPlan}
+                                      </div>
+                                      <div className="mt-2 text-lg font-black text-brand-dark">
+                                        {formatPercent(branchCompletion)}
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+
+                          <tfoot className="border-t border-black/6 bg-[#f7f8f4]">
+                            <tr>
+                              <td className="px-4 py-4 text-sm font-black text-brand-dark">Итого по дням</td>
+                              {activeBranchReport.totals.map((day) => (
+                                <td key={`total-${day.label}`} className="px-3 py-4">
+                                  <div className="rounded-[20px] border border-black/6 bg-white p-3">
+                                    <div className="flex items-baseline justify-between gap-3">
+                                      <span className="text-xs font-black text-brand-dark">{day.plan}</span>
+                                      <span className="text-xs font-semibold text-brand-dark/58">{day.fact}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                              ))}
+                              <td className="px-4 py-4">
+                                <div className="text-lg font-black text-brand-dark">
+                                  {activeBranchReport.weeklyFact} / {activeBranchReport.weeklyPlan}
+                                </div>
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td className="px-4 py-4 text-sm font-black text-brand-dark">Выполнение дня</td>
+                              {activeBranchReport.dailyCompletion.map((value, index) => (
+                                <td key={`completion-${activeBranchReport.days[index]}`} className="px-3 py-4">
+                                  <div className="rounded-[20px] border border-black/6 bg-white p-3">
+                                    <div className="text-sm font-black text-brand-dark">{formatPercent(value)}</div>
+                                  </div>
+                                </td>
+                              ))}
+                              <td className="px-4 py-4">
+                                <div className="text-lg font-black text-brand-green">
+                                  {formatPercent(activeBranchReport.weeklyCompletion)}
+                                </div>
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-6 rounded-[32px] border border-black/6 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-6">
                   <div className="grid gap-4 2xl:grid-cols-[220px_240px_minmax(0,1fr)_auto]">
