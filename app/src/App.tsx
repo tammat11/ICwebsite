@@ -56,11 +56,14 @@ function ScrollToTop() {
 }
 
 function VersionRefreshGuard() {
+  const location = useLocation();
+
   useEffect(() => {
     if (import.meta.env.DEV) return;
 
     const currentVersion = String(import.meta.env.VITE_APP_BUILD_ID || '').trim();
     if (!currentVersion) return;
+    const isPstRoute = location.pathname === '/pst';
 
     let disposed = false;
 
@@ -102,11 +105,32 @@ function VersionRefreshGuard() {
     checkVersion();
     const intervalId = window.setInterval(checkVersion, VERSION_CHECK_INTERVAL_MS);
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkVersion();
+      }
+    };
+
+    const handleFocus = () => {
+      if (isPstRoute) {
+        checkVersion();
+      }
+    };
+
+    if (isPstRoute) {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('focus', handleFocus);
+    }
+
     return () => {
       disposed = true;
       window.clearInterval(intervalId);
+      if (isPstRoute) {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('focus', handleFocus);
+      }
     };
-  }, []);
+  }, [location.pathname]);
 
   return null;
 }

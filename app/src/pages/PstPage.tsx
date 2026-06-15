@@ -95,6 +95,7 @@ declare global {
 }
 
 const SEARCH_RADIUS_KM = 0.3;
+const PST_PAYLOAD_VERSION = 2;
 const PST_SHEETS_WEB_APP_URL =
   (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
   'https://script.google.com/macros/s/AKfycbwTtYydw97Ijbo_qdVLfvFoFAUEfzsb1gTlRQkYTTBOG38jLGT_CK684KbGq5L7bZlDMg/exec';
@@ -1020,6 +1021,8 @@ const PstPage = () => {
       }
 
       const payload = {
+        payloadVersion: PST_PAYLOAD_VERSION,
+        clientBuildId: String(import.meta.env.VITE_APP_BUILD_ID || '').trim() || 'dev-build',
         submittedAt,
         location: {
           id: selectedLocation!.id,

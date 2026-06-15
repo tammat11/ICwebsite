@@ -2,7 +2,8 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-05-history-sheet-v10';
+const SCRIPT_VERSION = '2026-06-15-pst-v2-only';
+const ACCEPTED_PAYLOAD_VERSION = 2;
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
 const STATUS_HEADER = 'Помыли?';
@@ -22,7 +23,12 @@ const HISTORY_HEADERS = [
 ];
 
 function doGet() {
-  return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION });
+  return jsonResponse({
+    ok: true,
+    service: 'pst-cleaning-webapp',
+    version: SCRIPT_VERSION,
+    acceptedPayloadVersion: ACCEPTED_PAYLOAD_VERSION,
+  });
 }
 
 function authorizeDriveAccess() {
@@ -38,20 +44,24 @@ function doPost(event) {
     lock.waitLock(30000);
 
     const payload = JSON.parse((event.postData && event.postData.contents) || '{}');
+    const payloadVersion = Number(payload.payloadVersion || 0);
     const location = payload.location || {};
     const beforePhotos = Array.isArray(payload.beforePhotos) ? payload.beforePhotos : [];
     const afterPhotos = Array.isArray(payload.afterPhotos) ? payload.afterPhotos : [];
-    const groupedPhotos =
-      beforePhotos.length > 0 || afterPhotos.length > 0
-        ? { before: beforePhotos, after: afterPhotos }
-        : { before: Array.isArray(payload.photos) ? payload.photos : [], after: [] };
+    const groupedPhotos = { before: beforePhotos, after: afterPhotos };
+
+    if (payloadVersion !== ACCEPTED_PAYLOAD_VERSION) {
+      throw new Error(
+        `Unsupported payload version: ${payloadVersion || 'missing'}. Expected ${ACCEPTED_PAYLOAD_VERSION}. Please reload /pst and try again.`
+      );
+    }
 
     if (!location.id) {
       throw new Error('POSTOMAT_ID is missing');
     }
 
-    if (groupedPhotos.before.length === 0 && groupedPhotos.after.length === 0) {
-      throw new Error('At least one photo is required');
+    if (groupedPhotos.before.length === 0 || groupedPhotos.after.length === 0) {
+      throw new Error('Both beforePhotos and afterPhotos are required');
     }
 
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
