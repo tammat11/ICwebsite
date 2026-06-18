@@ -26,7 +26,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                             <div className="w-10 h-10 md:w-12 md:h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center">
                                 <img
                                     src="/logo_IC_group.png"
-                                    alt="IC GROUP — крупнейшая клининговая компания в Казахстане"
+                                    alt="IC GROUP вЂ” РєСЂСѓРїРЅРµР№С€Р°СЏ РєР»РёРЅРёРЅРіРѕРІР°СЏ РєРѕРјРїР°РЅРёСЏ РІ РљР°Р·Р°С…СЃС‚Р°РЅРµ"
                                     className="h-6 md:h-7 w-auto object-contain"
                                     loading="lazy"
                                 />
@@ -34,7 +34,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                             <span className="text-xl md:text-3xl font-bold tracking-tighter">IC GROUP</span>
                         </div>
                         <p className="text-white/40 text-sm md:text-lg leading-relaxed max-w-sm">
-                            Мы предоставляем широкий спектр услуг от ежедневной уборки до производства чистящих средств. Мы поможем вам подобрать комплекс услуг, отвечающий всем пожеланиям и нуждам вашей компании.
+                            РњС‹ РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµРј С€РёСЂРѕРєРёР№ СЃРїРµРєС‚СЂ СѓСЃР»СѓРі РѕС‚ РµР¶РµРґРЅРµРІРЅРѕР№ СѓР±РѕСЂРєРё РґРѕ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° С‡РёСЃС‚СЏС‰РёС… СЃСЂРµРґСЃС‚РІ. РњС‹ РїРѕРјРѕР¶РµРј РІР°Рј РїРѕРґРѕР±СЂР°С‚СЊ РєРѕРјРїР»РµРєСЃ СѓСЃР»СѓРі, РѕС‚РІРµС‡Р°СЋС‰РёР№ РІСЃРµРј РїРѕР¶РµР»Р°РЅРёСЏРј Рё РЅСѓР¶РґР°Рј РІР°С€РµР№ РєРѕРјРїР°РЅРёРё.
                         </p>
                         <div className="flex flex-wrap gap-4">
                             {[
@@ -51,12 +51,12 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
 
                     {/* Contacts */}
                     <div className="space-y-4 md:space-y-6">
-                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">Контакты</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">РљРѕРЅС‚Р°РєС‚С‹</h4>
                         <ul className="space-y-5 md:space-y-6">
                             <li className="flex items-start gap-4">
                                 <Phone className="mt-1 text-brand-green" size={18} />
                                 <div>
-                                    <p className="text-white/40 text-sm mb-1">Продажи</p>
+                                    <p className="text-white/40 text-sm mb-1">РџСЂРѕРґР°Р¶Рё</p>
                                     <a href="tel:+77770087360" className="text-lg md:text-xl font-medium hover:text-brand-green transition-colors">+7 777 008 73 60</a>
                                 </div>
                             </li>
@@ -70,8 +70,8 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                             <li className="flex items-start gap-4">
                                 <MapPin className="mt-1 text-brand-green" size={18} />
                                 <div>
-                                    <p className="text-white/40 text-sm mb-1">Главный офис</p>
-                                    <p className="text-white/80 leading-snug text-sm md:text-base">Алматы, ул. Натарова, 12,<br />050016, Казахстан</p>
+                                    <p className="text-white/40 text-sm mb-1">Р“Р»Р°РІРЅС‹Р№ РѕС„РёСЃ</p>
+                                    <p className="text-white/80 leading-snug text-sm md:text-base">Алматы, Ауэзовский район,<br />8-й микрорайон, 55а,<br />050006, Казахстан</p>
                                 </div>
                             </li>
                         </ul>
@@ -79,7 +79,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
 
                     {/* Employees / Resources */}
                     <div className="space-y-4 md:space-y-6">
-                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">Сотрудникам</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green">РЎРѕС‚СЂСѓРґРЅРёРєР°Рј</h4>
                         <ul className="space-y-4">
                             <li>
                                 <Link 
@@ -89,7 +89,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-dark transition-all">
                                         <GraduationCap size={16} />
                                     </div>
-                                    <span className="text-sm font-medium">Обучающие курсы</span>
+                                    <span className="text-sm font-medium">РћР±СѓС‡Р°СЋС‰РёРµ РєСѓСЂСЃС‹</span>
                                 </Link>
                             </li>
                             <li>
@@ -100,7 +100,7 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-dark transition-all">
                                         <ArrowUpRight size={16} />
                                     </div>
-                                    <span className="text-sm font-medium">Вакансии</span>
+                                    <span className="text-sm font-medium">Р’Р°РєР°РЅСЃРёРё</span>
                                 </Link>
                             </li>
                             <li>
@@ -111,42 +111,42 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-brand-dark transition-all">
                                         <FileText size={16} />
                                     </div>
-                                    <span className="text-sm font-medium">Анкета кандидата</span>
+                                    <span className="text-sm font-medium">РђРЅРєРµС‚Р° РєР°РЅРґРёРґР°С‚Р°</span>
                                 </Link>
                             </li>
                         </ul>
 
                         <div className="pt-4">
-                            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green mb-4">Популярные страницы</h4>
+                            <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-brand-green mb-4">РџРѕРїСѓР»СЏСЂРЅС‹Рµ СЃС‚СЂР°РЅРёС†С‹</h4>
                             <ul className="space-y-3">
                                 <li>
                                     <Link to="/klining-ofisov" className="text-sm text-white/60 hover:text-white transition-colors">
-                                        Клининг офисов
+                                        РљР»РёРЅРёРЅРі РѕС„РёСЃРѕРІ
                                     </Link>
                                 </li>
                                 <li>
                                     <Link to="/kliningovaya-kompaniya-almaty" className="text-sm text-white/60 hover:text-white transition-colors">
-                                        Клининговая компания в Алматы
+                                        РљР»РёРЅРёРЅРіРѕРІР°СЏ РєРѕРјРїР°РЅРёСЏ РІ РђР»РјР°С‚С‹
                                     </Link>
                                 </li>
                                 <li>
                                     <Link to="/kliningovaya-kompaniya-astana" className="text-sm text-white/60 hover:text-white transition-colors">
-                                        Клининговая компания в Астане
+                                        РљР»РёРЅРёРЅРіРѕРІР°СЏ РєРѕРјРїР°РЅРёСЏ РІ РђСЃС‚Р°РЅРµ
                                     </Link>
                                 </li>
                                 <li>
                                     <Link to="/generalnaya-uborka" className="text-sm text-white/60 hover:text-white transition-colors">
-                                        Генеральная уборка
+                                        Р“РµРЅРµСЂР°Р»СЊРЅР°СЏ СѓР±РѕСЂРєР°
                                     </Link>
                                 </li>
                                 <li>
                                     <Link to="/poslestroitelnaya-uborka" className="text-sm text-white/60 hover:text-white transition-colors">
-                                        Послестроительная уборка
+                                        РџРѕСЃР»РµСЃС‚СЂРѕРёС‚РµР»СЊРЅР°СЏ СѓР±РѕСЂРєР°
                                     </Link>
                                 </li>
                                 <li>
                                     <Link to="/moyka-vitrazhey" className="text-sm text-white/60 hover:text-white transition-colors">
-                                        Мойка витражей
+                                        РњРѕР№РєР° РІРёС‚СЂР°Р¶РµР№
                                     </Link>
                                 </li>
                             </ul>
@@ -160,18 +160,18 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                         onClick={onCalcOpen}
                         className="px-7 md:px-10 py-3.5 md:py-5 bg-brand-green rounded-full text-brand-dark font-bold uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2 text-[13px] md:text-base w-full md:w-auto text-center"
                     >
-                        ОСТАВИТЬ ЗАЯВКУ
+                        РћРЎРўРђР’РРўР¬ Р—РђРЇР’РљРЈ
                         <ArrowUpRight size={20} />
                     </button>
                 </div>
 
                 {/* Copyright */}
                 <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left text-[10px] md:text-xs font-medium text-white/20 uppercase tracking-widest">
-                    <p>© 2026 IC Group Holding. Все права защищены.</p>
+                    <p>В© 2026 IC Group Holding. Р’СЃРµ РїСЂР°РІР° Р·Р°С‰РёС‰РµРЅС‹.</p>
                     <div className="flex gap-8">
-                        <a href="/sitemap.xml" className="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Карта сайта</a>
-                        <a href="#" className="hover:text-white transition-colors">Политика конфиденциальности</a>
-                        <a href="#" className="hover:text-white transition-colors">Условия использования</a>
+                        <a href="/sitemap.xml" className="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">РљР°СЂС‚Р° СЃР°Р№С‚Р°</a>
+                        <a href="#" className="hover:text-white transition-colors">РџРѕР»РёС‚РёРєР° РєРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅРѕСЃС‚Рё</a>
+                        <a href="#" className="hover:text-white transition-colors">РЈСЃР»РѕРІРёСЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ</a>
                     </div>
                 </div>
             </div>

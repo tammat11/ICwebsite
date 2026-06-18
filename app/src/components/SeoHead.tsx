@@ -47,9 +47,9 @@ const baseOrganizationSchema = {
   areaServed: 'KZ',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'ул. Натарова, 12',
-    addressLocality: 'Алматы',
-    postalCode: '050016',
+    streetAddress: 'Ауэзовский район, 8-й микрорайон, 55а',
+    addressLocality: 'РђР»РјР°С‚С‹',
+    postalCode: '050006',
     addressCountry: 'KZ',
   },
   contactPoint: [
