@@ -48,7 +48,7 @@ const baseOrganizationSchema = {
   address: {
     '@type': 'PostalAddress',
     streetAddress: 'Ауэзовский район, 8-й микрорайон, 55а',
-    addressLocality: 'РђР»РјР°С‚С‹',
+    addressLocality: 'Алматы',
     postalCode: '050006',
     addressCountry: 'KZ',
   },
