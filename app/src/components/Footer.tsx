@@ -71,7 +71,14 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                 <MapPin className="mt-1 text-brand-green" size={18} />
                                 <div>
                                     <p className="text-white/40 text-sm mb-1">Главный офис</p>
-                                    <p className="text-white/80 leading-snug text-sm md:text-base">Алматы, Ауэзовский район,<br />8-й микрорайон, 55а,<br />050006, Казахстан</p>
+                                    <a
+                                        href="https://2gis.kz/almaty/geo/9430047374969547"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-white/80 leading-snug text-sm md:text-base hover:text-brand-green transition-colors"
+                                    >
+                                        Алматы, Ауэзовский район,<br />8-й микрорайон, 55а,<br />050006, Казахстан
+                                    </a>
                                 </div>
                             </li>
                         </ul>
