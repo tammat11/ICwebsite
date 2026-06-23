@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const buildTimestamp = new Date().toISOString()
 const buildId = `${buildTimestamp}-${Math.random().toString(36).slice(2, 8)}`
-const pstSheetsWebAppUrl = 'https://script.google.com/macros/s/AKfycbx9ovxC2Effj6P3IDo9DgZr65BDhDPbBFZVKqS96ydHFwh7BI49nenzn3S32zkNqXCJPQ/exec'
+const pstSheetsWebAppUrl = 'https://script.google.com/macros/s/AKfycbx5djrvi6RgOJ0zXUPtPi1IDNWjdXfwYKdK1FbGOI7SzbqQf_ZzX16x6ZL__1NvpXaVsg/exec'
 
 function appVersionPlugin() {
     return {
