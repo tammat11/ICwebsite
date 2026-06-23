@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const buildTimestamp = new Date().toISOString()
 const buildId = `${buildTimestamp}-${Math.random().toString(36).slice(2, 8)}`
+const pstSheetsWebAppUrl = 'https://script.google.com/macros/s/AKfycbx9ovxC2Effj6P3IDo9DgZr65BDhDPbBFZVKqS96ydHFwh7BI49nenzn3S32zkNqXCJPQ/exec'
 
 function appVersionPlugin() {
     return {
@@ -28,6 +29,7 @@ function appVersionPlugin() {
 export default defineConfig({
     define: {
         'import.meta.env.VITE_APP_BUILD_ID': JSON.stringify(buildId),
+        'import.meta.env.VITE_PST_SHEETS_WEB_APP_URL': JSON.stringify(pstSheetsWebAppUrl),
     },
     plugins: [react(), tailwindcss(), appVersionPlugin()],
     base: '/',
