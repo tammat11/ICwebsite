@@ -39,16 +39,41 @@ function authorizeDriveAccess() {
 
 function doPost(event) {
   const lock = LockService.getScriptLock();
+  let debugId = getRequestDebugId(event);
 
   try {
+    logPstEvent('doPost:start', {
+      debugId,
+      version: SCRIPT_VERSION,
+      contentType: event.postData && event.postData.type,
+      contentLength: event.postData && event.postData.length,
+      query: event.parameter || {},
+    });
+
     lock.waitLock(30000);
 
     const payload = JSON.parse((event.postData && event.postData.contents) || '{}');
+    debugId = payload.submissionDebugId || debugId;
     const payloadVersion = Number(payload.payloadVersion || 0);
     const location = payload.location || {};
     const beforePhotos = Array.isArray(payload.beforePhotos) ? payload.beforePhotos : [];
     const afterPhotos = Array.isArray(payload.afterPhotos) ? payload.afterPhotos : [];
     const groupedPhotos = { before: beforePhotos, after: afterPhotos };
+
+    logPstEvent('payload:parsed', {
+      debugId,
+      payloadVersion,
+      clientBuildId: payload.clientBuildId || '',
+      submittedAt: payload.submittedAt || '',
+      postomatId: location.id || '',
+      address: location.address || '',
+      city: location.city || '',
+      branch: location.branch || '',
+      beforePhotosCount: beforePhotos.length,
+      afterPhotosCount: afterPhotos.length,
+      beforePhotoSizes: beforePhotos.map((photo) => photo.sizeBytes || 0),
+      afterPhotoSizes: afterPhotos.map((photo) => photo.sizeBytes || 0),
+    });
 
     if (payloadVersion !== ACCEPTED_PAYLOAD_VERSION) {
       throw new Error(
@@ -67,11 +92,21 @@ function doPost(event) {
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     const objectsSheet = getObjectsSheet(spreadsheet);
     const historySheet = getOrCreateHistorySheet(spreadsheet);
+    logPstEvent('sheet:opened', {
+      debugId,
+      spreadsheetId: SPREADSHEET_ID,
+      objectsSheet: objectsSheet.getName(),
+      historySheet: historySheet.getName(),
+      objectsRows: objectsSheet.getLastRow(),
+      historyRows: historySheet.getLastRow(),
+    });
+
     const objectRow = findObjectRow(objectsSheet, location.id);
 
     if (!objectRow) {
       throw new Error(`POSTOMAT_ID ${location.id} not found`);
     }
+    logPstEvent('object:found', { debugId, postomatId: location.id, row: objectRow });
 
     const submittedAt = payload.submittedAt ? new Date(payload.submittedAt) : new Date();
     const timezone = Session.getScriptTimeZone();
@@ -79,17 +114,43 @@ function doPost(event) {
     const submittedDate = Utilities.formatDate(submittedAt, timezone, 'dd.MM.yyyy');
     const submittedTime = Utilities.formatDate(submittedAt, timezone, 'HH:mm');
     const storedPhotos = savePhotosToDrive(groupedPhotos, location, submittedAt, monthTitle, timezone);
+    logPstEvent('drive:saved', {
+      debugId,
+      folderUrl: storedPhotos.folderUrl,
+      beforeFiles: storedPhotos.before.map((file) => file.fileName),
+      afterFiles: storedPhotos.after.map((file) => file.fileName),
+    });
 
     appendCleaningHistory(historySheet, location, submittedDate, submittedTime, storedPhotos);
-    updateObjectCleaningStatus(objectsSheet, objectRow, submittedDate);
+    logPstEvent('history:appended', {
+      debugId,
+      historySheet: historySheet.getName(),
+      row: historySheet.getLastRow(),
+      submittedDate,
+      submittedTime,
+    });
 
-    return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION });
+    updateObjectCleaningStatus(objectsSheet, objectRow, submittedDate);
+    logPstEvent('status:updated', {
+      debugId,
+      objectsSheet: objectsSheet.getName(),
+      row: objectRow,
+      submittedDate,
+    });
+
+    logPstEvent('doPost:success', { debugId, postomatId: location.id });
+    return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION, debugId });
   } catch (error) {
-    console.error(error && error.stack ? error.stack : error);
+    logPstEvent('doPost:error', {
+      debugId,
+      message: String(error && error.message ? error.message : error),
+      stack: String(error && error.stack ? error.stack : ''),
+    });
     return jsonResponse({
       ok: false,
       service: 'pst-cleaning-webapp',
       version: SCRIPT_VERSION,
+      debugId,
       error: String(error && error.message ? error.message : error),
     });
   } finally {
@@ -97,6 +158,22 @@ function doPost(event) {
       lock.releaseLock();
     }
   }
+}
+
+function getRequestDebugId(event) {
+  const fromQuery = event && event.parameter && event.parameter.debugId;
+  return String(fromQuery || `server-${Date.now()}`).trim();
+}
+
+function logPstEvent(stage, details) {
+  const payload = Object.assign(
+    {
+      stage,
+      timestamp: new Date().toISOString(),
+    },
+    details || {}
+  );
+  console.log(`PST_CLEANING_LOG ${JSON.stringify(payload)}`);
 }
 
 function getObjectsSheet(spreadsheet) {
