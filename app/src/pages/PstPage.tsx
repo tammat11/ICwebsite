@@ -80,6 +80,8 @@ type PhotoStamp = {
   city: string;
 };
 
+type CompressedPhotosBySection = Record<PhotoSection, CompressedPhoto[]>;
+
 type IndexedLocation = PstLocation & {
   searchIndex: string;
 };
@@ -410,6 +412,69 @@ const compressPhotoForSheets = async (
   }
 
   return bestPhoto!;
+};
+
+const formatFileDateTime = (value: string) => {
+  const date = new Date(value);
+  const part = (segment: number) => String(segment).padStart(2, '0');
+
+  return [
+    date.getFullYear(),
+    part(date.getMonth() + 1),
+    part(date.getDate()),
+  ].join('-') + `_${part(date.getHours())}-${part(date.getMinutes())}-${part(date.getSeconds())}`;
+};
+
+const sanitizeFileNamePart = (value: string) =>
+  value
+    .normalize('NFKD')
+    .replace(/[^\w\d-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .slice(0, 48);
+
+const buildGalleryFileName = (
+  submittedAt: string,
+  location: Pick<PstLocation, 'id' | 'city' | 'address'>,
+  section: PhotoSection,
+  index: number
+) => {
+  const cityPart = sanitizeFileNamePart(location.city) || 'city';
+  const addressPart = sanitizeFileNamePart(location.address) || 'address';
+
+  return `${formatFileDateTime(submittedAt)}_PST-${location.id}_${section}_${index + 1}_${cityPart}_${addressPart}.jpg`;
+};
+
+const triggerDataUrlDownload = (dataUrl: string, fileName: string) => {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = fileName;
+  link.rel = 'noopener';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const saveCompressedPhotosToDevice = async (
+  groupedPhotos: CompressedPhotosBySection,
+  location: Pick<PstLocation, 'id' | 'city' | 'address'>,
+  submittedAt: string
+) => {
+  let savedCount = 0;
+
+  for (const section of ['before', 'after'] as PhotoSection[]) {
+    const photos = groupedPhotos[section] ?? [];
+
+    for (const [index, photo] of photos.entries()) {
+      const fileName = buildGalleryFileName(submittedAt, location, section, index);
+      triggerDataUrlDownload(photo.dataUrl, fileName);
+      savedCount += 1;
+      await new Promise((resolve) => window.setTimeout(resolve, 120));
+    }
+  }
+
+  return savedCount;
 };
 
 const toRadians = (value: number) => (value * Math.PI) / 180;
@@ -969,7 +1034,6 @@ const PstPage = () => {
     });
   };
 
-  const totalPhotosCount = beforePhotos.length + afterPhotos.length;
   const hasBeforePhotos = beforePhotos.length > 0;
   const hasAfterPhotos = afterPhotos.length > 0;
   const isReady = Boolean(selectedLocation && hasBeforePhotos && hasAfterPhotos);
@@ -995,6 +1059,7 @@ const PstPage = () => {
     isSubmittingRef.current = true;
     setIsSubmitting(true);
     setSubmitError('');
+    let savedLocallyCount = 0;
 
     try {
       const submittedAt = new Date().toISOString();
@@ -1018,6 +1083,19 @@ const PstPage = () => {
         throw new Error(
           `Фото ${oversizedPhoto.fileName} не удалось сжать до лимита Google Sheets.`
         );
+      }
+
+      try {
+        savedLocallyCount = await saveCompressedPhotosToDevice(
+          {
+            before: compressedBeforePhotos,
+            after: compressedAfterPhotos,
+          },
+          selectedLocation!,
+          submittedAt
+        );
+      } catch (localSaveError) {
+        console.error('Failed to save stamped PST photos to device:', localSaveError);
       }
 
       const payload = {
@@ -1075,8 +1153,8 @@ const PstPage = () => {
       console.error('Failed to submit PST cleaning report:', error);
       setSubmitError(
         error instanceof Error
-          ? error.message
-          : 'Не удалось отправить отчет в Google Sheets.'
+          ? `${error.message}${savedLocallyCount > 0 ? ` Подписанные фото уже сохранены на устройстве: ${savedLocallyCount} шт.` : ''}`
+          : `Не удалось отправить отчет в Google Sheets.${savedLocallyCount > 0 ? ` Подписанные фото уже сохранены на устройстве: ${savedLocallyCount} шт.` : ''}`
       );
     } finally {
       isSubmittingRef.current = false;
@@ -1208,7 +1286,7 @@ const PstPage = () => {
 
                     <div className="overflow-hidden rounded-[28px] border border-black/6 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
                       <div className="max-h-[560px] divide-y divide-black/6 overflow-y-auto">
-                      {visibleLocations.map((location, index) => {
+                      {visibleLocations.map((location) => {
                         const isSelected = location.id === selectedLocationId;
 
                         return (
