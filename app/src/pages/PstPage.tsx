@@ -98,9 +98,6 @@ declare global {
 
 const SEARCH_RADIUS_KM = 0.3;
 const PST_PAYLOAD_VERSION = 2;
-const PST_SHEETS_WEB_APP_URL =
-  (import.meta.env.VITE_PST_SHEETS_WEB_APP_URL as string | undefined) ||
-  'https://script.google.com/macros/s/AKfycbwTtYydw97Ijbo_qdVLfvFoFAUEfzsb1gTlRQkYTTBOG38jLGT_CK684KbGq5L7bZlDMg/exec';
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const PST_DRAFT_DB_NAME = 'pst-cleaning-draft-db';
 const PST_DRAFT_STORE_NAME = 'drafts';
@@ -470,7 +467,7 @@ const saveCompressedPhotosToDevice = async (
       const fileName = buildGalleryFileName(submittedAt, location, section, index);
       triggerDataUrlDownload(photo.dataUrl, fileName);
       savedCount += 1;
-      await new Promise((resolve) => window.setTimeout(resolve, 120));
+      await new Promise((resolve) => window.setTimeout(resolve, 180));
     }
   }
 
@@ -757,7 +754,9 @@ const PstPage = () => {
   const [beforePhotos, setBeforePhotos] = useState<PhotoItem[]>([]);
   const [afterPhotos, setAfterPhotos] = useState<PhotoItem[]>([]);
   const [submitError, setSubmitError] = useState('');
+  const [downloadError, setDownloadError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDownloadingPhotos, setIsDownloadingPhotos] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isRestoringDraft, setIsRestoringDraft] = useState(true);
   const [draftNotice, setDraftNotice] = useState('');
@@ -1036,15 +1035,52 @@ const PstPage = () => {
 
   const hasBeforePhotos = beforePhotos.length > 0;
   const hasAfterPhotos = afterPhotos.length > 0;
+  const hasAnyPhotos = hasBeforePhotos || hasAfterPhotos;
   const isReady = Boolean(selectedLocation && hasBeforePhotos && hasAfterPhotos);
+
+  const handleDownloadPhotos = async () => {
+    if (!selectedLocation || !hasAnyPhotos || isDownloadingPhotos) return;
+
+    setDownloadError('');
+    setIsDownloadingPhotos(true);
+
+    try {
+      const submittedAt = new Date().toISOString();
+      const stamp = {
+        submittedAt,
+        address: selectedLocation.address,
+        city: selectedLocation.city,
+      };
+
+      const compressedBeforePhotos = await Promise.all(
+        beforePhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
+      );
+      const compressedAfterPhotos = await Promise.all(
+        afterPhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
+      );
+
+      await saveCompressedPhotosToDevice(
+        {
+          before: compressedBeforePhotos,
+          after: compressedAfterPhotos,
+        },
+        selectedLocation,
+        submittedAt
+      );
+    } catch (error) {
+      console.error('Failed to save stamped PST photos to device:', error);
+      setDownloadError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось сохранить подписанные фото на устройство.'
+      );
+    } finally {
+      setIsDownloadingPhotos(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!isReady || isSubmittingRef.current) return;
-
-    if (!PST_SHEETS_WEB_APP_URL) {
-      setSubmitError('Не настроен адрес Google Apps Script для отправки в таблицу.');
-      return;
-    }
 
     if (!selectedLocation) {
       setSubmitError('\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043b\u043e\u043a\u0430\u0446\u0438\u044e.');
@@ -1059,7 +1095,6 @@ const PstPage = () => {
     isSubmittingRef.current = true;
     setIsSubmitting(true);
     setSubmitError('');
-    let savedLocallyCount = 0;
 
     try {
       const submittedAt = new Date().toISOString();
@@ -1083,19 +1118,6 @@ const PstPage = () => {
         throw new Error(
           `Фото ${oversizedPhoto.fileName} не удалось сжать до лимита Google Sheets.`
         );
-      }
-
-      try {
-        savedLocallyCount = await saveCompressedPhotosToDevice(
-          {
-            before: compressedBeforePhotos,
-            after: compressedAfterPhotos,
-          },
-          selectedLocation!,
-          submittedAt
-        );
-      } catch (localSaveError) {
-        console.error('Failed to save stamped PST photos to device:', localSaveError);
       }
 
       const payload = {
@@ -1130,11 +1152,28 @@ const PstPage = () => {
         afterPhotos: compressedAfterPhotos,
       };
 
-      await fetch(PST_SHEETS_WEB_APP_URL, {
+      const response = await fetch('/api/pst-submit', {
         method: 'POST',
-        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(payload),
       });
+
+      const result = (await response.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; debugId?: string }
+        | null;
+
+      if (!response.ok || !result?.ok) {
+        const reason =
+          (typeof result?.error === 'string' && result.error.trim()) || `HTTP ${response.status}`;
+        const debugSuffix =
+          typeof result?.debugId === 'string' && result.debugId.trim()
+            ? ` Debug ID: ${result.debugId}`
+            : '';
+
+        throw new Error(`${reason}${debugSuffix}`);
+      }
 
       await clearDraft();
       [...beforePhotos, ...afterPhotos].forEach((photo) => {
@@ -1153,8 +1192,8 @@ const PstPage = () => {
       console.error('Failed to submit PST cleaning report:', error);
       setSubmitError(
         error instanceof Error
-          ? `${error.message}${savedLocallyCount > 0 ? ` Подписанные фото уже сохранены на устройстве: ${savedLocallyCount} шт.` : ''}`
-          : `Не удалось отправить отчет в Google Sheets.${savedLocallyCount > 0 ? ` Подписанные фото уже сохранены на устройстве: ${savedLocallyCount} шт.` : ''}`
+          ? error.message
+          : 'Не удалось отправить отчет в Google Sheets.'
       );
     } finally {
       isSubmittingRef.current = false;
@@ -1457,6 +1496,26 @@ const PstPage = () => {
                 >
                   {isSubmitting ? 'Отправляем...' : 'Отправить'}
                 </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadPhotos}
+                  disabled={!selectedLocation || !hasAnyPhotos || isDownloadingPhotos}
+                  className={`mt-3 w-full rounded-2xl border px-6 py-4 text-sm font-black uppercase tracking-[0.16em] transition-all ${
+                    selectedLocation && hasAnyPhotos && !isDownloadingPhotos
+                      ? 'border-brand-dark/12 bg-white text-brand-dark hover:border-brand-green/50 hover:bg-brand-green/5'
+                      : 'border-brand-dark/10 bg-white/75 text-brand-dark/35 cursor-not-allowed'
+                  }`}
+                >
+                  {isDownloadingPhotos ? 'РЎРѕС…СЂР°РЅСЏРµРј С„РѕС‚Рѕ...' : 'РЎРѕС…СЂР°РЅРёС‚СЊ РІСЃРµ С„РѕС‚Рѕ'}
+                </button>
+                <div className="mt-3 text-sm font-semibold leading-6 text-brand-dark/48">
+                  Р•СЃР»Рё РЅСѓР¶РЅРѕ, РјРѕР¶РЅРѕ РѕС‚РґРµР»СЊРЅРѕ СЃРєР°С‡Р°С‚СЊ РїРѕРґРїРёСЃР°РЅРЅС‹Рµ С„РѕС‚Рѕ РЅР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ.
+                </div>
+                {downloadError && (
+                  <div className="mt-3 rounded-[24px] border border-red-100 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600">
+                    {downloadError}
+                  </div>
+                )}
                 {!isReady && (
                   <div className="mt-3 text-sm font-semibold leading-6 text-brand-dark/48">
                     {selectedLocation
