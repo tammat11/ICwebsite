@@ -1,11 +1,11 @@
 const DEFAULT_PST_SHEETS_WEB_APP_URL =
   process.env.PST_SHEETS_WEB_APP_URL ||
-  'https://script.google.com/macros/s/AKfycbwPIeEoLWRHN__p2ou9pjUYGeFJWsfDIAgYOiSsET5FcnssCHTyRGbF9-8BVni6EicxKA/exec';
+  'https://script.google.com/macros/s/AKfycbzt60bOJZui7vJCx66tiGV3HFEDFjGfJMci-haQtSunZR-TDyXIQNrQ4r5ubOw6LYvFgg/exec';
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '12mb',
+      sizeLimit: '25mb',
     },
   },
 };
@@ -121,9 +121,11 @@ export default async function handler(req, res) {
 
     const { rawText, parsed } = await readJsonResponse(upstreamResponse);
 
+    const action = String(payload?.action || '').trim();
+
     if (!upstreamResponse.ok) {
       const upstreamStatus = await fetchUpstreamStatus(targetUrl, debugId).catch(() => null);
-      if (upstreamStatus?.saved === true) {
+      if ((action === 'finalize' || !action) && upstreamStatus?.saved === true) {
         return res.status(200).json({
           ok: true,
           saved: true,
@@ -145,7 +147,7 @@ export default async function handler(req, res) {
 
     if (!parsed || parsed.ok !== true) {
       const upstreamStatus = await fetchUpstreamStatus(targetUrl, debugId).catch(() => null);
-      if (upstreamStatus?.saved === true) {
+      if ((action === 'finalize' || !action) && upstreamStatus?.saved === true) {
         return res.status(200).json({
           ok: true,
           saved: true,
@@ -164,6 +166,13 @@ export default async function handler(req, res) {
           normalizeErrorMessage(parsed?.error) ||
           normalizeErrorMessage(rawText) ||
           'Apps Script returned an invalid response',
+      });
+    }
+
+    if (action && action !== 'finalize') {
+      return res.status(200).json({
+        ok: true,
+        ...parsed,
       });
     }
 
