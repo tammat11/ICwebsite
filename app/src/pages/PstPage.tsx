@@ -500,13 +500,13 @@ const chipClass =
   'rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]';
 
 const PHOTO_SECTION_LABELS: Record<PhotoSection, string> = {
-  before: '??',
-  after: '?????',
+  before: 'До',
+  after: 'После',
 };
 
 const PHOTO_SECTION_DESCRIPTIONS: Record<PhotoSection, string> = {
-  before: '?????? ????????? ?? ??????',
-  after: '?????? ????????? ????? ??????',
+  before: 'Снимки состояния до уборки',
+  after: 'Снимки состояния после уборки',
 };
 
 type PstMiniMapProps = {
@@ -594,7 +594,7 @@ const PstMiniMap = ({
       fillColor: '#8fc640',
       fillOpacity: 1,
     })
-      .bindTooltip('?? ?????', { direction: 'top', offset: [0, -8] })
+      .bindTooltip('Вы здесь', { direction: 'top', offset: [0, -8] })
       .addTo(markersGroup.current);
 
     locations.forEach((location, index) => {
@@ -604,7 +604,7 @@ const PstMiniMap = ({
         radius: isSelected ? 11 : 8,
         color: isSelected ? '#8fc640' : '#ffffff',
         weight: isSelected ? 4 : 3,
-        fillColor: location.installPlace === '???????' ? '#2b6cb0' : '#1a2215',
+        fillColor: location.installPlace === 'Уличный' ? '#2b6cb0' : '#1a2215',
         fillOpacity: 0.95,
       });
 
@@ -662,14 +662,14 @@ const PhotoUploadSection = ({
           {PHOTO_SECTION_LABELS[section]}
         </div>
         <div className="mt-2 text-base font-black text-brand-dark">
-          {section === 'before' ? '???? ?? ??????' : '???? ????? ??????'}
+          {section === 'before' ? 'Фото до уборки' : 'Фото после уборки'}
         </div>
         <div className="mt-1 text-sm font-semibold text-brand-dark/55">
           {PHOTO_SECTION_DESCRIPTIONS[section]}
         </div>
       </div>
       <div className="rounded-full bg-white px-3 py-1 text-xs font-black text-brand-dark/45 shadow-sm">
-        {photos.length} ??.
+        {photos.length} шт.
       </div>
     </div>
 
@@ -679,12 +679,12 @@ const PhotoUploadSection = ({
           <Camera size={22} />
         </div>
         <div className="text-base font-black uppercase tracking-[0.12em] text-brand-dark">
-          {section === 'before' ? '????????? ???? ?? ??????' : '????????? ???? ????? ??????'}
+          {section === 'before' ? 'Загрузить фото до уборки' : 'Загрузить фото после уборки'}
         </div>
       </div>
 
       <div className="inline-flex min-h-14 items-center justify-center rounded-[22px] bg-brand-green px-5 text-center text-sm font-black uppercase tracking-[0.16em] text-brand-dark shadow-[0_18px_35px_rgba(143,198,64,0.24)]">
-        {section === 'before' ? '???????? ???? ??' : '???????? ???? ?????'}
+        {section === 'before' ? 'Добавить фото до' : 'Добавить фото после'}
       </div>
 
       <input
@@ -716,14 +716,14 @@ const PhotoUploadSection = ({
                 <span>{formatDateTime(photo.addedAt)}</span>
               </div>
               <div className="mt-1 text-xs text-brand-dark/45">
-                {(photo.file.size / (1024 * 1024)).toFixed(2)} ??
+                {(photo.file.size / (1024 * 1024)).toFixed(2)} МБ
               </div>
             </div>
             <button
               type="button"
               onClick={() => onRemove(photo.id, section)}
               className="rounded-2xl border border-red-100 bg-red-50 p-3 text-red-500 transition hover:bg-red-100"
-              aria-label="??????? ????"
+              aria-label="Удалить фото"
             >
               <Trash2 size={16} />
             </button>
@@ -924,7 +924,7 @@ const PstPage = () => {
       (error) => {
         console.error('PST geolocation error:', error);
         setGeoState('denied');
-        setGeoError('?????? ? ?????????? ?????????. ??????????, ????????? ?????? ??? ???????????.');
+        setGeoError('Доступ к геолокации ограничен. Пожалуйста, разрешите доступ для продолжения.');
       },
       {
         enableHighAccuracy: true,
@@ -1245,17 +1245,17 @@ const PstPage = () => {
     return (
       <div className="min-h-screen bg-brand-light flex items-center justify-center p-6 pt-32">
         <SeoHead
-          title="PST ????? | IC Group"
-          description="????? ????????? PST-????? ?? ?????????? ? ????????? ???? ? ???????."
+          title="PST точки | IC Group"
+          description="Выбор ближайшей PST-точки по геолокации с фиксацией фото и времени."
           path="/pst"
         />
         <div className="max-w-md w-full bg-white rounded-[40px] p-10 shadow-premium text-center">
           <div className="w-20 h-20 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-8">
             <CheckCircle2 className="text-brand-green" size={40} />
           </div>
-          <h1 className="text-2xl font-black text-brand-dark mb-4 uppercase">??????</h1>
+          <h1 className="text-2xl font-black text-brand-dark mb-4 uppercase">Готово</h1>
           <p className="text-sm leading-6 text-brand-dark/60">
-            ??????? ???????, ???? ?????????????. ????? ?????????? ? ?????????? ?????.
+            Локация выбрана, фото зафиксированы. Можно переходить к следующему этапу.
           </p>
           {submissionDebugId && (
             <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/35">
@@ -1270,7 +1270,7 @@ const PstPage = () => {
             }}
             className="btn-premium w-full mt-6"
           >
-            ?????????
+            Вернуться
           </button>
         </div>
       </div>
@@ -1280,8 +1280,8 @@ const PstPage = () => {
   return (
     <div className="min-h-screen bg-brand-light pb-16 pt-24 md:pt-32">
       <SeoHead
-        title="PST ????? | IC Group"
-        description="????? ????????? PST-????? ?? ?????????? ? ????????? ???? ? ???????."
+        title="PST точки | IC Group"
+        description="Выбор ближайшей PST-точки по геолокации с фиксацией фото и времени."
         path="/pst"
       />
 
@@ -1298,7 +1298,7 @@ const PstPage = () => {
           </div>
 
           <h1 className="mx-auto max-w-[620px] text-center font-black uppercase leading-[0.9] tracking-0 text-brand-dark text-[clamp(2.1rem,5.8vw,4.1rem)]">
-            ??????
+            Уборка
             <br />
             <span className="text-brand-green">Kaspi Postomat</span>
           </h1>
@@ -1319,11 +1319,11 @@ const PstPage = () => {
               <div className="rounded-[28px] border border-brand-green/20 bg-brand-green/10 px-6 py-5">
                 <div className="flex items-center gap-2 text-base font-black uppercase tracking-[0.02em] text-brand-green">
                   <LocateFixed size={18} />
-                  ?????????? ??????????
+                  Геолокация определена
                 </div>
                 <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/60">
                   GPS: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-                  {coords.accuracy ? `, ???????? ${Math.round(coords.accuracy)} ?` : ''}
+                  {coords.accuracy ? `, точность ${Math.round(coords.accuracy)} м` : ''}
                 </div>
               </div>
             )}
@@ -1332,7 +1332,7 @@ const PstPage = () => {
               <div className="rounded-[28px] border border-black/5 bg-white px-6 py-5 text-base font-bold leading-7 text-brand-dark/60 shadow-premium">
                 <div className="flex items-center gap-3">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark/15 border-t-brand-green" />
-                  ?????????? ??????? ??????????????...
+                  Запрашиваем координаты устройства...
                 </div>
               </div>
             )}
@@ -1359,7 +1359,7 @@ const PstPage = () => {
                       type="text"
                       value={searchTerm}
                       onChange={(event) => setSearchTerm(event.target.value)}
-                      placeholder="????????: Jaqsy, ????????, 7162"
+                      placeholder="Например: Jaqsy, Жарокова, 7162"
                       className="w-full rounded-[26px] border border-brand-dark/10 bg-white py-5 pl-12 pr-4 text-base font-semibold text-brand-dark outline-none transition shadow-premium focus:border-brand-green focus:bg-white"
                     />
                   </div>
@@ -1367,7 +1367,7 @@ const PstPage = () => {
                   <div className="mt-6">
                     {visibleLocations.length > 0 && (
                       <div className="mb-4 text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                        ???????? ??????
+                        Выберите объект
                       </div>
                     )}
 
@@ -1405,7 +1405,7 @@ const PstPage = () => {
                                 </span>
                                 <span
                                   className={`${chipClass} ${
-                                    location.installPlace === '???????'
+                                    location.installPlace === 'Уличный'
                                       ? 'bg-[#e9f3ff] text-[#2b6cb0]'
                                       : 'bg-[#eef6e3] text-[#5a7d20]'
                                   }`}
@@ -1444,13 +1444,13 @@ const PstPage = () => {
 
                     {!isLoadingLocations && searchTerm && manualResults.length === 0 && (
                       <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
-                        ?????????? ?? ???????. ?????????? ?????, ???????, ??????????? ??? ????? ?????????.
+                        Совпадений не найдено. Попробуйте адрес, магазин, комментарий или номер постомата.
                       </div>
                     )}
 
                     {!isLoadingLocations && !searchTerm && nearestLocations.length === 0 && (
                       <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
-                        ? ??????? 300 ?????? ????? ?? ???????. ??????????? ????? ????, ????? ??????? ?????? ???????.
+                        В радиусе 300 метров ничего не найдено. Используйте поиск выше, чтобы выбрать нужную точку вручную.
                       </div>
                     )}
                     </div>
@@ -1462,7 +1462,7 @@ const PstPage = () => {
               {selectedLocation && (
                 <div className="mt-8 space-y-4 border-t border-black/6 pt-8">
                   <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                    ????????? ???????
+                    Выбранная локация
                   </div>
                 <div className="rounded-[28px] bg-brand-dark p-5 text-white shadow-premium">
                   <div className="flex flex-wrap items-center gap-2">
@@ -1473,7 +1473,7 @@ const PstPage = () => {
                       {selectedLocation.category}
                     </span>
                     <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
-                      {selectedLocation.surfaceType || '???????? ?? ???????'}
+                      {selectedLocation.surfaceType || 'Покрытие не указано'}
                     </span>
                     {selectedDistance !== null && (
                       <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
