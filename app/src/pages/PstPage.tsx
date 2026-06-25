@@ -122,6 +122,9 @@ const formatDateTime = (value: string) =>
     minute: '2-digit',
   }).format(new Date(value));
 
+const isLegacyBeforeAfterRequiredError = (value: string) =>
+  /beforephotos.*afterphotos.*required/i.test(String(value || ''));
+
 const buildSubmissionDebugId = (locationId: string) => {
   const randomPart = Math.random().toString(36).slice(2, 8);
   return `pst-${Date.now()}-${locationId}-${randomPart}`;
@@ -1114,6 +1117,47 @@ const PstPage = () => {
           : null,
       };
 
+      const submitLegacyPayload = async () => {
+        const legacyResponse = await fetch('/api/pst-submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...basePayload,
+            beforePhotos: compressedBeforePhotos,
+            afterPhotos: compressedAfterPhotos,
+          }),
+        });
+
+        const legacyResult = (await legacyResponse.json().catch(() => null)) as
+          | {
+              ok?: boolean;
+              saved?: boolean;
+              error?: string;
+              debugId?: string;
+              historyRow?: number;
+              objectRow?: number;
+            }
+          | null;
+
+        if (!legacyResponse.ok || !legacyResult?.ok || legacyResult.saved !== true) {
+          const reason =
+            (typeof legacyResult?.error === 'string' && legacyResult.error.trim()) ||
+            (legacyResult?.ok && legacyResult.saved !== true
+              ? 'Google Sheets не подтвердил сохранение записи. Страница не будет закрыта, пока запись не появится.'
+              : `HTTP ${legacyResponse.status}`);
+          const debugSuffix =
+            typeof legacyResult?.debugId === 'string' && legacyResult.debugId.trim()
+              ? ` Debug ID: ${legacyResult.debugId}`
+              : '';
+
+          throw new Error(`${reason}${debugSuffix}`);
+        }
+
+        return legacyResult;
+      };
+
       const initResponse = await fetch('/api/pst-submit', {
         method: 'POST',
         headers: {
@@ -1139,6 +1183,26 @@ const PstPage = () => {
         const reason =
           (typeof initResult?.error === 'string' && initResult.error.trim()) ||
           `HTTP ${initResponse.status}`;
+
+        if (isLegacyBeforeAfterRequiredError(reason)) {
+          const legacyResult = await submitLegacyPayload();
+
+          setSubmissionDebugId(String(legacyResult.debugId || debugId).trim());
+          await clearDraft();
+          [...beforePhotos, ...afterPhotos].forEach((photo) => {
+            if (photo.previewUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(photo.previewUrl);
+            }
+          });
+          setBeforePhotos([]);
+          setAfterPhotos([]);
+          setSelectedLocationId('');
+          setSearchTerm('');
+          setDraftNotice('');
+          setIsSubmitted(true);
+          return;
+        }
+
         throw new Error(reason);
       }
 
