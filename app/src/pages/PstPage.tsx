@@ -120,6 +120,11 @@ const formatDateTime = (value: string) =>
     minute: '2-digit',
   }).format(new Date(value));
 
+const buildSubmissionDebugId = (locationId: string) => {
+  const randomPart = Math.random().toString(36).slice(2, 8);
+  return `pst-${Date.now()}-${locationId}-${randomPart}`;
+};
+
 const normalizeSearch = (value: string) =>
   value
     .toLowerCase()
@@ -758,6 +763,7 @@ const PstPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDownloadingPhotos, setIsDownloadingPhotos] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionDebugId, setSubmissionDebugId] = useState('');
   const [isRestoringDraft, setIsRestoringDraft] = useState(true);
   const [draftNotice, setDraftNotice] = useState('');
   const isSubmittingRef = useRef(false);
@@ -1098,6 +1104,7 @@ const PstPage = () => {
 
     try {
       const submittedAt = new Date().toISOString();
+      const debugId = buildSubmissionDebugId(selectedLocation.id);
       const stamp = {
         submittedAt,
         address: selectedLocation!.address,
@@ -1122,6 +1129,7 @@ const PstPage = () => {
 
       const payload = {
         payloadVersion: PST_PAYLOAD_VERSION,
+        submissionDebugId: debugId,
         clientBuildId: String(import.meta.env.VITE_APP_BUILD_ID || '').trim() || 'dev-build',
         submittedAt,
         location: {
@@ -1161,12 +1169,22 @@ const PstPage = () => {
       });
 
       const result = (await response.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; debugId?: string }
+        | {
+            ok?: boolean;
+            saved?: boolean;
+            error?: string;
+            debugId?: string;
+            historyRow?: number;
+            objectRow?: number;
+          }
         | null;
 
-      if (!response.ok || !result?.ok) {
+      if (!response.ok || !result?.ok || result.saved !== true) {
         const reason =
-          (typeof result?.error === 'string' && result.error.trim()) || `HTTP ${response.status}`;
+          (typeof result?.error === 'string' && result.error.trim()) ||
+          (result?.ok && result.saved !== true
+            ? 'Google Sheets не подтвердил сохранение записи. Страница не будет закрыта, пока запись не появится.'
+            : `HTTP ${response.status}`);
         const debugSuffix =
           typeof result?.debugId === 'string' && result.debugId.trim()
             ? ` Debug ID: ${result.debugId}`
@@ -1175,6 +1193,7 @@ const PstPage = () => {
         throw new Error(`${reason}${debugSuffix}`);
       }
 
+      setSubmissionDebugId(String(result.debugId || debugId).trim());
       await clearDraft();
       [...beforePhotos, ...afterPhotos].forEach((photo) => {
         if (photo.previewUrl.startsWith('blob:')) {
@@ -1217,9 +1236,17 @@ const PstPage = () => {
           <p className="text-sm leading-6 text-brand-dark/60">
             Локация выбрана, фото зафиксированы. Можно переходить к следующему этапу.
           </p>
+          {submissionDebugId && (
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/35">
+              Debug ID: {submissionDebugId}
+            </p>
+          )}
           <button
             type="button"
-            onClick={() => setIsSubmitted(false)}
+            onClick={() => {
+              setIsSubmitted(false);
+              setSubmissionDebugId('');
+            }}
             className="btn-premium w-full mt-6"
           >
             Вернуться

@@ -2,7 +2,7 @@ const SPREADSHEET_ID = '1ApfnLS5npNMBW3YYI9_d94yyWwbfv-Bpck_Hozjcl58';
 const OBJECTS_SHEET_NAME = 'Объекты';
 const HISTORY_SHEET_NAME = 'История уборок';
 const DRIVE_ROOT_FOLDER_NAME = 'PST уборки';
-const SCRIPT_VERSION = '2026-06-15-pst-v2-only';
+const SCRIPT_VERSION = '2026-06-25-pst-reliable-submit';
 const ACCEPTED_PAYLOAD_VERSION = 2;
 const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
 const DATA_START_ROW = 2;
@@ -121,11 +121,11 @@ function doPost(event) {
       afterFiles: storedPhotos.after.map((file) => file.fileName),
     });
 
-    appendCleaningHistory(historySheet, location, submittedDate, submittedTime, storedPhotos);
+    const historyRow = appendCleaningHistory(historySheet, location, submittedDate, submittedTime, storedPhotos);
     logPstEvent('history:appended', {
       debugId,
       historySheet: historySheet.getName(),
-      row: historySheet.getLastRow(),
+      row: historyRow,
       submittedDate,
       submittedTime,
     });
@@ -138,8 +138,24 @@ function doPost(event) {
       submittedDate,
     });
 
-    logPstEvent('doPost:success', { debugId, postomatId: location.id });
-    return jsonResponse({ ok: true, service: 'pst-cleaning-webapp', version: SCRIPT_VERSION, debugId });
+    SpreadsheetApp.flush();
+
+    logPstEvent('doPost:success', {
+      debugId,
+      postomatId: location.id,
+      saved: true,
+      historyRow: historyRow,
+      objectRow: objectRow,
+    });
+    return jsonResponse({
+      ok: true,
+      saved: true,
+      service: 'pst-cleaning-webapp',
+      version: SCRIPT_VERSION,
+      debugId,
+      historyRow: historyRow,
+      objectRow: objectRow,
+    });
   } catch (error) {
     logPstEvent('doPost:error', {
       debugId,
@@ -228,6 +244,9 @@ function appendCleaningHistory(sheet, location, submittedDate, submittedTime, st
   if (!tryApplyFolderChip(sheet, row, HISTORY_LINKS_COLUMN, storedPhotos.folderUrl)) {
     linksCell.setRichTextValue(buildFolderRichText(storedPhotos.folderUrl));
   }
+
+  SpreadsheetApp.flush();
+  return row;
 }
 
 function tryApplyFolderChip(sheet, row, column, folderUrl) {
