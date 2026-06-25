@@ -72,6 +72,7 @@ type CompressedPhoto = {
   originalSizeBytes: number;
   width: number;
   height: number;
+  photoIndex?: number;
 };
 
 type PhotoStamp = {
@@ -98,7 +99,8 @@ declare global {
 
 const SEARCH_RADIUS_KM = 0.3;
 const PST_PAYLOAD_VERSION = 2;
-const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 250 * 1024;
+const DRIVE_PHOTO_SIZE_LIMIT_BYTES = 180 * 1024;
+const PST_UPLOAD_CHUNK_TARGET_BYTES = 900 * 1024;
 const PST_DRAFT_DB_NAME = 'pst-cleaning-draft-db';
 const PST_DRAFT_STORE_NAME = 'drafts';
 const PST_DRAFT_KEY = 'pst-cleaning-form';
@@ -123,6 +125,32 @@ const formatDateTime = (value: string) =>
 const buildSubmissionDebugId = (locationId: string) => {
   const randomPart = Math.random().toString(36).slice(2, 8);
   return `pst-${Date.now()}-${locationId}-${randomPart}`;
+};
+
+const estimatePayloadSizeBytes = (payload: unknown) => new Blob([JSON.stringify(payload)]).size;
+
+const chunkCompressedPhotos = (photos: CompressedPhoto[]) => {
+  const chunks: CompressedPhoto[][] = [];
+  let currentChunk: CompressedPhoto[] = [];
+
+  photos.forEach((photo) => {
+    const nextChunk = [...currentChunk, photo];
+    const nextChunkSize = estimatePayloadSizeBytes({ photos: nextChunk });
+
+    if (currentChunk.length > 0 && nextChunkSize > PST_UPLOAD_CHUNK_TARGET_BYTES) {
+      chunks.push(currentChunk);
+      currentChunk = [photo];
+      return;
+    }
+
+    currentChunk = nextChunk;
+  });
+
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
 };
 
 const normalizeSearch = (value: string) =>
@@ -380,6 +408,9 @@ const compressPhotoForSheets = async (
     { maxSide: 1100, quality: 0.78 },
     { maxSide: 960, quality: 0.72 },
     { maxSide: 820, quality: 0.68 },
+    { maxSide: 720, quality: 0.64 },
+    { maxSide: 640, quality: 0.58 },
+    { maxSide: 560, quality: 0.54 },
   ];
 
   let bestPhoto: CompressedPhoto | null = null;
@@ -435,50 +466,6 @@ const sanitizeFileNamePart = (value: string) =>
     .replace(/^_|_$/g, '')
     .slice(0, 48);
 
-const buildGalleryFileName = (
-  submittedAt: string,
-  location: Pick<PstLocation, 'id' | 'city' | 'address'>,
-  section: PhotoSection,
-  index: number
-) => {
-  const cityPart = sanitizeFileNamePart(location.city) || 'city';
-  const addressPart = sanitizeFileNamePart(location.address) || 'address';
-
-  return `${formatFileDateTime(submittedAt)}_PST-${location.id}_${section}_${index + 1}_${cityPart}_${addressPart}.jpg`;
-};
-
-const triggerDataUrlDownload = (dataUrl: string, fileName: string) => {
-  const link = document.createElement('a');
-  link.href = dataUrl;
-  link.download = fileName;
-  link.rel = 'noopener';
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-const saveCompressedPhotosToDevice = async (
-  groupedPhotos: CompressedPhotosBySection,
-  location: Pick<PstLocation, 'id' | 'city' | 'address'>,
-  submittedAt: string
-) => {
-  let savedCount = 0;
-
-  for (const section of ['before', 'after'] as PhotoSection[]) {
-    const photos = groupedPhotos[section] ?? [];
-
-    for (const [index, photo] of photos.entries()) {
-      const fileName = buildGalleryFileName(submittedAt, location, section, index);
-      triggerDataUrlDownload(photo.dataUrl, fileName);
-      savedCount += 1;
-      await new Promise((resolve) => window.setTimeout(resolve, 180));
-    }
-  }
-
-  return savedCount;
-};
-
 const toRadians = (value: number) => (value * Math.PI) / 180;
 
 const getDistanceKm = (from: GeoCoords, to: Pick<PstLocation, 'lat' | 'lng'>) => {
@@ -513,13 +500,13 @@ const chipClass =
   'rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]';
 
 const PHOTO_SECTION_LABELS: Record<PhotoSection, string> = {
-  before: 'До',
-  after: 'После',
+  before: '??',
+  after: '?????',
 };
 
 const PHOTO_SECTION_DESCRIPTIONS: Record<PhotoSection, string> = {
-  before: 'Снимки состояния до уборки',
-  after: 'Снимки состояния после уборки',
+  before: '?????? ????????? ?? ??????',
+  after: '?????? ????????? ????? ??????',
 };
 
 type PstMiniMapProps = {
@@ -607,7 +594,7 @@ const PstMiniMap = ({
       fillColor: '#8fc640',
       fillOpacity: 1,
     })
-      .bindTooltip('Вы здесь', { direction: 'top', offset: [0, -8] })
+      .bindTooltip('?? ?????', { direction: 'top', offset: [0, -8] })
       .addTo(markersGroup.current);
 
     locations.forEach((location, index) => {
@@ -617,7 +604,7 @@ const PstMiniMap = ({
         radius: isSelected ? 11 : 8,
         color: isSelected ? '#8fc640' : '#ffffff',
         weight: isSelected ? 4 : 3,
-        fillColor: location.installPlace === 'Уличный' ? '#2b6cb0' : '#1a2215',
+        fillColor: location.installPlace === '???????' ? '#2b6cb0' : '#1a2215',
         fillOpacity: 0.95,
       });
 
@@ -675,14 +662,14 @@ const PhotoUploadSection = ({
           {PHOTO_SECTION_LABELS[section]}
         </div>
         <div className="mt-2 text-base font-black text-brand-dark">
-          {section === 'before' ? 'Фото до уборки' : 'Фото после уборки'}
+          {section === 'before' ? '???? ?? ??????' : '???? ????? ??????'}
         </div>
         <div className="mt-1 text-sm font-semibold text-brand-dark/55">
           {PHOTO_SECTION_DESCRIPTIONS[section]}
         </div>
       </div>
       <div className="rounded-full bg-white px-3 py-1 text-xs font-black text-brand-dark/45 shadow-sm">
-        {photos.length} шт.
+        {photos.length} ??.
       </div>
     </div>
 
@@ -692,12 +679,12 @@ const PhotoUploadSection = ({
           <Camera size={22} />
         </div>
         <div className="text-base font-black uppercase tracking-[0.12em] text-brand-dark">
-          {section === 'before' ? 'Загрузить фото до уборки' : 'Загрузить фото после уборки'}
+          {section === 'before' ? '????????? ???? ?? ??????' : '????????? ???? ????? ??????'}
         </div>
       </div>
 
       <div className="inline-flex min-h-14 items-center justify-center rounded-[22px] bg-brand-green px-5 text-center text-sm font-black uppercase tracking-[0.16em] text-brand-dark shadow-[0_18px_35px_rgba(143,198,64,0.24)]">
-        {section === 'before' ? 'Добавить фото до' : 'Добавить фото после'}
+        {section === 'before' ? '???????? ???? ??' : '???????? ???? ?????'}
       </div>
 
       <input
@@ -729,14 +716,14 @@ const PhotoUploadSection = ({
                 <span>{formatDateTime(photo.addedAt)}</span>
               </div>
               <div className="mt-1 text-xs text-brand-dark/45">
-                {(photo.file.size / (1024 * 1024)).toFixed(2)} МБ
+                {(photo.file.size / (1024 * 1024)).toFixed(2)} ??
               </div>
             </div>
             <button
               type="button"
               onClick={() => onRemove(photo.id, section)}
               className="rounded-2xl border border-red-100 bg-red-50 p-3 text-red-500 transition hover:bg-red-100"
-              aria-label="Удалить фото"
+              aria-label="??????? ????"
             >
               <Trash2 size={16} />
             </button>
@@ -759,9 +746,7 @@ const PstPage = () => {
   const [beforePhotos, setBeforePhotos] = useState<PhotoItem[]>([]);
   const [afterPhotos, setAfterPhotos] = useState<PhotoItem[]>([]);
   const [submitError, setSubmitError] = useState('');
-  const [downloadError, setDownloadError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDownloadingPhotos, setIsDownloadingPhotos] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submissionDebugId, setSubmissionDebugId] = useState('');
   const [isRestoringDraft, setIsRestoringDraft] = useState(true);
@@ -939,7 +924,7 @@ const PstPage = () => {
       (error) => {
         console.error('PST geolocation error:', error);
         setGeoState('denied');
-        setGeoError('Доступ к геолокации ограничен. Пожалуйста, разрешите доступ для продолжения.');
+        setGeoError('?????? ? ?????????? ?????????. ??????????, ????????? ?????? ??? ???????????.');
       },
       {
         enableHighAccuracy: true,
@@ -1044,47 +1029,6 @@ const PstPage = () => {
   const hasAnyPhotos = hasBeforePhotos || hasAfterPhotos;
   const isReady = Boolean(selectedLocation && hasBeforePhotos && hasAfterPhotos);
 
-  const handleDownloadPhotos = async () => {
-    if (!selectedLocation || !hasAnyPhotos || isDownloadingPhotos) return;
-
-    setDownloadError('');
-    setIsDownloadingPhotos(true);
-
-    try {
-      const submittedAt = new Date().toISOString();
-      const stamp = {
-        submittedAt,
-        address: selectedLocation.address,
-        city: selectedLocation.city,
-      };
-
-      const compressedBeforePhotos = await Promise.all(
-        beforePhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
-      );
-      const compressedAfterPhotos = await Promise.all(
-        afterPhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
-      );
-
-      await saveCompressedPhotosToDevice(
-        {
-          before: compressedBeforePhotos,
-          after: compressedAfterPhotos,
-        },
-        selectedLocation,
-        submittedAt
-      );
-    } catch (error) {
-      console.error('Failed to save stamped PST photos to device:', error);
-      setDownloadError(
-        error instanceof Error
-          ? error.message
-          : 'Не удалось сохранить подписанные фото на устройство.'
-      );
-    } finally {
-      setIsDownloadingPhotos(false);
-    }
-  };
-
   const handleSubmit = async () => {
     if (!isReady || isSubmittingRef.current) return;
 
@@ -1094,7 +1038,9 @@ const PstPage = () => {
     }
 
     if (!hasBeforePhotos || !hasAfterPhotos) {
-      setSubmitError('\u0414\u043b\u044f \u043e\u0442\u043f\u0440\u0430\u0432\u043a\u0438 \u043d\u0443\u0436\u043d\u043e \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u043d\u043e \u0444\u043e\u0442\u043e \u0432 \u0440\u0430\u0437\u0434\u0435\u043b\u044b \u00ab\u0414\u043e\u00bb \u0438 \u00ab\u041f\u043e\u0441\u043b\u0435\u00bb.');
+      setSubmitError(
+        '\u0414\u043b\u044f \u043e\u0442\u043f\u0440\u0430\u0432\u043a\u0438 \u043d\u0443\u0436\u043d\u043e \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u043d\u043e \u0444\u043e\u0442\u043e \u0432 \u0440\u0430\u0437\u0434\u0435\u043b\u044b \u00ab\u0414\u043e\u00bb \u0438 \u00ab\u041f\u043e\u0441\u043b\u0435\u00bb.'
+      );
       return;
     }
 
@@ -1107,14 +1053,24 @@ const PstPage = () => {
       const debugId = buildSubmissionDebugId(selectedLocation.id);
       const stamp = {
         submittedAt,
-        address: selectedLocation!.address,
-        city: selectedLocation!.city,
+        address: selectedLocation.address,
+        city: selectedLocation.city,
       };
       const compressedBeforePhotos = await Promise.all(
-        beforePhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
+        beforePhotos.map((photo, index) =>
+          compressPhotoForSheets(photo.file, stamp).then((compressedPhoto) => ({
+            ...compressedPhoto,
+            photoIndex: index + 1,
+          }))
+        )
       );
       const compressedAfterPhotos = await Promise.all(
-        afterPhotos.map((photo) => compressPhotoForSheets(photo.file, stamp))
+        afterPhotos.map((photo, index) =>
+          compressPhotoForSheets(photo.file, stamp).then((compressedPhoto) => ({
+            ...compressedPhoto,
+            photoIndex: index + 1,
+          }))
+        )
       );
       const compressedPhotos = [...compressedBeforePhotos, ...compressedAfterPhotos];
       const oversizedPhoto = compressedPhotos.find(
@@ -1123,29 +1079,29 @@ const PstPage = () => {
 
       if (oversizedPhoto) {
         throw new Error(
-          `Фото ${oversizedPhoto.fileName} не удалось сжать до лимита Google Sheets.`
+          `\u0424\u043e\u0442\u043e ${oversizedPhoto.fileName} \u043d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u0436\u0430\u0442\u044c \u0434\u043e \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0433\u043e \u0440\u0430\u0437\u043c\u0435\u0440\u0430 \u043e\u0442\u043f\u0440\u0430\u0432\u043a\u0438.`
         );
       }
 
-      const payload = {
+      const basePayload = {
         payloadVersion: PST_PAYLOAD_VERSION,
         submissionDebugId: debugId,
         clientBuildId: String(import.meta.env.VITE_APP_BUILD_ID || '').trim() || 'dev-build',
         submittedAt,
         location: {
-          id: selectedLocation!.id,
+          id: selectedLocation.id,
           title: capitalizeFirstLetter(
-            selectedLocation!.hint || selectedLocation!.comment || selectedLocation!.address
+            selectedLocation.hint || selectedLocation.comment || selectedLocation.address
           ),
-          city: selectedLocation!.city,
-          branch: selectedLocation!.branch,
-          address: selectedLocation!.address,
-          category: selectedLocation!.category,
-          installPlace: selectedLocation!.installPlace,
-          surfaceType: selectedLocation!.surfaceType,
-          cellsCount: selectedLocation!.cellsCount,
-          lat: selectedLocation!.lat,
-          lng: selectedLocation!.lng,
+          city: selectedLocation.city,
+          branch: selectedLocation.branch,
+          address: selectedLocation.address,
+          category: selectedLocation.category,
+          installPlace: selectedLocation.installPlace,
+          surfaceType: selectedLocation.surfaceType,
+          cellsCount: selectedLocation.cellsCount,
+          lat: selectedLocation.lat,
+          lng: selectedLocation.lng,
           distanceMeters:
             selectedDistance !== null ? Math.round(selectedDistance * 1000) : null,
         },
@@ -1156,19 +1112,84 @@ const PstPage = () => {
               accuracy: coords.accuracy ?? null,
             }
           : null,
-        beforePhotos: compressedBeforePhotos,
-        afterPhotos: compressedAfterPhotos,
       };
 
-      const response = await fetch('/api/pst-submit', {
+      const initResponse = await fetch('/api/pst-submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...basePayload,
+          action: 'init',
+          beforeCount: compressedBeforePhotos.length,
+          afterCount: compressedAfterPhotos.length,
+        }),
       });
 
-      const result = (await response.json().catch(() => null)) as
+      const initResult = (await initResponse.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            error?: string;
+            debugId?: string;
+          }
+        | null;
+
+      if (!initResponse.ok || !initResult?.ok) {
+        const reason =
+          (typeof initResult?.error === 'string' && initResult.error.trim()) ||
+          `HTTP ${initResponse.status}`;
+        throw new Error(reason);
+      }
+
+      const uploadPhotoChunks = async (section: PhotoSection, photos: CompressedPhoto[]) => {
+        const chunks = chunkCompressedPhotos(photos);
+
+        for (const chunk of chunks) {
+          const chunkResponse = await fetch('/api/pst-submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...basePayload,
+              action: 'upload-chunk',
+              section,
+              photos: chunk,
+            }),
+          });
+
+          const chunkResult = (await chunkResponse.json().catch(() => null)) as
+            | {
+                ok?: boolean;
+                error?: string;
+              }
+            | null;
+
+          if (!chunkResponse.ok || !chunkResult?.ok) {
+            const reason =
+              (typeof chunkResult?.error === 'string' && chunkResult.error.trim()) ||
+              `HTTP ${chunkResponse.status}`;
+            throw new Error(reason);
+          }
+        }
+      };
+
+      await uploadPhotoChunks('before', compressedBeforePhotos);
+      await uploadPhotoChunks('after', compressedAfterPhotos);
+
+      const finalizeResponse = await fetch('/api/pst-submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...basePayload,
+          action: 'finalize',
+        }),
+      });
+
+      const result = (await finalizeResponse.json().catch(() => null)) as
         | {
             ok?: boolean;
             saved?: boolean;
@@ -1179,12 +1200,12 @@ const PstPage = () => {
           }
         | null;
 
-      if (!response.ok || !result?.ok || result.saved !== true) {
+      if (!finalizeResponse.ok || !result?.ok || result.saved !== true) {
         const reason =
           (typeof result?.error === 'string' && result.error.trim()) ||
           (result?.ok && result.saved !== true
-            ? 'Google Sheets не подтвердил сохранение записи. Страница не будет закрыта, пока запись не появится.'
-            : `HTTP ${response.status}`);
+            ? 'Google Sheets \u043d\u0435 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043b \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u0435 \u0437\u0430\u043f\u0438\u0441\u0438. \u0421\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043d\u0435 \u0431\u0443\u0434\u0435\u0442 \u0437\u0430\u043a\u0440\u044b\u0442\u0430, \u043f\u043e\u043a\u0430 \u0437\u0430\u043f\u0438\u0441\u044c \u043d\u0435 \u043f\u043e\u044f\u0432\u0438\u0442\u0441\u044f.'
+            : `HTTP ${finalizeResponse.status}`);
         const debugSuffix =
           typeof result?.debugId === 'string' && result.debugId.trim()
             ? ` Debug ID: ${result.debugId}`
@@ -1212,7 +1233,7 @@ const PstPage = () => {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : 'Не удалось отправить отчет в Google Sheets.'
+          : '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u043e\u0442\u0447\u0435\u0442 \u0432 Google Sheets.'
       );
     } finally {
       isSubmittingRef.current = false;
@@ -1224,17 +1245,17 @@ const PstPage = () => {
     return (
       <div className="min-h-screen bg-brand-light flex items-center justify-center p-6 pt-32">
         <SeoHead
-          title="PST точки | IC Group"
-          description="Выбор ближайшей PST-точки по геолокации с фиксацией фото и времени."
+          title="PST ????? | IC Group"
+          description="????? ????????? PST-????? ?? ?????????? ? ????????? ???? ? ???????."
           path="/pst"
         />
         <div className="max-w-md w-full bg-white rounded-[40px] p-10 shadow-premium text-center">
           <div className="w-20 h-20 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-8">
             <CheckCircle2 className="text-brand-green" size={40} />
           </div>
-          <h1 className="text-2xl font-black text-brand-dark mb-4 uppercase">Готово</h1>
+          <h1 className="text-2xl font-black text-brand-dark mb-4 uppercase">??????</h1>
           <p className="text-sm leading-6 text-brand-dark/60">
-            Локация выбрана, фото зафиксированы. Можно переходить к следующему этапу.
+            ??????? ???????, ???? ?????????????. ????? ?????????? ? ?????????? ?????.
           </p>
           {submissionDebugId && (
             <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark/35">
@@ -1249,7 +1270,7 @@ const PstPage = () => {
             }}
             className="btn-premium w-full mt-6"
           >
-            Вернуться
+            ?????????
           </button>
         </div>
       </div>
@@ -1259,8 +1280,8 @@ const PstPage = () => {
   return (
     <div className="min-h-screen bg-brand-light pb-16 pt-24 md:pt-32">
       <SeoHead
-        title="PST точки | IC Group"
-        description="Выбор ближайшей PST-точки по геолокации с фиксацией фото и времени."
+        title="PST ????? | IC Group"
+        description="????? ????????? PST-????? ?? ?????????? ? ????????? ???? ? ???????."
         path="/pst"
       />
 
@@ -1277,7 +1298,7 @@ const PstPage = () => {
           </div>
 
           <h1 className="mx-auto max-w-[620px] text-center font-black uppercase leading-[0.9] tracking-0 text-brand-dark text-[clamp(2.1rem,5.8vw,4.1rem)]">
-            Уборка
+            ??????
             <br />
             <span className="text-brand-green">Kaspi Postomat</span>
           </h1>
@@ -1298,11 +1319,11 @@ const PstPage = () => {
               <div className="rounded-[28px] border border-brand-green/20 bg-brand-green/10 px-6 py-5">
                 <div className="flex items-center gap-2 text-base font-black uppercase tracking-[0.02em] text-brand-green">
                   <LocateFixed size={18} />
-                  Геолокация определена
+                  ?????????? ??????????
                 </div>
                 <div className="mt-2 text-sm font-semibold leading-6 text-brand-dark/60">
                   GPS: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-                  {coords.accuracy ? `, точность ${Math.round(coords.accuracy)} м` : ''}
+                  {coords.accuracy ? `, ???????? ${Math.round(coords.accuracy)} ?` : ''}
                 </div>
               </div>
             )}
@@ -1311,7 +1332,7 @@ const PstPage = () => {
               <div className="rounded-[28px] border border-black/5 bg-white px-6 py-5 text-base font-bold leading-7 text-brand-dark/60 shadow-premium">
                 <div className="flex items-center gap-3">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark/15 border-t-brand-green" />
-                  Запрашиваем координаты устройства...
+                  ?????????? ??????? ??????????????...
                 </div>
               </div>
             )}
@@ -1338,7 +1359,7 @@ const PstPage = () => {
                       type="text"
                       value={searchTerm}
                       onChange={(event) => setSearchTerm(event.target.value)}
-                      placeholder="Например: Jaqsy, Жарокова, 7162"
+                      placeholder="????????: Jaqsy, ????????, 7162"
                       className="w-full rounded-[26px] border border-brand-dark/10 bg-white py-5 pl-12 pr-4 text-base font-semibold text-brand-dark outline-none transition shadow-premium focus:border-brand-green focus:bg-white"
                     />
                   </div>
@@ -1346,7 +1367,7 @@ const PstPage = () => {
                   <div className="mt-6">
                     {visibleLocations.length > 0 && (
                       <div className="mb-4 text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                        Выберите объект
+                        ???????? ??????
                       </div>
                     )}
 
@@ -1384,7 +1405,7 @@ const PstPage = () => {
                                 </span>
                                 <span
                                   className={`${chipClass} ${
-                                    location.installPlace === 'Уличный'
+                                    location.installPlace === '???????'
                                       ? 'bg-[#e9f3ff] text-[#2b6cb0]'
                                       : 'bg-[#eef6e3] text-[#5a7d20]'
                                   }`}
@@ -1423,13 +1444,13 @@ const PstPage = () => {
 
                     {!isLoadingLocations && searchTerm && manualResults.length === 0 && (
                       <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
-                        Совпадений не найдено. Попробуйте адрес, магазин, комментарий или номер постамата.
+                        ?????????? ?? ???????. ?????????? ?????, ???????, ??????????? ??? ????? ?????????.
                       </div>
                     )}
 
                     {!isLoadingLocations && !searchTerm && nearestLocations.length === 0 && (
                       <div className="rounded-[24px] border border-dashed border-brand-dark/12 bg-white p-5 text-sm font-semibold text-brand-dark/55">
-                        В радиусе 300 метров ничего не найдено. Используйте поиск выше, чтобы выбрать нужную точку вручную.
+                        ? ??????? 300 ?????? ????? ?? ???????. ??????????? ????? ????, ????? ??????? ?????? ???????.
                       </div>
                     )}
                     </div>
@@ -1441,7 +1462,7 @@ const PstPage = () => {
               {selectedLocation && (
                 <div className="mt-8 space-y-4 border-t border-black/6 pt-8">
                   <div className="text-[11px] font-black uppercase tracking-[0.24em] text-brand-dark/45">
-                    Выбранная локация
+                    ????????? ???????
                   </div>
                 <div className="rounded-[28px] bg-brand-dark p-5 text-white shadow-premium">
                   <div className="flex flex-wrap items-center gap-2">
@@ -1452,7 +1473,7 @@ const PstPage = () => {
                       {selectedLocation.category}
                     </span>
                     <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
-                      {selectedLocation.surfaceType || 'Покрытие не указано'}
+                      {selectedLocation.surfaceType || '???????? ?? ???????'}
                     </span>
                     {selectedDistance !== null && (
                       <span className={`${chipClass} border border-white/15 bg-white/10 text-white/80`}>
@@ -1479,12 +1500,6 @@ const PstPage = () => {
               {draftNotice && (
                 <div className="mb-5 rounded-[24px] border border-brand-green/20 bg-brand-green/10 px-5 py-4 text-sm font-semibold leading-6 text-brand-dark/72">
                   {draftNotice}
-                </div>
-              )}
-
-              {isRestoringDraft && (
-                <div className="mb-5 rounded-[24px] border border-black/6 bg-[#fbfcf8] px-5 py-4 text-sm font-semibold leading-6 text-brand-dark/55">
-                  Восстанавливаем неотправленные фото из черновика...
                 </div>
               )}
 
@@ -1523,26 +1538,6 @@ const PstPage = () => {
                 >
                   {isSubmitting ? 'Отправляем...' : 'Отправить'}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleDownloadPhotos}
-                  disabled={!selectedLocation || !hasAnyPhotos || isDownloadingPhotos}
-                  className={`mt-3 w-full rounded-2xl border px-6 py-4 text-sm font-black uppercase tracking-[0.16em] transition-all ${
-                    selectedLocation && hasAnyPhotos && !isDownloadingPhotos
-                      ? 'border-brand-dark/12 bg-white text-brand-dark hover:border-brand-green/50 hover:bg-brand-green/5'
-                      : 'border-brand-dark/10 bg-white/75 text-brand-dark/35 cursor-not-allowed'
-                  }`}
-                >
-                  {isDownloadingPhotos ? 'РЎРѕС…СЂР°РЅСЏРµРј С„РѕС‚Рѕ...' : 'РЎРѕС…СЂР°РЅРёС‚СЊ РІСЃРµ С„РѕС‚Рѕ'}
-                </button>
-                <div className="mt-3 text-sm font-semibold leading-6 text-brand-dark/48">
-                  Р•СЃР»Рё РЅСѓР¶РЅРѕ, РјРѕР¶РЅРѕ РѕС‚РґРµР»СЊРЅРѕ СЃРєР°С‡Р°С‚СЊ РїРѕРґРїРёСЃР°РЅРЅС‹Рµ С„РѕС‚Рѕ РЅР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ.
-                </div>
-                {downloadError && (
-                  <div className="mt-3 rounded-[24px] border border-red-100 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600">
-                    {downloadError}
-                  </div>
-                )}
                 {!isReady && (
                   <div className="mt-3 text-sm font-semibold leading-6 text-brand-dark/48">
                     {selectedLocation
