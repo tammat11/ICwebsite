@@ -1,6 +1,6 @@
 const DEFAULT_PST_SHEETS_WEB_APP_URL =
   process.env.PST_SHEETS_WEB_APP_URL ||
-  'https://script.google.com/macros/s/AKfycbwTs4Ui7gW3MfVAfUKTTnOzrczZmt4lICqn-S5SAz5tpBod9Tk157oQdsmfzKlnrzRhow/exec';
+  'https://script.google.com/macros/s/AKfycbxM_Nfc07nXoHWK2jD8Ubhj19bJd-52_-O0n5aRZMT69tEHLoA45EfpyxVZxoNJ2-HQqg/exec';
 
 export const config = {
   api: {
