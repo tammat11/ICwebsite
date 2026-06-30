@@ -1,57 +1,88 @@
 import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SparklesButton from './SparklesButton';
 
-gsap.registerPlugin(ScrollTrigger);
+const EASE = {
+    power4Out: 'cubic-bezier(0.165, 0.84, 0.44, 1)',
+    power3Out: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+    power2In:  'cubic-bezier(0.55, 0.055, 0.675, 0.19)',
+    sineInOut: 'ease-in-out',
+    backOut3:  'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+};
 
 const Hero = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
     const root = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            const tl = gsap.timeline();
+        const el = root.current;
+        if (!el) return;
 
-            // All major elements start together with slight staggers
-            tl.fromTo([".hero-fade-in", ".hero-title-reveal"],
-                { y: 30, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.9,
-                    stagger: 0.05, // very fast stagger for high sync
-                    ease: "power4.out"
-                }
+        const anims: Animation[] = [];
+
+        // Entrance: fade-in + slide-up for all hero text elements
+        const fadeEls = el.querySelectorAll<HTMLElement>('.hero-fade-in, .hero-title-reveal');
+        fadeEls.forEach((node, i) => {
+            const a = node.animate(
+                [{ transform: 'translateY(30px)', opacity: '0' }, { transform: 'translateY(0)', opacity: '1' }],
+                { duration: 900, delay: i * 50, easing: EASE.power4Out, fill: 'both' }
             );
+            anims.push(a);
+        });
 
-            const cleaningTl = gsap.timeline({ delay: 1.4 });
+        // Cleaning hand sequence
+        const hand    = el.querySelector<HTMLElement>('.cleaning-hand');
+        const dirt    = el.querySelector<HTMLElement>('.clean-dirt');
+        const sparkle = el.querySelector<HTMLElement>('.clean-sparkle');
+        if (!hand || !dirt || !sparkle) return () => anims.forEach(a => a.cancel());
 
-            cleaningTl
-                .fromTo(".cleaning-hand",
-                    { x: 300, y: 100, rotate: 30, opacity: 0 },
-                    { x: 20, y: -5, rotate: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
-                )
-                .to(".cleaning-hand", {
-                    x: -20, y: 5, rotate: -5, duration: 0.2, repeat: 3, yoyo: true, ease: "sine.inOut"
-                })
-                .to(".clean-dirt", {
-                    opacity: 0, scale: 1.1, filter: "blur(20px)", duration: 0.4, ease: "power2.in"
-                }, "-=0.6")
-                .to(".cleaning-hand", {
-                    x: -1200, y: 800, rotate: -60, opacity: 0, duration: 0.8, ease: "power2.in"
-                })
-                .fromTo(".clean-sparkle",
-                    { scale: 0, opacity: 0, rotate: -45 },
-                    { scale: 1.5, opacity: 1, rotate: 45, duration: 0.5, ease: "back.out(3)" },
-                    "-=0.4"
-                )
-                .to(".clean-sparkle", {
-                    opacity: 0, scale: 0, duration: 0.4, delay: 0.2
+        // 1. Enter from right
+        const enter = hand.animate([
+            { transform: 'translate(300px, 100px) rotate(30deg)', opacity: '0' },
+            { transform: 'translate(20px, -5px) rotate(0deg)',    opacity: '1' },
+        ], { duration: 600, delay: 1400, easing: EASE.power3Out, fill: 'both' });
+        anims.push(enter);
+
+        enter.finished.then(() => {
+            // 2. Oscillate (4 half-cycles → ends at start position)
+            const osc = hand.animate([
+                { transform: 'translate(20px, -5px) rotate(0deg)' },
+                { transform: 'translate(-20px, 5px) rotate(-5deg)' },
+            ], { duration: 200, iterations: 4, direction: 'alternate', easing: EASE.sineInOut, fill: 'forwards' });
+            anims.push(osc);
+
+            // Dirt fades out overlapping with oscillation
+            const dirtAnim = dirt.animate([
+                { opacity: '0.5', transform: 'scale(1)',   filter: 'blur(0px)' },
+                { opacity: '0',   transform: 'scale(1.1)', filter: 'blur(20px)' },
+            ], { duration: 400, delay: 200, easing: EASE.power2In, fill: 'forwards' });
+            anims.push(dirtAnim);
+
+            osc.finished.then(() => {
+                // 3. Exit to bottom-left
+                const exit = hand.animate([
+                    { transform: 'translate(20px, -5px) rotate(0deg)',      opacity: '1' },
+                    { transform: 'translate(-1200px, 800px) rotate(-60deg)', opacity: '0' },
+                ], { duration: 800, easing: EASE.power2In, fill: 'forwards' });
+                anims.push(exit);
+
+                // Sparkle appears (overlapping with exit)
+                const sparkleIn = sparkle.animate([
+                    { transform: 'scale(0) rotate(-45deg)',  opacity: '0' },
+                    { transform: 'scale(1.5) rotate(45deg)', opacity: '1' },
+                ], { duration: 500, delay: 400, easing: EASE.backOut3, fill: 'forwards' });
+                anims.push(sparkleIn);
+
+                exit.finished.then(() => {
+                    // Sparkle fades out
+                    const sparkleOut = sparkle.animate([
+                        { transform: 'scale(1.5) rotate(45deg)', opacity: '1' },
+                        { transform: 'scale(0) rotate(45deg)',    opacity: '0' },
+                    ], { duration: 400, delay: 200, fill: 'forwards' });
+                    anims.push(sparkleOut);
                 });
+            });
+        });
 
-        }, root);
-
-        return () => ctx.revert();
+        return () => anims.forEach(a => a.cancel());
     }, []);
 
     return (

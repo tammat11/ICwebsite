@@ -135,6 +135,16 @@
   }
 }
 
+/* Simple fade-in for quiz sections (replacing GSAP) */
+@keyframes fadeInSimple {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.reveal-simple {
+  opacity: 0;
+  animation: fadeInSimple 0.5s ease forwards;
+}
+
 /* Global Clean Background */
 .bg-clean {
   @apply bg-brand-light;

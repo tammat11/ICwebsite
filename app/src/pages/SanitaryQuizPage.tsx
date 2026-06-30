@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Footer from '../components/Footer';
 import { CheckCircle2, Play, ChevronRight, User } from 'lucide-react';
-import gsap from 'gsap';
 
 import { updateSanitaryStats } from '../utils/bitrix';
 import SeoHead from '../components/SeoHead';
@@ -176,21 +175,11 @@ const SanitaryQuizPage = () => {
         });
     }, []);
 
-    const contentRef = useRef<HTMLDivElement>(null);
-    const quizRef = useRef<HTMLDivElement>(null);
-
     const t = quizData[lang];
 
     const score = userAnswers.reduce((acc, ans, idx) => {
         return ans === t.questions[idx].correct ? acc + 1 : acc;
     }, 0);
-
-    useEffect(() => {
-        gsap.fromTo(".reveal-simple", 
-            { opacity: 0 }, 
-            { opacity: 1, duration: 0.5, stagger: 0.1, ease: "none" }
-        );
-    }, [lang, quizStarted, showResults]);
 
     useEffect(() => {
         if (showResults && selectedCurator) {
@@ -220,7 +209,7 @@ const SanitaryQuizPage = () => {
     };
 
     return (
-        <div ref={contentRef} className="bg-brand-light">
+        <div className="bg-brand-light">
             <SeoHead
                 title="Обучающий курс по уборке офисов и общественных пространств | IC Group"
                 description="Обучающий курс IC Group по стандартам уборки офисов и общественных пространств."
@@ -324,7 +313,7 @@ const SanitaryQuizPage = () => {
                     ) : (
                         <div className="reveal-simple">
                             {!showResults ? (
-                                <div className="bg-white rounded-3xl p-8 shadow-xl border border-brand-dark/5" ref={quizRef}>
+                                <div className="bg-white rounded-3xl p-8 shadow-xl border border-brand-dark/5">
                                     <div className="h-1 bg-brand-dark/5 rounded-full mb-8 overflow-hidden">
                                         <div className="h-full bg-brand-green transition-all duration-300" style={{ width: `${((currentQuestion + 1) / t.questions.length) * 100}%` }} />
                                     </div>
