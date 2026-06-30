@@ -3,6 +3,16 @@
     "outputDirectory": "dist",
     "redirects": [
         {
+            "source": "/pst",
+            "destination": "https://opu.ic-group.kz/pst",
+            "permanent": true
+        },
+        {
+            "source": "/pst/",
+            "destination": "https://opu.ic-group.kz/pst",
+            "permanent": true
+        },
+        {
             "source": "/about-company",
             "destination": "/",
             "permanent": true
