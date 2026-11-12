@@ -36,6 +36,7 @@ const ApplicationModal = ({ isOpen, onClose, position, category }: ApplicationMo
                 email: email,
                 phone: phone,
                 comments: `Категория: ${category}\nПозиция: ${position}\n\nСообщение: ${message}`,
+                funnel: 'leads', // отклик на вакансию — не в продажи
             });
 
             alert('Заявка успешно отправлена!');

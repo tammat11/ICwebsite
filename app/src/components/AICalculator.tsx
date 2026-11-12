@@ -92,6 +92,8 @@ const AICalculator = ({ isOpen, onClose }: AICalculatorProps) => {
                 company: company,
                 phone: phone,
                 comments: `Тип объекта: ${sectorLabel}\nПлощадь: ${size} м²\nКомментарий: ${comment}`,
+                area: size,
+                sector: sectorLabel,
             });
             
             alert('Заявка успешно отправлена!');

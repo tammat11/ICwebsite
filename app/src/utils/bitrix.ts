@@ -14,6 +14,10 @@ export interface LeadData {
     companyId?: string | number;
     extraFields?: Record<string, string | number | boolean>;
     files?: File[];
+    // Куда: по умолчанию — «Отдел продаж», стадия «Лиды»; 'leads' — старая воронка «Лиды» (отклики на вакансии)
+    funnel?: 'sales' | 'leads';
+    area?: number | string; // площадь, м² — в поле сделки
+    sector?: string; // тип объекта из калькулятора — в «Сегмент» сделки
 }
 
 export type TenderFieldValue =

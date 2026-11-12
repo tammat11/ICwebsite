@@ -1,7 +1,19 @@
 const BITRIX_WEBHOOK_URL = process.env.BITRIX_WEBHOOK_URL;
 
+// Воронка «Лиды» — теперь только для откликов на вакансии (funnel: 'leads')
 const DEAL_FUNNEL_ID = 111;
 const DEAL_STAGE_ID = 'C111:PREPARATION';
+// Заявки клиентов (калькулятор, обратная связь) — сразу в «Отдел продаж», стадия «Лиды», ответственная Айнур Бейсенова
+const SALES_FUNNEL_ID = 0;
+const SALES_STAGE_ID = 'UC_76L2EM';
+const SALES_ASSIGNED_ID = 435;
+// Площадь и сегмент сделки — чтобы менеджер не вводил их заново после звонка
+const AREA_FIELD = 'UF_CRM_1707724024179';
+const SEGMENT_FIELD = 'UF_CRM_OP_SEGMENT';
+const SEGMENT_IDS = {
+    'Банк': 153545, 'БЦ': 153547, 'Офисы': 153549, 'Производство': 153551,
+    'Ритейл': 153553, 'Склады': 153555, 'E-com склады': 153555, 'ТРЦ': 153557,
+};
 const TENDER_ENTITY_TYPE_ID = 1372;
 const TENDER_CATEGORY_ID = 435;
 const TENDER_STAGE_ID = 'DT1372_435:CLIENT';
@@ -113,9 +125,10 @@ async function bitrixRequest(endpoint, { method = 'POST', headers, body, query }
     return result;
 }
 
-async function createContact(data) {
+async function createContact(data, assignedById) {
     const params = new URLSearchParams();
     params.append('fields[NAME]', data.name || 'Клиент');
+    if (assignedById) params.append('fields[ASSIGNED_BY_ID]', String(assignedById));
     if (data.lastName) params.append('fields[LAST_NAME]', data.lastName);
     if (data.company) params.append('fields[COMPANY_TITLE]', data.company);
     if (data.comments) params.append('fields[COMMENTS]', data.comments);
@@ -138,12 +151,20 @@ async function createContact(data) {
 }
 
 async function handleCreateBitrixLead(data) {
-    const contactId = await createContact(data);
+    const toSales = data.funnel !== 'leads';
+    const contactId = await createContact(data, toSales ? SALES_ASSIGNED_ID : null);
     const params = new URLSearchParams();
 
     params.append('fields[TITLE]', data.title);
-    params.append('fields[CATEGORY_ID]', String(DEAL_FUNNEL_ID));
-    params.append('fields[STAGE_ID]', DEAL_STAGE_ID);
+    params.append('fields[CATEGORY_ID]', String(toSales ? SALES_FUNNEL_ID : DEAL_FUNNEL_ID));
+    params.append('fields[STAGE_ID]', toSales ? SALES_STAGE_ID : DEAL_STAGE_ID);
+    if (toSales) {
+        params.append('fields[ASSIGNED_BY_ID]', String(SALES_ASSIGNED_ID));
+        params.append('fields[SOURCE_ID]', 'WEB');
+        const area = Number(data.area);
+        if (area > 0) params.append(`fields[${AREA_FIELD}]`, String(area));
+        if (SEGMENT_IDS[data.sector]) params.append(`fields[${SEGMENT_FIELD}]`, String(SEGMENT_IDS[data.sector]));
+    }
     if (data.comments) params.append('fields[COMMENTS]', data.comments);
     if (contactId) params.append('fields[CONTACT_ID]', String(contactId));
 
