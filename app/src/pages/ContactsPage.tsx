@@ -19,7 +19,7 @@ const ContactsPage = () => {
 
     const departments = [
         { title: "Отдел продаж", email: "sales@ic-group.kz", phone: "+7 777 008 73 60", icon: Building2 },
-        { title: "HR Департамент", email: "hr@ic-group.kz", phone: "+7 771 780 2366", icon: Globe },
+        { title: "HR Департамент", email: "hr@ic-group.kz", phone: "+7 771 780 2366", showEmail: true, icon: Globe },
         { title: "Тендерный отдел", email: "tenders@ic-group.kz", phone: "+7 707 808 3003", icon: Mail },
     ];
     const breadcrumbSchema = buildBreadcrumbSchema([
@@ -105,7 +105,11 @@ const ContactsPage = () => {
                                 </div>
                                 <div className="min-w-0">
                                     <h4 className="font-bold text-base sm:text-lg truncate">{dep.title}</h4>
-                                    <p className="text-brand-dark font-mono text-xs sm:text-sm">{dep.phone}</p>
+                                    {dep.showEmail ? (
+                                        <a href={`mailto:${dep.email}`} className="text-brand-dark font-mono text-xs sm:text-sm hover:text-brand-green transition-colors">{dep.email}</a>
+                                    ) : (
+                                        <p className="text-brand-dark font-mono text-xs sm:text-sm">{dep.phone}</p>
+                                    )}
                                 </div>
                             </div>
                         ))}
