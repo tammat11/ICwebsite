@@ -19,7 +19,7 @@ const ContactsPage = () => {
 
     const departments = [
         { title: "Отдел продаж", email: "sales@ic-group.kz", phone: "+7 777 008 73 60", icon: Building2 },
-        { title: "HR Департамент", email: "hr@ic-group.kz", phone: "+7 771 780 2366", showEmail: true, icon: Globe },
+        { title: "HR Департамент", email: "hr@ic-group.kz", phone: "", showEmail: true, icon: Globe },
         { title: "Тендерный отдел", email: "tenders@ic-group.kz", phone: "+7 707 808 3003", icon: Mail },
     ];
     const breadcrumbSchema = buildBreadcrumbSchema([

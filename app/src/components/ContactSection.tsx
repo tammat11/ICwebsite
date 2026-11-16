@@ -41,7 +41,7 @@ const ContactSection = ({ onCalcOpen }: { onCalcOpen?: () => void }) => {
                     <div className="group relative flex flex-col items-center md:items-start gap-2 rounded-[28px] px-5 py-5 bg-[#f7f8f4] border border-black/5 shadow-sm animate-bob-soft-alt">
                         <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-black/20">HR</span>
-                        <a href="tel:+77717802366" className="text-xl md:text-2xl font-bold hover:text-brand-green transition-colors">+7 771 780 2366</a>
+                        <a href="mailto:hr@ic-group.kz" className="text-xl md:text-2xl font-bold hover:text-brand-green transition-colors">hr@ic-group.kz</a>
                     </div>
                     <div className="group relative flex flex-col items-center md:items-start gap-2 rounded-[28px] px-5 py-5 bg-[#f7f8f4] border border-black/5 shadow-sm animate-bob-soft">
                         <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/80 to-transparent opacity-0 group-hover:opacity-100 sheen-pass" />

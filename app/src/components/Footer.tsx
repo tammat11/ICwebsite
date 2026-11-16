@@ -1,4 +1,4 @@
-import { Instagram, Linkedin, ArrowUpRight, Facebook, MapPin, Phone, GraduationCap, FileText } from 'lucide-react';
+import { Instagram, Linkedin, ArrowUpRight, Facebook, MapPin, Phone, Mail, GraduationCap, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FooterProps {
@@ -61,10 +61,10 @@ const Footer = ({ onCalcOpen }: FooterProps) => {
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
-                                <Phone className="mt-1 text-brand-green" size={18} />
+                                <Mail className="mt-1 text-brand-green" size={18} />
                                 <div>
                                     <p className="text-white/40 text-sm mb-1">HR</p>
-                                    <a href="tel:+77717802366" className="text-base md:text-lg font-medium hover:text-brand-green transition-colors">+7 771 780 2366</a>
+                                    <a href="mailto:hr@ic-group.kz" className="text-base md:text-lg font-medium hover:text-brand-green transition-colors">hr@ic-group.kz</a>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">

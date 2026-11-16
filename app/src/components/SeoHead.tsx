@@ -62,7 +62,7 @@ const baseOrganizationSchema = {
     },
     {
       '@type': 'ContactPoint',
-      telephone: '+7 771 780 2366',
+      email: 'hr@ic-group.kz',
       contactType: 'hr',
       areaServed: 'KZ',
       availableLanguage: ['ru', 'kk'],
